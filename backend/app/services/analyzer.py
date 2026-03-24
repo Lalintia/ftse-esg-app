@@ -29,6 +29,92 @@ from app.utils.sector_themes import get_applicable_themes
 
 logger = logging.getLogger(__name__)
 
+# Industry detection prompt for auto-detect
+_INDUSTRY_DETECT_PROMPT = """You are an ICB (Industry Classification Benchmark) expert.
+
+Analyze this company website content and determine the most appropriate ICB subsector.
+
+Return ONLY a JSON object with:
+- "subsector_code": the 8-digit ICB subsector code (e.g. "45102020" for Food Products)
+- "industry": short industry name in English
+- "confidence": 0.0-1.0
+
+Common ICB subsector codes:
+- 60101010: Oil & Gas Producers
+- 65101010: Electricity
+- 55101010: Industrial Metals & Mining
+- 45102020: Food Products
+- 45201020: Personal Goods
+- 20103010: Pharmaceuticals
+- 30101010: Banks
+- 35102010: Real Estate Investment & Services
+- 10101015: Software
+- 15101010: Telecommunications
+- 40201020: General Retailers
+- 40501020: Restaurants & Bars
+- 50101010: Industrial Transportation
+- 40101010: Automobiles
+- 50201030: Electronic & Electrical Equipment
+- 55201010: Chemicals
+- 50201010: Construction & Materials
+- 60102020: Alternative Energy
+- 15104025: Media
+- 65102020: Gas, Water & Multi-utilities
+
+Website content (first 3000 chars):
+"""
+
+
+async def _detect_subsector(openai_client, website_content: str) -> str | None:
+    """Auto-detect ICB subsector from crawled website content.
+
+    Args:
+        openai_client: AsyncOpenAI client.
+        website_content: Concatenated website content.
+
+    Returns:
+        Detected ICB subsector code, or None if detection fails.
+    """
+    import json as _json
+    from app.config import get_settings
+    settings = get_settings()
+
+    snippet = website_content[:3000]
+    try:
+        response = await openai_client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": _INDUSTRY_DETECT_PROMPT},
+                {"role": "user", "content": snippet},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.1,
+        )
+        raw = response.choices[0].message.content or "{}"
+        data = _json.loads(raw)
+        code = data.get("subsector_code", "")
+        industry = data.get("industry", "unknown")
+        confidence = data.get("confidence", 0)
+
+        usage = response.usage
+        if usage:
+            logger.info(
+                "Industry detection tokens — input: %d, output: %d",
+                usage.prompt_tokens,
+                usage.completion_tokens,
+            )
+
+        logger.info(
+            "Auto-detected industry: %s (code: %s, confidence: %.2f)",
+            industry, code, confidence,
+        )
+        if code and len(code) >= 4:
+            return code
+        return None
+    except Exception as exc:
+        logger.error("Industry auto-detection failed: %s", exc)
+        return None
+
 # Titles containing these words are not useful for company name extraction
 _SKIP_TITLE_WORDS = [
     "cookie", "privacy", "terms", "policy", "404", "error", "login",
@@ -513,6 +599,27 @@ async def run_analysis(
             f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
             for page in crawl_result.pages
         )
+
+        # Step 1.5: Auto-detect subsector if not provided
+        if not subsector_code:
+            logger.info("No subsector code — running auto-detection")
+            subsector_code = await _detect_subsector(openai_client, website_content)
+            if subsector_code:
+                # Update analysis record with detected subsector
+                sub_result = (
+                    supabase.table("icb_subsectors")
+                    .select("id")
+                    .eq("code", subsector_code)
+                    .limit(1)
+                    .execute()
+                )
+                if sub_result.data:
+                    supabase.table("analyses").update({
+                        "subsector_id": sub_result.data[0]["id"],
+                    }).eq("id", analysis_id).execute()
+                    logger.info("Updated analysis with auto-detected subsector: %s", subsector_code)
+            else:
+                logger.warning("Auto-detection failed — using all 381 indicators")
 
         # Step 2: Load reference data
         ftse_indicators = load_ftse_indicators()
