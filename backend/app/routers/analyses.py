@@ -151,7 +151,7 @@ async def list_analyses(
             "id, company_name, company_url, status, overall_score, "
             "environmental_score, social_score, governance_score, "
             "ifrs_s1_score, ifrs_s2_score, pages_crawled, "
-            "error_message, started_at, completed_at, created_at"
+            "status_message, error_message, started_at, completed_at, created_at"
         )
         .order("created_at", desc=True)
         .range(offset, offset + limit - 1)

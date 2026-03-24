@@ -21,6 +21,7 @@ export interface AnalysisListItem {
   ifrs_s1_score: number | null;
   ifrs_s2_score: number | null;
   pages_crawled: number;
+  status_message: string | null;
   error_message: string | null;
   started_at: string | null;
   completed_at: string | null;

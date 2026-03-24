@@ -291,6 +291,7 @@ def _update_status(
     analysis_id: str,
     status: str,
     error_message: str | None = None,
+    status_message: str | None = None,
 ) -> None:
     """Update the analysis status in the database.
 
@@ -299,8 +300,11 @@ def _update_status(
         analysis_id: UUID of the analysis.
         status: New status value.
         error_message: Optional error message if status is 'failed'.
+        status_message: Optional human-readable progress message.
     """
     update_data: dict[str, str | None] = {"status": status}
+    if status_message is not None:
+        update_data["status_message"] = status_message
     if error_message:
         update_data["error_message"] = error_message
     if status == "completed" or status == "failed":
@@ -308,6 +312,23 @@ def _update_status(
 
     supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
     logger.info("Analysis %s status updated to: %s", analysis_id, status)
+
+
+def _update_message(
+    supabase: Client,
+    analysis_id: str,
+    message: str,
+) -> None:
+    """Update only the status_message field for live progress feedback.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        message: Human-readable progress message.
+    """
+    supabase.table("analyses").update(
+        {"status_message": message}
+    ).eq("id", analysis_id).execute()
 
 
 def _save_ftse_results(
@@ -577,7 +598,7 @@ async def run_analysis(
 
     try:
         # Step 1: Crawl
-        _update_status(supabase, analysis_id, "crawling")
+        _update_status(supabase, analysis_id, "crawling", status_message="Starting web crawler...")
         supabase.table("analyses").update({
             "started_at": datetime.now(timezone.utc).isoformat(),
         }).eq("id", analysis_id).execute()
@@ -585,9 +606,13 @@ async def run_analysis(
         from app.config import get_settings
         settings = get_settings()
 
+        def _crawl_progress(msg: str) -> None:
+            _update_message(supabase, analysis_id, msg)
+
         crawl_result = await crawl_website(
             url=company_url,
             max_pages=settings.MAX_PAGES_TO_CRAWL,
+            on_progress=_crawl_progress,
         )
 
         # Extract company name from homepage title
@@ -599,6 +624,7 @@ async def run_analysis(
         supabase.table("analyses").update({
             "pages_crawled": crawl_result.pages_crawled,
             "company_name": company_name,
+            "status_message": f"Crawled {crawl_result.pages_crawled} pages from {company_name or company_url}",
         }).eq("id", analysis_id).execute()
 
         # Concatenate all page content
@@ -610,6 +636,7 @@ async def run_analysis(
         # Step 1.5: Auto-detect subsector if not provided
         if not subsector_code:
             logger.info("No subsector code — running auto-detection")
+            _update_message(supabase, analysis_id, "Auto-detecting industry...")
             subsector_code = await _detect_subsector(openai_client, website_content)
             if subsector_code:
                 # Update analysis record with detected subsector
@@ -686,7 +713,12 @@ async def run_analysis(
             indicators_by_theme = filtered_by_theme
 
         # Step 3: Analyze FTSE + IFRS in parallel
-        _update_status(supabase, analysis_id, "analyzing")
+        total_themes = len(indicators_by_theme)
+        total_indicators = sum(len(inds) for inds in indicators_by_theme.values())
+        _update_status(
+            supabase, analysis_id, "analyzing",
+            status_message=f"Analyzing {total_indicators} indicators across {total_themes} themes...",
+        )
 
         ftse_results, ifrs_results = await asyncio.gather(
             analyze_ftse(openai_client, website_content, indicators_by_theme),
@@ -694,6 +726,7 @@ async def run_analysis(
         )
 
         # Step 4: Save raw results
+        _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE + {len(ifrs_results)} IFRS results...")
         _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
         _save_ifrs_results(supabase, analysis_id, ifrs_results)
 
@@ -714,6 +747,7 @@ async def run_analysis(
             for r in ifrs_results
         ]
 
+        _update_message(supabase, analysis_id, "Calculating ESG scores...")
         ftse_scores = calculate_ftse_scores(
             ftse_result_dicts,
             indicators_by_theme,
@@ -723,6 +757,7 @@ async def run_analysis(
         _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)
 
         # Step 6: Generate sitemap recommendations
+        _update_message(supabase, analysis_id, "Generating sitemap recommendations...")
         ftse_gaps = _extract_ftse_gaps(ftse_results, indicators_by_theme)
         ifrs_gaps = _extract_ifrs_gaps(ifrs_results, ifrs_requirements)
 
@@ -734,7 +769,7 @@ async def run_analysis(
         _save_sitemap(supabase, analysis_id, recommendations)
 
         # Step 7: Complete
-        _update_status(supabase, analysis_id, "completed")
+        _update_status(supabase, analysis_id, "completed", status_message="Analysis complete!")
         logger.info("Analysis %s completed successfully", analysis_id)
 
     except Exception as exc:

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface AnalysisProgressProps {
   status: string;
   pagesCrawled: number;
+  statusMessage: string | null;
 }
 
 const steps = [
@@ -26,7 +27,7 @@ const statusProgress: Record<string, number> = {
   failed: 0,
 };
 
-export const AnalysisProgress = ({ status, pagesCrawled }: AnalysisProgressProps) => {
+export const AnalysisProgress = ({ status, pagesCrawled, statusMessage }: AnalysisProgressProps) => {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const targetProgress = statusProgress[status] ?? 0;
 
@@ -81,6 +82,11 @@ export const AnalysisProgress = ({ status, pagesCrawled }: AnalysisProgressProps
           <span>{animatedProgress}%</span>
           {pagesCrawled > 0 && <span>{pagesCrawled} pages</span>}
         </div>
+        {statusMessage && (
+          <p className="mt-2 text-center text-xs text-muted-foreground animate-pulse">
+            {statusMessage}
+          </p>
+        )}
       </div>
 
       {/* Steps */}

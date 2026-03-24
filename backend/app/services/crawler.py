@@ -5,6 +5,7 @@ import io
 import logging
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from dataclasses import dataclass, field as dataclass_field
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
@@ -743,6 +744,7 @@ async def _discover_report_pdfs(
 async def crawl_website(
     url: str,
     max_pages: int = 20,
+    on_progress: Callable[[str], None] | None = None,
 ) -> CrawlResult:
     """Crawl a company website and extract ESG-relevant content.
 
@@ -753,6 +755,7 @@ async def crawl_website(
     Args:
         url: The company website URL to crawl.
         max_pages: Maximum number of pages to crawl.
+        on_progress: Optional callback for progress messages.
 
     Returns:
         CrawlResult with crawled page contents.
@@ -760,7 +763,12 @@ async def crawl_website(
     Raises:
         RuntimeError: If crawling fails completely.
     """
+    def _progress(msg: str) -> None:
+        if on_progress:
+            on_progress(msg)
+
     logger.info("Starting crawl for %s (max %d pages)", url, max_pages)
+    _progress("Looking for sitemap.xml...")
 
     base_domain = _get_domain(url)
     all_urls: list[str] = []
@@ -769,6 +777,7 @@ async def crawl_website(
     sitemap_urls = await _fetch_sitemap_urls(url)
     if sitemap_urls:
         all_urls = sitemap_urls
+        _progress(f"Found sitemap with {len(all_urls)} URLs")
         logger.info("Using %d URLs from sitemap", len(all_urls))
 
     async with async_playwright() as p:
@@ -785,6 +794,7 @@ async def crawl_website(
 
             # Step 2: If no sitemap, crawl links from homepage + subpages
             if not all_urls:
+                _progress("No sitemap found — crawling links from homepage...")
                 logger.info("No sitemap — crawling links from homepage")
 
                 try:
@@ -913,7 +923,8 @@ async def crawl_website(
 
             # Step 5: Scrape HTML pages
             pages: list[PageContent] = []
-            for page_url in html_urls:
+            for idx, page_url in enumerate(html_urls, 1):
+                _progress(f"Scraping page {idx}/{len(html_urls)}...")
                 result = await _scrape_page(page, page_url)
                 if result:
                     pages.append(result)
@@ -927,6 +938,7 @@ async def crawl_website(
     pdf_download_infos: list[PdfDownloadInfo] = []
 
     if pdf_urls:
+        _progress(f"Downloading {len(pdf_urls)} ESG PDF(s)...")
         logger.info(
             "Processing %d ESG PDF(s): %s",
             len(pdf_urls),
@@ -941,6 +953,7 @@ async def crawl_website(
                 logger.info("PDF total char limit reached — stopping PDF extraction")
                 break
 
+            _progress(f"Reading PDF: {_pdf_filename(pdf_url)} ({pdf_count + 1}/{len(pdf_urls)})")
             pdf_result, pdf_info = await _download_and_extract_pdf(pdf_url)
             if pdf_result and pdf_info:
                 # Enforce total character budget

@@ -231,7 +231,7 @@ export default function AnalysisDashboard({
             {analysis.company_name ?? analysis.company_url}
           </p>
         </div>
-        <AnalysisProgress status={analysis.status} pagesCrawled={analysis.pages_crawled} />
+        <AnalysisProgress status={analysis.status} pagesCrawled={analysis.pages_crawled} statusMessage={analysis.status_message} />
       </div>
     );
   }
