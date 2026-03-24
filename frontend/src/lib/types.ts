@@ -70,8 +70,10 @@ export interface IfrsResultItem {
 
 export interface SitemapRecommendation {
   id: string;
-  page_title: string;
-  page_path: string | null;
+  page_title?: string;
+  page_path?: string | null;
+  recommended_page_title?: string;
+  recommended_page_path?: string | null;
   reason: string;
   priority: 'high' | 'medium' | 'low';
 }

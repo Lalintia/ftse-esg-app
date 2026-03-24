@@ -394,11 +394,12 @@ export default function AnalysisDashboard({
         {activeTab === 'sitemap' && (
           sitemap_recommendations.length > 0 ? (
             <div className="space-y-2">
-              {sitemap_recommendations.map((item) => (
-                <div key={item.id} className="flex items-start gap-4 rounded-lg border bg-card p-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-semibold">{item.page_title}</h4>
+              {sitemap_recommendations.map((item) => {
+                const title = item.recommended_page_title || item.page_title || 'Recommended Page';
+                const path = item.recommended_page_path || item.page_path;
+                return (
+                  <div key={item.id} className="rounded-lg border bg-card p-4">
+                    <div className="flex items-center gap-2 mb-2">
                       <span className={cn(
                         'rounded-full px-2 py-0.5 text-[11px] font-medium',
                         item.priority === 'high' && 'bg-red-50 text-red-700',
@@ -407,14 +408,15 @@ export default function AnalysisDashboard({
                       )}>
                         {item.priority}
                       </span>
+                      <h4 className="text-sm font-semibold">{title}</h4>
                     </div>
-                    {item.page_path && (
-                      <p className="mt-1 font-mono text-xs text-muted-foreground">{item.page_path}</p>
+                    {path && (
+                      <p className="mb-1.5 font-mono text-xs text-muted-foreground">{path}</p>
                     )}
-                    <p className="mt-1.5 text-xs text-muted-foreground">{item.reason}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.reason}</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <EmptyState message="No sitemap recommendations available." />
