@@ -1,0 +1,640 @@
+"""Main analysis orchestrator — coordinates crawl, analysis, scoring, and storage."""
+
+import asyncio
+import logging
+import re
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+
+from supabase import Client
+
+from app.dependencies import get_openai, get_supabase
+from app.services.crawler import PageContent, crawl_website
+from app.services.ftse_analyzer import FtseResult, analyze_ftse
+from app.services.ifrs_analyzer import IfrsResult, analyze_ifrs
+from app.services.scoring import (
+    FtseScores,
+    IfrsScores,
+    calculate_ftse_scores,
+    calculate_ifrs_scores,
+)
+from app.services.sitemap_generator import SitemapRecommendation, generate_sitemap
+from app.utils.data_loader import (
+    get_indicators_by_theme,
+    get_requirements_by_chapter,
+    load_ftse_indicators,
+    load_ifrs_requirements,
+)
+from app.utils.sector_themes import get_applicable_themes
+
+logger = logging.getLogger(__name__)
+
+# Titles containing these words are not useful for company name extraction
+_SKIP_TITLE_WORDS = [
+    "cookie", "privacy", "terms", "policy", "404", "error", "login",
+    "whistleblow", "อนุรักษ์", "กิจกรรม", "ข่าวสาร", "ติดต่อ",
+    "sitemap", "search", "register", "sign in", "forgot",
+    "csr news", "news archive", "blog", "contact", "career",
+    "สมัครงาน", "ร่วมงาน", "แผนที่", "ประกาศ",
+]
+
+
+def _is_usable_title(title: str) -> bool:
+    """Check if a page title is likely a company name, not a content page.
+
+    Args:
+        title: Page title string.
+
+    Returns:
+        True if the title does not match skip patterns.
+    """
+    lower = title.lower()
+    return not any(word in lower for word in _SKIP_TITLE_WORDS)
+
+
+def _extract_name_from_title(raw_title: str) -> str:
+    """Extract company name from a page title by splitting on separators.
+
+    Picks the shortest part after splitting on | - etc., since the
+    company name is usually shorter than the tagline/description.
+
+    Args:
+        raw_title: Raw page title string.
+
+    Returns:
+        Extracted company name.
+    """
+    for separator in [" | ", " - ", " – ", " — "]:
+        if separator in raw_title:
+            parts = [p.strip() for p in raw_title.split(separator) if p.strip()]
+            if not parts:
+                continue
+            shortest = min(parts, key=len)
+            if len(shortest) >= 2:
+                return shortest
+            return parts[0]
+    return raw_title.strip()
+
+
+def _extract_name_from_domain(url: str) -> str:
+    """Extract a company name from the domain as a last resort.
+
+    Examples:
+        www.scb.co.th -> SCB
+        www.pttgc.com -> PTTGC
+
+    Args:
+        url: Company website URL.
+
+    Returns:
+        Uppercased domain-based name.
+    """
+    parsed = urlparse(url)
+    hostname = parsed.hostname or ""
+    # Remove www. prefix
+    hostname = re.sub(r"^www\.", "", hostname)
+    # Take the first part before .co, .com, etc.
+    name_part = hostname.split(".")[0] if hostname else ""
+    return name_part.upper()
+
+
+def _looks_like_company_name(name: str) -> bool:
+    """Check if extracted name looks like a real company name.
+
+    A good company name is typically short (under 60 chars) and doesn't
+    contain generic content page words.
+
+    Args:
+        name: Candidate company name.
+
+    Returns:
+        True if the name looks like a company name.
+    """
+    if len(name) > 60 or len(name) < 2:
+        return False
+    generic_words = [
+        "news", "archive", "article", "page", "home", "welcome",
+        "about us", "our story", "overview", "annual report",
+        "sustainability report", "csr report",
+    ]
+    lower = name.lower()
+    return not any(word in lower for word in generic_words)
+
+
+def _extract_company_name(
+    pages: list[PageContent],
+    base_url: str,
+) -> str | None:
+    """Extract the company name from crawled pages.
+
+    Strategy:
+    1. Find the homepage (URL closest to base URL).
+    2. If the homepage title looks like a company name, use it.
+    3. If not, look for a common company name across multiple page titles.
+    4. As a last resort, extract from the domain name.
+
+    Args:
+        pages: List of crawled pages.
+        base_url: The original company URL.
+
+    Returns:
+        Extracted company name, or None if no pages available.
+    """
+    if not pages:
+        return None
+
+    clean_base = base_url.rstrip("/")
+
+    # Find homepage — URL that matches base URL most closely
+    homepage: PageContent | None = None
+    for page in pages:
+        page_clean = page.url.rstrip("/")
+        if page_clean == clean_base or page_clean in (
+            f"{clean_base}/en",
+            f"{clean_base}/th",
+            f"{clean_base}/index.html",
+        ):
+            homepage = page
+            break
+
+    if not homepage:
+        homepage = pages[0]
+
+    # Try homepage title first
+    raw_title = homepage.title.strip()
+    if raw_title and raw_title != homepage.url and _is_usable_title(raw_title):
+        name = _extract_name_from_title(raw_title)
+        if _looks_like_company_name(name):
+            return name
+
+    # Look for a common company name across page titles
+    # Many pages have format: "Page Title | Company Name"
+    # The company name part repeats across pages
+    from collections import Counter
+    name_candidates: list[str] = []
+    for page in pages[:15]:
+        title = page.title.strip()
+        if not title or title == page.url:
+            continue
+        for separator in [" | ", " - ", " – ", " — "]:
+            if separator in title:
+                parts = [p.strip() for p in title.split(separator) if p.strip()]
+                name_candidates.extend(parts)
+                break
+
+    if name_candidates:
+        counts = Counter(name_candidates)
+        most_common_name, most_common_count = counts.most_common(1)[0]
+        if most_common_count >= 2 and _looks_like_company_name(most_common_name):
+            return most_common_name
+
+    # Fallback: scan for any usable title
+    for page in pages[:10]:
+        title = page.title.strip()
+        if title and title != page.url and _is_usable_title(title):
+            name = _extract_name_from_title(title)
+            if _looks_like_company_name(name):
+                return name
+
+    # Last resort: extract from domain
+    return _extract_name_from_domain(base_url)
+
+
+def _update_status(
+    supabase: Client,
+    analysis_id: str,
+    status: str,
+    error_message: str | None = None,
+) -> None:
+    """Update the analysis status in the database.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        status: New status value.
+        error_message: Optional error message if status is 'failed'.
+    """
+    update_data: dict[str, str | None] = {"status": status}
+    if error_message:
+        update_data["error_message"] = error_message
+    if status == "completed" or status == "failed":
+        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+
+    supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
+    logger.info("Analysis %s status updated to: %s", analysis_id, status)
+
+
+def _save_ftse_results(
+    supabase: Client,
+    analysis_id: str,
+    results: list[FtseResult],
+    indicators: list[dict[str, str | bool]],
+) -> None:
+    """Save FTSE analysis results to the database.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        results: List of FtseResult from analysis.
+        indicators: All FTSE indicators for looking up IDs.
+    """
+    # Look up indicator UUIDs from the database
+    indicator_rows = (
+        supabase.table("ftse_indicators")
+        .select("id, indicator_code")
+        .execute()
+    )
+    code_to_id: dict[str, str] = {
+        row["indicator_code"]: row["id"]
+        for row in indicator_rows.data
+    }
+
+    seen: dict[str, dict[str, str | float | int | None]] = {}
+    for r in results:
+        indicator_id = code_to_id.get(r.indicator_code)
+        if not indicator_id:
+            logger.warning("No DB record for indicator %s — skipping", r.indicator_code)
+            continue
+
+        seen[indicator_id] = {
+            "analysis_id": analysis_id,
+            "indicator_id": indicator_id,
+            "status": r.status,
+            "score": r.score,
+            "evidence": r.evidence or None,
+            "confidence": r.confidence,
+            "ai_reasoning": r.reasoning or None,
+        }
+
+    rows = list(seen.values())
+    if rows:
+        batch_size = 50
+        for i in range(0, len(rows), batch_size):
+            batch = rows[i:i + batch_size]
+            supabase.table("analysis_ftse_results").upsert(
+                batch, on_conflict="analysis_id,indicator_id"
+            ).execute()
+        logger.info("Saved %d FTSE results for analysis %s", len(rows), analysis_id)
+
+
+def _save_ifrs_results(
+    supabase: Client,
+    analysis_id: str,
+    results: list[IfrsResult],
+) -> None:
+    """Save IFRS analysis results to the database.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        results: List of IfrsResult from analysis.
+    """
+    # Look up requirement UUIDs from the database
+    req_rows = (
+        supabase.table("ifrs_requirements")
+        .select("id, paragraph_ref")
+        .execute()
+    )
+    ref_to_id: dict[str, str] = {
+        row["paragraph_ref"]: row["id"]
+        for row in req_rows.data
+    }
+
+    seen: dict[str, dict[str, str | float | None]] = {}
+    for r in results:
+        requirement_id = ref_to_id.get(r.paragraph_ref)
+        if not requirement_id:
+            logger.warning("No DB record for requirement %s — skipping", r.paragraph_ref)
+            continue
+
+        seen[requirement_id] = {
+            "analysis_id": analysis_id,
+            "requirement_id": requirement_id,
+            "status": r.status,
+            "evidence": r.evidence or None,
+            "confidence": r.confidence,
+            "ai_reasoning": r.reasoning or None,
+        }
+
+    rows = list(seen.values())
+    if rows:
+        batch_size = 50
+        for i in range(0, len(rows), batch_size):
+            batch = rows[i:i + batch_size]
+            supabase.table("analysis_ifrs_results").upsert(
+                batch, on_conflict="analysis_id,requirement_id"
+            ).execute()
+        logger.info("Saved %d IFRS results for analysis %s", len(rows), analysis_id)
+
+
+def _save_scores(
+    supabase: Client,
+    analysis_id: str,
+    ftse_scores: FtseScores,
+    ifrs_scores: IfrsScores,
+) -> None:
+    """Save calculated scores to the analysis record.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        ftse_scores: Calculated FTSE scores.
+        ifrs_scores: Calculated IFRS scores.
+    """
+    supabase.table("analyses").update({
+        "overall_score": ftse_scores.overall_score,
+        "environmental_score": ftse_scores.environmental_score,
+        "social_score": ftse_scores.social_score,
+        "governance_score": ftse_scores.governance_score,
+        "ifrs_s1_score": ifrs_scores.s1_score,
+        "ifrs_s2_score": ifrs_scores.s2_score,
+    }).eq("id", analysis_id).execute()
+
+    logger.info("Saved scores for analysis %s", analysis_id)
+
+
+def _save_sitemap(
+    supabase: Client,
+    analysis_id: str,
+    recommendations: list[SitemapRecommendation],
+) -> None:
+    """Save sitemap recommendations to the database.
+
+    Args:
+        supabase: Supabase client.
+        analysis_id: UUID of the analysis.
+        recommendations: List of SitemapRecommendation.
+    """
+    rows: list[dict[str, str | None]] = []
+    for rec in recommendations:
+        rows.append({
+            "analysis_id": analysis_id,
+            "recommended_page_title": rec.page_title,
+            "recommended_page_path": rec.page_path,
+            "reason": rec.reason,
+            "priority": rec.priority,
+        })
+
+    if rows:
+        supabase.table("sitemap_recommendations").insert(rows).execute()
+        logger.info(
+            "Saved %d sitemap recommendations for analysis %s",
+            len(rows),
+            analysis_id,
+        )
+
+
+def _extract_ftse_gaps(
+    results: list[FtseResult],
+    indicators_by_theme: dict[str, list[dict[str, str | bool]]],
+) -> list[dict[str, str]]:
+    """Extract FTSE gaps (missing/partial) for sitemap generation.
+
+    Args:
+        results: List of FtseResult.
+        indicators_by_theme: Indicators grouped by theme.
+
+    Returns:
+        List of gap dicts with indicator_code, theme_name, indicator_name, status.
+    """
+    # Build indicator lookup
+    indicator_lookup: dict[str, dict[str, str]] = {}
+    for theme_name, indicators in indicators_by_theme.items():
+        for ind in indicators:
+            indicator_lookup[ind["indicator_code"]] = {
+                "theme_name": theme_name,
+                "indicator_name": str(ind.get("indicator_name", "")),
+            }
+
+    gaps: list[dict[str, str]] = []
+    for r in results:
+        if r.status in ("missing", "partial"):
+            info = indicator_lookup.get(r.indicator_code, {})
+            gaps.append({
+                "indicator_code": r.indicator_code,
+                "theme_name": info.get("theme_name", "Unknown"),
+                "indicator_name": info.get("indicator_name", ""),
+                "status": r.status,
+            })
+
+    return gaps
+
+
+def _extract_ifrs_gaps(
+    results: list[IfrsResult],
+    requirements: list[dict[str, str | bool | int]],
+) -> list[dict[str, str]]:
+    """Extract IFRS gaps (missing/partial) for sitemap generation.
+
+    Args:
+        results: List of IfrsResult.
+        requirements: All IFRS requirements.
+
+    Returns:
+        List of gap dicts with paragraph_ref, standard, section, status.
+    """
+    req_lookup: dict[str, dict[str, str]] = {
+        req["paragraph_ref"]: {
+            "standard": str(req.get("standard", "")),
+            "section": str(req.get("section", "")),
+        }
+        for req in requirements
+    }
+
+    gaps: list[dict[str, str]] = []
+    for r in results:
+        if r.status in ("missing", "partial"):
+            info = req_lookup.get(r.paragraph_ref, {})
+            gaps.append({
+                "paragraph_ref": r.paragraph_ref,
+                "standard": info.get("standard", "Unknown"),
+                "section": info.get("section", ""),
+                "status": r.status,
+            })
+
+    return gaps
+
+
+async def run_analysis(
+    analysis_id: str,
+    company_url: str,
+    subsector_code: str | None = None,
+) -> None:
+    """Run a full ESG analysis pipeline.
+
+    Flow:
+    1. Update status to 'crawling'
+    2. Crawl the company website
+    3. Update status to 'analyzing'
+    4. Run FTSE + IFRS analysis in parallel
+    5. Calculate scores
+    6. Generate sitemap recommendations
+    7. Save all results to database
+    8. Update status to 'completed'
+
+    On any error: set status='failed' with error_message.
+
+    Args:
+        analysis_id: UUID of the analysis record.
+        company_url: Company website URL to analyze.
+        subsector_code: Optional ICB subsector code for context.
+    """
+    supabase = get_supabase()
+    openai_client = get_openai()
+
+    try:
+        # Step 1: Crawl
+        _update_status(supabase, analysis_id, "crawling")
+        supabase.table("analyses").update({
+            "started_at": datetime.now(timezone.utc).isoformat(),
+        }).eq("id", analysis_id).execute()
+
+        from app.config import get_settings
+        settings = get_settings()
+
+        crawl_result = await crawl_website(
+            url=company_url,
+            max_pages=settings.MAX_PAGES_TO_CRAWL,
+        )
+
+        # Extract company name from homepage title
+        company_name = _extract_company_name(
+            pages=crawl_result.pages,
+            base_url=company_url,
+        )
+
+        supabase.table("analyses").update({
+            "pages_crawled": crawl_result.pages_crawled,
+            "company_name": company_name,
+        }).eq("id", analysis_id).execute()
+
+        # Concatenate all page content
+        website_content = "\n\n---\n\n".join(
+            f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
+            for page in crawl_result.pages
+        )
+
+        # Step 2: Load reference data
+        ftse_indicators = load_ftse_indicators()
+        ifrs_requirements = load_ifrs_requirements()
+        indicators_by_theme = get_indicators_by_theme()
+        requirements_by_chapter = get_requirements_by_chapter()
+
+        # Filter indicators by subsector mapping (theme applicability + indicator-subsector)
+        if subsector_code:
+            applicable_themes = get_applicable_themes(subsector_code)
+            applicable_theme_names = {t["theme"] for t in applicable_themes}
+            all_theme_count = sum(
+                len(inds) for inds in indicators_by_theme.values()
+            )
+
+            # Load indicator-subsector mapping
+            from pathlib import Path
+            import json as _json
+            mapping_path = Path(__file__).resolve().parent.parent.parent / "data" / "indicator_subsector_mapping.json"
+            indicator_mapping: dict[str, dict] = {}
+            if mapping_path.exists():
+                with open(mapping_path, encoding="utf-8") as f:
+                    indicator_mapping = _json.load(f)
+
+            filtered_by_theme: dict[str, list[dict[str, str | bool]]] = {}
+            for theme, inds in indicators_by_theme.items():
+                if theme not in applicable_theme_names:
+                    continue
+
+                applicable_inds: list[dict[str, str | bool]] = []
+                for ind in inds:
+                    code = ind["indicator_code"]
+                    m = indicator_mapping.get(code, {"type": "core", "subsectors": []})
+                    if m["type"] in ("core", "performance"):
+                        applicable_inds.append(ind)
+                    else:
+                        # Match full code or partial (subsector codes vary in length)
+                        subs = m.get("subsectors", [])
+                        if any(subsector_code.endswith(s) or s == subsector_code for s in subs):
+                            applicable_inds.append(ind)
+
+                if applicable_inds:
+                    filtered_by_theme[theme] = applicable_inds
+
+            filtered_count = sum(
+                len(inds) for inds in filtered_by_theme.values()
+            )
+
+            logger.info(
+                "Subsector %s: evaluating %d/%d indicators across %d/%d themes",
+                subsector_code,
+                filtered_count,
+                all_theme_count,
+                len(filtered_by_theme),
+                len(indicators_by_theme),
+            )
+            indicators_by_theme = filtered_by_theme
+
+        # Step 3: Analyze FTSE + IFRS in parallel
+        _update_status(supabase, analysis_id, "analyzing")
+
+        ftse_results, ifrs_results = await asyncio.gather(
+            analyze_ftse(openai_client, website_content, indicators_by_theme),
+            analyze_ifrs(openai_client, website_content, requirements_by_chapter),
+        )
+
+        # Step 4: Save raw results
+        _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
+        _save_ifrs_results(supabase, analysis_id, ifrs_results)
+
+        # Step 5: Calculate scores
+        ftse_result_dicts = [
+            {
+                "indicator_code": r.indicator_code,
+                "status": r.status,
+                "score": r.score,
+            }
+            for r in ftse_results
+        ]
+        ifrs_result_dicts = [
+            {
+                "paragraph_ref": r.paragraph_ref,
+                "status": r.status,
+            }
+            for r in ifrs_results
+        ]
+
+        ftse_scores = calculate_ftse_scores(
+            ftse_result_dicts,
+            indicators_by_theme,
+            subsector_code=subsector_code,
+        )
+        ifrs_scores = calculate_ifrs_scores(ifrs_result_dicts, ifrs_requirements)
+        _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)
+
+        # Step 6: Generate sitemap recommendations
+        ftse_gaps = _extract_ftse_gaps(ftse_results, indicators_by_theme)
+        ifrs_gaps = _extract_ifrs_gaps(ifrs_results, ifrs_requirements)
+
+        recommendations = await generate_sitemap(
+            openai_client=openai_client,
+            ftse_gaps=ftse_gaps,
+            ifrs_gaps=ifrs_gaps,
+        )
+        _save_sitemap(supabase, analysis_id, recommendations)
+
+        # Step 7: Complete
+        _update_status(supabase, analysis_id, "completed")
+        logger.info("Analysis %s completed successfully", analysis_id)
+
+    except Exception as exc:
+        logger.error("Analysis %s failed: %s", analysis_id, exc, exc_info=True)
+        try:
+            _update_status(
+                supabase,
+                analysis_id,
+                "failed",
+                error_message=str(exc)[:500],
+            )
+        except Exception as save_exc:
+            logger.error(
+                "Failed to save error status for analysis %s: %s",
+                analysis_id,
+                save_exc,
+            )

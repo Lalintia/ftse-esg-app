@@ -1,0 +1,2598 @@
+{
+  "EBD02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD10": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55102000",
+      "55102010",
+      "55102035",
+      "55102050",
+      "55103020",
+      "55103025",
+      "55103030",
+      "60101040"
+    ]
+  },
+  "EBD11": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020"
+    ]
+  },
+  "EBD12": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55101010",
+      "55101015"
+    ]
+  },
+  "EBD13": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020"
+    ]
+  },
+  "EBD14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EBD15": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020"
+    ]
+  },
+  "EBD16": {
+    "type": "specific",
+    "marker": "SP",
+    "subsectors": [
+      "45102010",
+      "45102020"
+    ]
+  },
+  "EBD17": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC15": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC19": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40101020"
+    ]
+  },
+  "ECC22": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "ECC31": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC38": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC39": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC41": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC42": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC43": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC44": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC45": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC48": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "50101035"
+    ]
+  },
+  "ECC49": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC50": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC51": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC56": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "ECC57": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010",
+      "60101035"
+    ]
+  },
+  "ECC60": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101010",
+      "65101015"
+    ]
+  },
+  "ECC73": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC74": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC75": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC76": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC77": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ECC78": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR13": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR15": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR16": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR18": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR19": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR21": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR24": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR25": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR26": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR27": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EPR28": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC02": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "ESC12": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC22": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC24": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC25": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC26": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC27": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC28": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC29": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC30": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC31": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC32": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "ESC55": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020",
+      "45201010",
+      "45201020",
+      "45201030"
+    ]
+  },
+  "ESC56": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020",
+      "45201010",
+      "45201020",
+      "45201030"
+    ]
+  },
+  "ESC57": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "ESC58": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "EWT06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT13": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT15": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65102030"
+    ]
+  },
+  "EWT16": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65102030"
+    ]
+  },
+  "EWT20": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65102030"
+    ]
+  },
+  "EWT23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65102030"
+    ]
+  },
+  "EWT24": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT25": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT26": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT27": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT28": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT29": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT30": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT31": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT32": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT33": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT34": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT35": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "EWT36": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "EWT37": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "EWT38": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "EWT39": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "EWT40": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "60101000",
+      "60101010"
+    ]
+  },
+  "EWT41": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101010",
+      "65101015"
+    ]
+  },
+  "EWT42": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55102000",
+      "55103025",
+      "60101040"
+    ]
+  },
+  "EWT43": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45101010",
+      "45101020",
+      "50101035",
+      "55101010",
+      "55101015"
+    ]
+  },
+  "EWT44": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55101010",
+      "55101015"
+    ]
+  },
+  "EWT45": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "50101035"
+    ]
+  },
+  "EWT46": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45101010",
+      "45101020"
+    ]
+  },
+  "EWT47": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102020"
+    ]
+  },
+  "GAC01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC13": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GAC14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG19": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG21": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG22": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG26": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG27": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG28": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG29": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG30": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG31": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG32": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GCG33": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GCG34": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GCG35": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GCG36": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "GCG37": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "GCG38": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "GCG39": {
+    "type": "specific",
+    "marker": "SP",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GCG40": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG41": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "GCG42": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG43": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG44": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG45": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010",
+      "30201025",
+      "30203020",
+      "30301010",
+      "30302010",
+      "30302020"
+    ]
+  },
+  "GCG46": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG47": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG48": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG49": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GCG50": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM11": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40101020",
+      "40202010",
+      "45101010",
+      "45101015",
+      "45101020",
+      "45102010",
+      "45102020",
+      "45103010",
+      "50101010",
+      "55101010",
+      "55102000",
+      "55102010",
+      "55102035",
+      "55102050",
+      "55103020",
+      "55103025",
+      "55103030",
+      "60101000",
+      "60101010",
+      "60101030",
+      "60101040",
+      "65101015"
+    ]
+  },
+  "GRM12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM20": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GRM21": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GRM22": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GRM23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GRM24": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GRM25": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "GTX01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GTX02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GTX04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GTX05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GTX10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "GTX12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SCR06": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SCR09": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR10": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR13": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR14": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR15": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR16": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR17": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR18": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR19": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR20": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR21": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR22": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR24": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR25": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR26": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR27": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR28": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR29": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR30": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR31": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR32": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45102010"
+    ]
+  },
+  "SCR33": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR34": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR35": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR36": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR37": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR38": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101010",
+      "45101015",
+      "45201010"
+    ]
+  },
+  "SCR39": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR40": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR41": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR42": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR43": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR44": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "45103010"
+    ]
+  },
+  "SCR45": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40501020",
+      "40501025"
+    ]
+  },
+  "SCR46": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40501020",
+      "40501025"
+    ]
+  },
+  "SCR47": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40501020",
+      "40501025"
+    ]
+  },
+  "SCR48": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40501020",
+      "40501025"
+    ]
+  },
+  "SCR50": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40501020",
+      "40501025"
+    ]
+  },
+  "SCR51": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR52": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR53": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR54": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR55": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103015"
+    ]
+  },
+  "SCR56": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR57": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR58": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR59": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR60": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR61": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR62": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR63": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "40401010",
+      "40501040",
+      "45101020",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SCR64": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SCR65": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SCR66": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SCR67": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SCR68": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30201020"
+    ]
+  },
+  "SHR03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR06": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "10101010",
+      "10101015",
+      "10101020",
+      "15102010",
+      "15102015",
+      "40301020",
+      "40301030",
+      "6575"
+    ]
+  },
+  "SHR07": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "10101010",
+      "10101015",
+      "10101020",
+      "15102010",
+      "15102015",
+      "40301020",
+      "40301030",
+      "6575"
+    ]
+  },
+  "SHR08": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55101010",
+      "55101015",
+      "55102000",
+      "55102010",
+      "55102035",
+      "55102050",
+      "55103020",
+      "55103025",
+      "55103030",
+      "60101000",
+      "60101040"
+    ]
+  },
+  "SHR09": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55102000",
+      "55102010",
+      "55102035",
+      "55102050",
+      "55103020",
+      "55103025",
+      "55103030",
+      "60101000",
+      "60101040"
+    ]
+  },
+  "SHR11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR15": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR16": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR17": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR19": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "55102000",
+      "55102010",
+      "55102035",
+      "55102050",
+      "55103020",
+      "55103025",
+      "55103030",
+      "60101000",
+      "60101040"
+    ]
+  },
+  "SHR21": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR22": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR23": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR24": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR25": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR26": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHR27": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS11": {
+    "type": "specific",
+    "marker": "G",
+    "subsectors": []
+  },
+  "SHS12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS13": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS15": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS18": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS19": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS20": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS21": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS22": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS24": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS25": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS26": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS27": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS28": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS29": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS30": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS31": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS32": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS33": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS34": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS35": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS36": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "SHS37": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS38": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS39": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS40": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SHS41": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS42": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SHS43": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "65101015"
+    ]
+  },
+  "SLS01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS13": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS14": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS16": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS21": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS24": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS25": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS26": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS27": {
+    "type": "specific",
+    "marker": "G",
+    "subsectors": []
+  },
+  "SLS28": {
+    "type": "performance",
+    "marker": "P",
+    "subsectors": []
+  },
+  "SLS29": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS30": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS32": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS33": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SLS34": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC01": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC02": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC03": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC04": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC05": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC06": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC07": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC08": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC09": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC10": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC11": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC12": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC16": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC17": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC18": {
+    "type": "core",
+    "marker": "",
+    "subsectors": []
+  },
+  "SSC22": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35101015",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "SSC23": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "SSC24": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "SSC25": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "SSC26": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "35101010",
+      "35102000",
+      "35102015",
+      "35102030",
+      "35102040",
+      "35102045",
+      "35102070"
+    ]
+  },
+  "SSC33": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC34": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC35": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC36": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC37": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC38": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC39": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC40": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010",
+      "30301010"
+    ]
+  },
+  "SSC41": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC42": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC43": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC44": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC45": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC46": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30302010",
+      "30302020",
+      "30302025"
+    ]
+  },
+  "SSC47": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202015"
+    ]
+  },
+  "SSC48": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202015"
+    ]
+  },
+  "SSC49": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202015"
+    ]
+  },
+  "SSC50": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202015"
+    ]
+  },
+  "SSC51": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "SSC52": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "SSC53": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "SSC54": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  },
+  "SSC55": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30202010"
+    ]
+  },
+  "SSC56": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "20103010",
+      "20103015",
+      "40501040",
+      "45102010",
+      "45102020",
+      "45201010"
+    ]
+  },
+  "SSC57": {
+    "type": "specific",
+    "marker": "S",
+    "subsectors": [
+      "30101010"
+    ]
+  }
+}

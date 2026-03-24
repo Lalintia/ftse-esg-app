@@ -1,0 +1,1001 @@
+[
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Interaction with law or regulation",
+    "paragraph_ref": "IFRS S1.B32",
+    "requirement_text": "Disclose material sustainability-related financial information, even if law or regulation permits the entity not to disclose such information.",
+    "is_mandatory": true,
+    "display_order": 1
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Interaction with law or regulation",
+    "paragraph_ref": "IFRS S1.B33",
+    "requirement_text": "An entity can omit information otherwise required by an IFRS Sustainability Disclosure Standard if law or regulation prohibits the entity from disclosing that information. If an entity omits material information for that reason, identify the type of information not disclosed and explain the source of the restriction.",
+    "is_mandatory": true,
+    "display_order": 2
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Commercially sensitive information",
+    "paragraph_ref": "IFRS S1.B34-B35",
+    "requirement_text": "If an entity determines that information about a sustainability-related opportunity is commercially sensitive, it is permitted to omit that information from its sustainability-related financial disclosures. Such an omission is permitted even if information is otherwise required by an IFRS Sustainability Disclosure Standard and the information is material. An entity qualifies for this exemption if, and only if: (a) information about the sustainability-related opportunity is not already publicly available; (b) disclosure of that information could reasonably be expected to prejudice seriously the economic benefits the entity would otherwise be able to realise in pursuing the opportunity; and (c) the entity has determined that it is impossible to disclose that information in a manner—e.g. at an aggregated level—that would enable the entity to meet the objectives of the disclosure requirements without prejudicing seriously the economic benefits the entity would otherwise be able to realise in pursuing the opportunity.",
+    "is_mandatory": false,
+    "display_order": 3
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Commercially sensitive information",
+    "paragraph_ref": "IFRS S1.B36",
+    "requirement_text": "If an entity elects to use the exemption specified in IFRS S1.B34, for each item of information omitted: (a) disclose the fact that it has used the exemption; and (b) reassess, at each reporting date, whether the information qualifies for the exemption.",
+    "is_mandatory": true,
+    "display_order": 4
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Reporting entity",
+    "paragraph_ref": "IFRS S1.20",
+    "requirement_text": "An entity's sustainability-related financial disclosures are for the same reporting entity as the related financial statements (see IFRS S1.B38).",
+    "is_mandatory": true,
+    "display_order": 5
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Connected information",
+    "paragraph_ref": "IFRS S1.22",
+    "requirement_text": "Identify the financial statements to which the sustainability-related financial disclosures relate.",
+    "is_mandatory": true,
+    "display_order": 6
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Connected information",
+    "paragraph_ref": "IFRS S1.24",
+    "requirement_text": "Use the presentation currency of the entity's related financial statements when currency is specified as the unit of measure in the sustainability-related financial disclosures.",
+    "is_mandatory": true,
+    "display_order": 7
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Connected information",
+    "paragraph_ref": "IFRS S1.B42(c)",
+    "requirement_text": "Drawing connections between disclosures involves, but is not limited to, providing necessary explanations and cross-references and using consistent data, assumptions, and units of measure. In providing connected information, disclose information about significant differences between the data and assumptions used in preparing the entity's sustainability-related financial disclosures and the data and assumptions used in preparing the related financial statements.",
+    "is_mandatory": true,
+    "display_order": 8
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Sources of guidance",
+    "paragraph_ref": "IFRS S1.59",
+    "requirement_text": "Identify: (a) the specific standards, pronouncements, industry practice and other sources of guidance that the entity has applied in preparing its sustainability-related financial disclosures, including, if applicable, identifying the disclosure topics in the SASB Standards; and (b) the industry(s) specified in the IFRS Sustainability Disclosure Standards, the SASB Standards or other sources of guidance relating to a particular industry(s) that the entity has applied in preparing its sustainability-related financial disclosures, including in identifying applicable metrics.",
+    "is_mandatory": true,
+    "display_order": 9
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Location of disclosures",
+    "paragraph_ref": "IFRS S1.60",
+    "requirement_text": "Provide disclosures required by IFRS Sustainability Disclosure Standards as part of the entity's general purpose financial reports.",
+    "is_mandatory": true,
+    "display_order": 10
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Location of disclosures",
+    "paragraph_ref": "IFRS S1.B47",
+    "requirement_text": "If information required by an IFRS Sustainability Disclosure Standard is included by cross-reference: (a) clearly identify in the sustainability-related financial disclosures the report within which that information is located and explain how to access that report; and (b) cross-refer to a precisely specified part of that report.",
+    "is_mandatory": true,
+    "display_order": 11
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Timing of reporting",
+    "paragraph_ref": "IFRS S1.64",
+    "requirement_text": "Report the sustainability-related financial disclosures at the same time as the related financial statements and for the same reporting period.",
+    "is_mandatory": true,
+    "display_order": 12
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Timing of reporting",
+    "paragraph_ref": "IFRS S1.66",
+    "requirement_text": "If an entity changes the end of its reporting period and provides sustainability-related financial disclosures for a period longer or shorter than 12 months, disclose: (a) the period covered by the sustainability-related financial disclosures; (b) the reason for using a longer or shorter period; and (c) the fact that the amounts disclosed in the sustainability-related financial disclosures are not entirely comparable.",
+    "is_mandatory": true,
+    "display_order": 13
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Timing of reporting",
+    "paragraph_ref": "IFRS S1.67",
+    "requirement_text": "If, after the end of the reporting period but before the date on which the sustainability-related financial disclosures are authorised for issue, an entity receives information about conditions that existed at the end of the reporting period, update disclosures that relate to those conditions in light of the new information.",
+    "is_mandatory": true,
+    "display_order": 14
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Timing of reporting",
+    "paragraph_ref": "IFRS S1.68",
+    "requirement_text": "Disclose information about transactions, other events and conditions that occur after the end of the reporting period, but before the date on which the sustainability-related financial disclosures are authorised for issue, if non-disclosure of that information could reasonably be expected to influence decisions that primary users of general purpose financial reports make on the basis of those reports.",
+    "is_mandatory": true,
+    "display_order": 15
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.70",
+    "requirement_text": "Unless another IFRS Sustainability Disclosure Standard permits or requires otherwise, disclose comparative information in respect of the preceding period for all amounts disclosed in the reporting period. If such information would be useful for an understanding of the sustainability-related financial disclosures for the reporting period, also disclose comparative information for narrative and descriptive sustainability-related financial information (see IFRS S1.B49-B59).",
+    "is_mandatory": true,
+    "display_order": 16
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.B50",
+    "requirement_text": "In some cases, the amount disclosed for a metric is an estimate. Except as specified in IFRS S1.B51, if an entity identifies new information in relation to the estimated amount disclosed in the preceding period and the new information provides evidence of circumstances that existed in that period, disclose: (a) a revised comparative amount that reflects that new information; (b) the difference between the amount disclosed in the preceding period and the revised comparative amount; and (c) an explanation of the reasons for revising the comparative amount.",
+    "is_mandatory": true,
+    "display_order": 17
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.B51",
+    "requirement_text": "In applying the requirement in IFRS S1.B50, an entity need not disclose a revised comparative amount if: (a) it is impracticable to do so (see IFRS S1.B54); or (b) the metric is forward-looking.",
+    "is_mandatory": false,
+    "display_order": 18
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.B52",
+    "requirement_text": "If an entity redefines or replaces a metric in the reporting period: (a) disclose a revised comparative amount, unless it is impracticable to do so; (b) explain the changes; and (c) explain the reasons for those changes, including why the redefined or replacement metric provides more useful information.",
+    "is_mandatory": true,
+    "display_order": 19
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.B53",
+    "requirement_text": "If an entity introduces a new metric in the reporting period, disclose a comparative amount for that metric unless it is impracticable to do so.",
+    "is_mandatory": true,
+    "display_order": 20
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Comparative information",
+    "paragraph_ref": "IFRS S1.B54",
+    "requirement_text": "Sometimes, it is impracticable to revise a comparative amount to achieve comparability with the reporting period. If it is impracticable to revise a comparative amount for the preceding period, disclose that fact.",
+    "is_mandatory": true,
+    "display_order": 21
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Statement of compliance",
+    "paragraph_ref": "IFRS S1.72",
+    "requirement_text": "If the sustainability-related financial disclosures comply with all the requirements of IFRS Sustainability Disclosure Standards, include an explicit and unreserved statement of compliance. Do not describe sustainability-related financial disclosures as complying with IFRS Sustainability Disclosure Standards unless they comply with all the requirements of IFRS Sustainability Disclosure Standards.",
+    "is_mandatory": true,
+    "display_order": 22
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Judgements",
+    "paragraph_ref": "IFRS S1.74",
+    "requirement_text": "Disclose information to enable users of general purpose financial reports to understand the judgements, apart from those involving estimations of amounts (see IFRS S1.77), that the entity has made in the process of preparing its sustainability-related financial disclosures and that have the most significant effect on the information included in those disclosures.",
+    "is_mandatory": true,
+    "display_order": 23
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Measurement uncertainty",
+    "paragraph_ref": "IFRS S1.77",
+    "requirement_text": "Disclose information to enable users of general purpose financial reports to understand the most significant uncertainties affecting the amounts reported in its sustainability-related financial disclosures.",
+    "is_mandatory": true,
+    "display_order": 24
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Measurement uncertainty",
+    "paragraph_ref": "IFRS S1.78",
+    "requirement_text": "Identify the amounts disclosed that are subject to a high level of measurement uncertainty and for each amount identified, disclose information about: (a) the sources of measurement uncertainty—e.g. the dependence of the amount on the outcome of a future event, on a measurement technique or on the availability and quality of data from the entity's value chain; and (b) the assumptions, approximations and judgements the entity has made in measuring the amount.",
+    "is_mandatory": true,
+    "display_order": 25
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Errors",
+    "paragraph_ref": "IFRS S1.83",
+    "requirement_text": "Correct material prior-period errors by restating the comparative amounts for the prior period(s) disclosed unless it is impracticable to do so.",
+    "is_mandatory": true,
+    "display_order": 26
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Errors",
+    "paragraph_ref": "IFRS S1.B58",
+    "requirement_text": "If an entity identifies a material error in its prior period(s) sustainability-related financial disclosures, disclose: (a) the nature of the prior-period error; (b) the correction, to the extent practicable, for each prior period disclosed; and (c) if correction of the error is impracticable, the circumstances that led to the existence of that condition and a description of how and from when the error has been corrected.",
+    "is_mandatory": true,
+    "display_order": 27
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Errors",
+    "paragraph_ref": "IFRS S1.B59",
+    "requirement_text": "When it is impracticable to determine the effect of an error on all prior periods presented, restate the comparative information to correct the error from the earliest date practicable.",
+    "is_mandatory": true,
+    "display_order": 28
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "General Disclosures",
+    "section": "Transition reliefs",
+    "paragraph_ref": "IFRS S1.E5",
+    "requirement_text": "In the first annual reporting period in which an entity applies IFRS S1, it is permitted to disclose information on only climate-related risks and opportunities (in accordance with IFRS S2) and consequently apply the requirements in IFRS S1 only insofar as they relate to the disclosure of information on climate-related risks and opportunities. If an entity uses this transition relief, disclose that fact.",
+    "is_mandatory": false,
+    "display_order": 29
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S2.5",
+    "requirement_text": "The objective of climate-related financial disclosures on governance is to enable users of general purpose financial reports to understand the governance processes, controls and procedures an entity uses to monitor, manage and oversee climate-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 30
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S2.6(a)",
+    "requirement_text": "Identify the governance body (or bodies) (which can include a board, committee or equivalent body charged with governance) or individual(s) responsible for oversight of climate-related risks and opportunities, and disclose how it: (a) reflects responsibilities for climate-related risks and opportunities in the terms of reference, mandates, role descriptions and other related policies applicable to it; (b) determines whether appropriate skills and competencies are available or will be developed to oversee strategies designed to respond to climate-related risks and opportunities; (c) is informed about climate-related risks and opportunities, including how often it is informed; (d) takes into account climate-related risks and opportunities when overseeing the entity's strategy, its decisions on major transactions and its risk management processes and related policies, including whether it has considered trade-offs associated with those risks and opportunities; and (e) oversees the setting of targets related to climate-related risks and opportunities, and monitors progress towards those targets (see IFRS S2.33-36), including whether and how related performance metrics are included in remuneration policies (see IFRS S2.29(g)).",
+    "is_mandatory": true,
+    "display_order": 31
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S2.6(b)",
+    "requirement_text": "Disclose management's role in the governance processes, controls and procedures used to monitor, manage and oversee climate-related risks and opportunities, including information about: (a) whether the role is delegated to a specific management-level position or management-level committee and how oversight is exercised over that position or committee; and (b) whether management uses controls and procedures to support the oversight of climate-related risks and opportunities and, if so, how these controls and procedures are integrated with other internal functions.",
+    "is_mandatory": true,
+    "display_order": 32
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy",
+    "paragraph_ref": "IFRS S2.8",
+    "requirement_text": "The objective of climate-related financial disclosures on strategy is to enable users of general purpose financial reports to understand an entity's strategy for managing climate-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 33
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate-related risks and opportunities",
+    "paragraph_ref": "IFRS S2.9(a), 10",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the climate-related risks and opportunities that could reasonably be expected to affect the entity's prospects, including: (a) a description of the climate-related risks and opportunities that could reasonably be expected to affect the entity's prospects; (b) for each climate-related risk the entity has identified, whether the entity considers the risk to be a climate-related physical risk or climate-related transition risk; (c) for each climate-related risk and opportunity the entity has identified, over which time horizons—short, medium or long term—the effects of each climate-related risk and opportunity could reasonably be expected to occur; and (d) how the entity defines 'short term', 'medium term' and 'long term' and how these definitions are linked to the planning horizons used by the entity for strategic decision-making.",
+    "is_mandatory": true,
+    "display_order": 34
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Business model and value chain",
+    "paragraph_ref": "IFRS S2.9(b), 13",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the current and anticipated effects of climate-related risks and opportunities on the entity's business model and value chain, including a description of: (a) the current and anticipated effects of climate-related risks and opportunities on the entity's business model and value chain; and (b) where in the entity's business model and value chain climate-related risks and opportunities are concentrated (e.g. geographical areas, facilities and types of assets).",
+    "is_mandatory": true,
+    "display_order": 35
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Strategy and decision-making",
+    "paragraph_ref": "IFRS S2.9(c), 14(a)",
+    "requirement_text": "Disclose information about how the entity has responded to, and plans to respond to, climate-related risks and opportunities in its strategy and decision-making, including how the entity plans to achieve any climate-related targets it has set and any targets it is required to meet by law or regulation, including: (a) current and anticipated changes to the entity's business model, including its resource allocation, to address climate-related risks and opportunities; (b) current and anticipated direct mitigation and adaptation efforts; (c) current and anticipated indirect mitigation and adaptation efforts; (d) any climate-related transition plan the entity has, including information about key assumptions used in developing its transition plan, and dependencies on which the entity's transition plan relies; and (e) how the entity plans to achieve any climate-related targets, including any greenhouse gas emissions targets.",
+    "is_mandatory": true,
+    "display_order": 36
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Strategy and decision-making",
+    "paragraph_ref": "IFRS S1.33(c)",
+    "requirement_text": "Disclose trade-offs between climate-related risks and opportunities that the entity considered (e.g. in making a decision on the location of new operations, an entity might have considered the environmental impacts of those operations and the employment opportunities they would create in a community).",
+    "is_mandatory": true,
+    "display_order": 37
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Strategy and decision-making",
+    "paragraph_ref": "IFRS S2.9(c), 14(b)",
+    "requirement_text": "Disclose information about how the entity is resourcing, and plans to resource, the activities disclosed in accordance with IFRS S2.14(a).",
+    "is_mandatory": true,
+    "display_order": 38
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Strategy and decision-making",
+    "paragraph_ref": "IFRS S2.9(c), 14(c)",
+    "requirement_text": "Disclose quantitative and qualitative information about the progress of plans disclosed in previous reporting periods in accordance with IFRS S2.14(a).",
+    "is_mandatory": true,
+    "display_order": 39
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.9(d), 15",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand: (a) the effects of climate-related risks and opportunities on the entity's financial position, financial performance and cash flows for the reporting period (current financial effects); and (b) the anticipated effects of climate-related risks and opportunities on the entity's financial position, financial performance and cash flows over the short, medium and long term, taking into consideration how climate-related risks and opportunities are included in the entity's financial planning (anticipated financial effects).",
+    "is_mandatory": true,
+    "display_order": 40
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.16",
+    "requirement_text": "Disclose quantitative and qualitative information about: (a) how climate-related risks and opportunities have affected the entity's financial position, financial performance and cash flows for the reporting period; (b) the climate-related risks and opportunities identified in IFRS S2.16(a) for which there is a significant risk of a material adjustment within the next annual reporting period to the carrying amounts of assets and liabilities reported in the related financial statements; (c) how the entity expects its financial position to change over the short, medium and long term, given its strategy to manage climate-related risks and opportunities, taking into consideration: (i) its investment and disposal plans and (ii) its planned sources of funding to implement its strategy; and (d) how the entity expects its financial performance and cash flows to change over the short, medium and long term, given its strategy to manage climate-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 41
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.17",
+    "requirement_text": "When providing quantitative information, disclose a single amount or a range.",
+    "is_mandatory": true,
+    "display_order": 42
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.19",
+    "requirement_text": "An entity need not provide quantitative information about the current or anticipated financial effects of a climate-related risk or opportunity if it determines that: (a) those effects are not separately identifiable; or (b) the level of measurement uncertainty involved in estimating those effects is so high that the resulting quantitative information would not be useful.",
+    "is_mandatory": false,
+    "display_order": 43
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.20",
+    "requirement_text": "In addition, an entity need not provide quantitative information about the anticipated financial effects of a climate-related risk or opportunity if it does not have the skills, capabilities or resources to provide that quantitative information.",
+    "is_mandatory": false,
+    "display_order": 44
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S2.21",
+    "requirement_text": "If an entity determines that it need not provide quantitative information about the current or anticipated financial effects of a climate-related risk or opportunity applying the criteria set out in IFRS S2.19-20: (a) explain why it has not provided quantitative information; (b) provide qualitative information about those financial effects, including identifying line items, totals and subtotals within the related financial statements that are likely to be affected, or have been affected, by that climate-related risk or opportunity; and (c) provide quantitative information about the combined financial effects of that climate-related risk or opportunity with other climate-related risks or opportunities and other factors unless the entity determines that quantitative information about the combined financial effects would not be useful.",
+    "is_mandatory": true,
+    "display_order": 45
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the resilience of the entity's strategy and business model to climate-related changes, developments and uncertainties, taking into consideration the entity's identified climate-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 46
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22(a)",
+    "requirement_text": "Disclose the entity's assessment of its climate resilience as at the reporting date to enable users of general purpose financial reports to understand: (a) the implications, if any, of the entity's assessment for its strategy and business model, including how the entity would need to respond to the effects identified in the climate-related scenario analysis; (b) the significant areas of uncertainty considered in the entity's assessment of its climate resilience; and (c) the entity's capacity to adjust or adapt its strategy and business model to climate change over the short, medium and long term, including: (i) the availability of, and flexibility in, the entity's existing financial resources to respond to the effects identified in the climate-related scenario analysis; (ii) the entity's ability to redeploy, repurpose, upgrade or decommission existing assets; and (iii) the effect of the entity's current and planned investments in climate-related mitigation, adaptation and opportunities for climate resilience.",
+    "is_mandatory": true,
+    "display_order": 47
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22(b)(i)",
+    "requirement_text": "Disclose information about the inputs the entity used for climate-related scenario analysis including: (a) which climate-related scenarios the entity used for the analysis and the sources of those scenarios; (b) whether the analysis included a diverse range of climate-related scenarios; (c) whether the climate-related scenarios used for the analysis are associated with climate-related transition risks or climate-related physical risks; (d) whether the entity used, among its scenarios, a climate-related scenario aligned with the latest international agreement on climate change; (e) why the entity decided that its chosen climate-related scenarios are relevant to assessing its resilience to climate-related changes, developments or uncertainties; (f) the time horizons the entity used in the analysis; and (g) what scope of operations the entity used in the analysis (e.g. the operating locations and business units used in the analysis).",
+    "is_mandatory": true,
+    "display_order": 48
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22(b)(ii)",
+    "requirement_text": "Disclose the key assumptions the entity made in the climate-related scenario analysis, including assumptions about: (a) climate-related policies in the jurisdictions in which the entity operates; (b) macroeconomic trends; (c) national- or regional-level variables (e.g. local weather patterns, demographics, land use, infrastructure and availability of natural resources); (d) energy usage and mix; and (e) developments in technology.",
+    "is_mandatory": true,
+    "display_order": 49
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22(b)(iii)",
+    "requirement_text": "Disclose the reporting period in which the climate-related scenario analysis was carried out (see IFRS S2.B18).",
+    "is_mandatory": true,
+    "display_order": 50
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Strategy - Climate resilience",
+    "paragraph_ref": "IFRS S2.22.2",
+    "requirement_text": "When providing quantitative information, disclose a single amount or a range.",
+    "is_mandatory": true,
+    "display_order": 51
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S2.24",
+    "requirement_text": "The objective of climate-related financial disclosures on risk management is to enable users of general purpose financial reports to understand an entity's processes to identify, assess, prioritise and monitor climate-related risks and opportunities, including whether and how those processes are integrated into and inform the entity's overall risk management process.",
+    "is_mandatory": true,
+    "display_order": 52
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S2.25(a)",
+    "requirement_text": "Disclose information about the processes and related policies the entity uses to identify, assess, prioritise and monitor climate-related risks, including information about: (a) the inputs and parameters the entity uses (e.g. information about data sources and the scope of operations covered in the processes); (b) whether and how the entity uses climate-related scenario analysis to inform its identification of climate-related risks; (c) how the entity assesses the nature, likelihood and magnitude of the effects of those risks (e.g. whether the entity considers qualitative factors, quantitative thresholds or other criteria); (d) whether and how the entity prioritises climate-related risks relative to other types of risk; (e) how the entity monitors climate-related risks; and (f) whether and how the entity has changed the processes it uses compared with the previous reporting period.",
+    "is_mandatory": true,
+    "display_order": 53
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S2.25(b)",
+    "requirement_text": "Disclose information about the processes the entity uses to identify, assess, prioritise and monitor climate-related opportunities, including information about whether and how the entity uses climate-related scenario analysis to inform its identification of climate-related opportunities.",
+    "is_mandatory": true,
+    "display_order": 54
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S2.25(c)",
+    "requirement_text": "Disclose information about the extent to which, and how, the processes for identifying, assessing, prioritising and monitoring climate-related risks and opportunities are integrated into and inform the entity's overall risk management process.",
+    "is_mandatory": true,
+    "display_order": 55
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S2.27",
+    "requirement_text": "The objective of climate-related financial disclosures on metrics and targets is to enable users of general purpose financial reports to understand an entity's performance in relation to its climate-related risks and opportunities, including progress towards any climate-related targets it has set, and any targets it is required to meet by law or regulation.",
+    "is_mandatory": true,
+    "display_order": 56
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.29(a)(i)",
+    "requirement_text": "Disclose absolute gross greenhouse gas emissions generated during the reporting period, expressed as metric tonnes of CO2 equivalent (see IFRS S2.B19-B22), classified as: (a) Scope 1 greenhouse gas emissions; (b) Scope 2 greenhouse gas emissions; and (c) Scope 3 greenhouse gas emissions.",
+    "is_mandatory": true,
+    "display_order": 57
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B19(c)",
+    "requirement_text": "The entity may have a different reporting period from some or all of the entities in its value chain and, in certain circumstances, may be permitted to measure its greenhouse gas emissions using information for reporting periods that differ from its own reporting period (see IFRS S2.B19). In such cases, the entity discloses the effects of significant events and changes in circumstances (relevant to its greenhouse gas emissions) that occur between the reporting dates of the entities in the value chain and the date of the entity's general purpose financial reports.",
+    "is_mandatory": true,
+    "display_order": 58
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.29(a)(iii)",
+    "requirement_text": "Disclose the approach used to measure greenhouse gas emissions (see IFRS S2.B26-B29), including: (a) the measurement approach, inputs and assumptions the entity uses to measure its greenhouse gas emissions; (b) the reason why the entity has chosen the measurement approach, inputs and assumptions it uses to measure its greenhouse gas emissions; and (c) any changes the entity made to the measurement approach, inputs and assumptions during the reporting period and the reasons for those changes.",
+    "is_mandatory": true,
+    "display_order": 59
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B26(a), B27",
+    "requirement_text": "Disclose information about the measurement approach the entity uses in accordance with the Greenhouse Gas Protocol: A Corporate Accounting and Reporting Standard (2004), including: (a) the approach it uses to determine its greenhouse gas emissions (e.g. the equity share or control approach in the Greenhouse Gas Protocol); and (b) the reason, or reasons, for the entity's choice of measurement approach and how that approach relates to the disclosure objective in IFRS S2.27.",
+    "is_mandatory": true,
+    "display_order": 60
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B26(b), B28",
+    "requirement_text": "When an entity discloses its greenhouse gas emissions measured in accordance with another method (i.e. other than the Greenhouse Gas Protocol), and applies IFRS S2.29(a)(ii), B24-B25 or C4(a), disclose: (a) the applicable method and measurement approach the entity uses to determine its greenhouse gas emissions; and (b) the reason, or reasons, for the entity's choice of method and measurement approach and how that approach relates to the disclosure objective in IFRS S2.27.",
+    "is_mandatory": true,
+    "display_order": 61
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B26(c), B29",
+    "requirement_text": "As part of an entity's disclosure of the measurement approach, inputs and assumptions, it discloses information to enable users of general purpose financial reports to understand which emission factors the entity uses in measuring its greenhouse gas emissions.",
+    "is_mandatory": true,
+    "display_order": 62
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.29(a)(iv)",
+    "requirement_text": "For Scope 1 and Scope 2 greenhouse gas emissions, disaggregate emissions between: (a) the consolidated accounting group (for example, for an entity applying IFRS Accounting Standards, this group would comprise the parent and its consolidated subsidiaries); and (b) other investees excluded from the consolidated accounting group (for example, for an entity applying IFRS Accounting Standards, these investees would include associates, joint ventures and unconsolidated subsidiaries).",
+    "is_mandatory": true,
+    "display_order": 63
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.29(a)(v)",
+    "requirement_text": "For Scope 2 greenhouse gas emissions, disclose location-based Scope 2 greenhouse gas emissions, and provide information about any contractual instruments that is necessary to inform users' understanding of the entity's Scope 2 greenhouse gas emissions (see IFRS S2.B30-B31).",
+    "is_mandatory": true,
+    "display_order": 64
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.29(a)(vi)(1)",
+    "requirement_text": "For Scope 3 greenhouse gas emissions, disclose the categories included within the entity's measure of Scope 3 greenhouse gas emissions, in accordance with the Scope 3 categories described in the Greenhouse Gas Protocol Corporate Value Chain (Scope 3) Accounting and Reporting Standard (2011).",
+    "is_mandatory": true,
+    "display_order": 65
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B40, B55-B56",
+    "requirement_text": "As part of disclosing information about the measurement approach, inputs and assumptions the entity uses to measure its Scope 3 greenhouse gas emissions: (a) include information about the characteristics of the data and inputs as described in IFRS S2.B40 (e.g. data based on direct measurement); and (b) to reflect how it prioritises Scope 3 data in accordance with the measurement framework set out in IFRS S2.B40-B54, disclose information that enables users of general purpose financial reports to understand the extent to which the entity's Scope 3 greenhouse gas emissions are measured using: (i) inputs from specific activities within the entity's value chain; and (ii) inputs that are verified.",
+    "is_mandatory": true,
+    "display_order": 66
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Greenhouse gas emissions",
+    "paragraph_ref": "IFRS S2.B57",
+    "requirement_text": "IFRS S2 includes the presumption that Scope 3 greenhouse gas emissions can be estimated reliably using secondary data and industry averages. In those rare cases when an entity determines it is impracticable to estimate its Scope 3 greenhouse gas emissions, it discloses how it is managing its Scope 3 greenhouse gas emissions.",
+    "is_mandatory": false,
+    "display_order": 67
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other cross-industry metrics",
+    "paragraph_ref": "IFRS S2.29(b)-(c)",
+    "requirement_text": "Disclose the amount and percentage of assets or business activities vulnerable to climate-related: (a) transition risks; and (b) physical risks.",
+    "is_mandatory": true,
+    "display_order": 68
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other cross-industry metrics",
+    "paragraph_ref": "IFRS S2.29(d)",
+    "requirement_text": "Disclose the amount and percentage of assets or business activities aligned with climate-related opportunities.",
+    "is_mandatory": true,
+    "display_order": 69
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other cross-industry metrics",
+    "paragraph_ref": "IFRS S2.29(e)",
+    "requirement_text": "Disclose the amount of capital expenditure, financing or investment deployed towards climate-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 70
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other cross-industry metrics",
+    "paragraph_ref": "IFRS S2.29(f)",
+    "requirement_text": "Disclose: (a) an explanation of whether and how the entity is applying a carbon price in decision-making (e.g. investment decisions, transfer pricing and scenario analysis); and (b) the price for each metric tonne of greenhouse gas emissions the entity uses to assess the costs of its greenhouse gas emissions.",
+    "is_mandatory": true,
+    "display_order": 71
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other cross-industry metrics",
+    "paragraph_ref": "IFRS S2.29(g)",
+    "requirement_text": "Disclose: (a) a description of whether and how climate-related considerations are factored into executive remuneration (see also IFRS S2.6(a)(v)); and (b) the percentage of executive management remuneration recognised in the current period that is linked to climate-related considerations.",
+    "is_mandatory": true,
+    "display_order": 72
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Industry-based metrics",
+    "paragraph_ref": "IFRS S2.32",
+    "requirement_text": "Disclose industry-based metrics that are associated with one or more particular business models, activities or other common features that characterise participation in an industry. In determining the industry-based metrics that the entity discloses, refer to and consider the applicability of the industry-based metrics associated with disclosure topics described in the Industry-based Guidance on Implementing IFRS S2.",
+    "is_mandatory": true,
+    "display_order": 73
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Financed emissions",
+    "paragraph_ref": "IFRS S2.29(a)(vi)(2)",
+    "requirement_text": "For Scope 3 greenhouse gas emissions, disclose additional information about the entity's Category 15 greenhouse gas emissions or those associated with its investments (financed emissions), if the entity's activities include asset management, commercial banking or insurance (see IFRS S2.B58-B63).",
+    "is_mandatory": true,
+    "display_order": 74
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Financed emissions",
+    "paragraph_ref": "IFRS S2.B61",
+    "requirement_text": "An entity that participates in asset management activities discloses: (a) its absolute gross financed emissions, disaggregated by Scope 1, Scope 2 and Scope 3 greenhouse gas emissions; (b) for each of the disaggregated items, the total amount of assets under management (AUM) that is included in the financed emissions disclosure, expressed in the presentation currency of the entity's financial statements; (c) the percentage of the entity's total AUM included in the financed emissions calculation (if this is less than 100 percent, disclose information that explains the exclusions, including types of assets and the associated amount of AUM); and (d) the methodology used to calculate the financed emissions, including the method of allocation the entity used to attribute its share of emissions in relation to the size of investments.",
+    "is_mandatory": true,
+    "display_order": 75
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Financed emissions",
+    "paragraph_ref": "IFRS S2.B62",
+    "requirement_text": "An entity that participates in commercial banking activities discloses: (a) its absolute gross financed emissions, disaggregated by Scope 1, Scope 2 and Scope 3 greenhouse gas emissions for each industry by asset class (disaggregating by Industry using GICS 6-digit industry-level code and by Asset class including loans, project finance, bonds, equity investments and undrawn loan commitments); (b) its gross exposure to each industry by asset class, expressed in the presentation currency of the entity's financial statements; (c) the percentage of the entity's gross exposure included in the financed emissions calculation; and (d) the methodology the entity used to calculate its financed emissions, including the method of allocation the entity used to attribute its share of emissions in relation to the size of its gross exposure.",
+    "is_mandatory": true,
+    "display_order": 76
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Financed emissions",
+    "paragraph_ref": "IFRS S2.B63",
+    "requirement_text": "An entity that participates in financial activities associated with the insurance industry discloses: (a) its absolute gross financed emissions, disaggregated by Scope 1, Scope 2 and Scope 3 greenhouse gas emissions for each industry by asset class; (b) the gross exposure for each industry by asset class, expressed in the presentation currency of the entity's financial statements; (c) the percentage of the entity's gross exposure included in the financed emissions calculation; and (d) the methodology the entity used to calculate its financed emissions, including the method of allocation the entity used to attribute its share of emissions in relation to the size of its gross exposure.",
+    "is_mandatory": true,
+    "display_order": 77
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other metrics",
+    "paragraph_ref": "IFRS S1.46(b)",
+    "requirement_text": "For each climate-related risk and opportunity that could reasonably be expected to affect the entity's prospects, in addition to the metrics required by IFRS S2 above, disclose metrics the entity uses to measure and monitor: (a) that climate-related risk or opportunity; and (b) its performance in relation to that climate-related risk or opportunity, including progress towards any targets the entity has set, and any targets it is required to meet by law or regulation.",
+    "is_mandatory": true,
+    "display_order": 78
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other metrics",
+    "paragraph_ref": "IFRS S1.49",
+    "requirement_text": "If an entity discloses a metric taken from a source other than IFRS Sustainability Disclosure Standards, identify the source and the metric taken.",
+    "is_mandatory": true,
+    "display_order": 79
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other metrics",
+    "paragraph_ref": "IFRS S1.50, IFRS S2.B67",
+    "requirement_text": "If a metric has been developed by an entity, disclose information about: (a) how the metric is defined, including whether it is derived by adjusting a metric taken from a source other than IFRS Sustainability Disclosure Standards and, if so, which source and how the metric disclosed by the entity differs from the metric specified in that source; (b) whether the metric is an absolute measure, a measure expressed in relation to another metric or a qualitative measure (such as a red, amber, green—or RAG—status); (c) whether the metric is validated by a third party and, if so, which party; and (d) the method used to calculate the metric and the inputs to the calculation, including the limitations of the method used and the significant assumptions made.",
+    "is_mandatory": true,
+    "display_order": 80
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Other metrics",
+    "paragraph_ref": "IFRS S1.53",
+    "requirement_text": "Label and define metrics and targets using meaningful, clear and precise names and descriptions.",
+    "is_mandatory": true,
+    "display_order": 81
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Climate-related targets",
+    "paragraph_ref": "IFRS S2.33",
+    "requirement_text": "Disclose the quantitative and qualitative climate-related targets the entity has set to monitor progress towards achieving its strategic goals, and any targets it is required to meet by law or regulation, including any greenhouse gas emissions targets. For each target, disclose: (a) the metric used to set the target (see IFRS S2.B66-B67); (b) the objective of the target (e.g. mitigation, adaptation or conformance with science-based initiatives); (c) the part of the entity to which the target applies; (d) the period over which the target applies; (e) the base period from which progress is measured; (f) any milestones and interim targets; (g) if the target is quantitative, whether it is an absolute target or an intensity target; and (h) how the latest international agreement on climate change, including jurisdictional commitments that arise from that agreement, has informed the target.",
+    "is_mandatory": true,
+    "display_order": 82
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Climate-related targets",
+    "paragraph_ref": "IFRS S2.34",
+    "requirement_text": "Disclose information about the entity's approach to setting and reviewing each target, and how it monitors progress against each target, including: (a) whether the target and the methodology for setting the target has been validated by a third party; (b) the entity's processes for reviewing the target; (c) the metrics used to monitor progress towards reaching the target; and (d) any revisions to the target and an explanation for those revisions.",
+    "is_mandatory": true,
+    "display_order": 83
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Climate-related targets",
+    "paragraph_ref": "IFRS S2.35",
+    "requirement_text": "Disclose information about the entity's performance against each climate-related target and an analysis of trends or changes in the entity's performance.",
+    "is_mandatory": true,
+    "display_order": 84
+  },
+  {
+    "standard": "IFRS S2",
+    "chapter": "Climate",
+    "section": "Metrics and targets - Climate-related targets",
+    "paragraph_ref": "IFRS S2.36",
+    "requirement_text": "For each greenhouse gas emissions target disclosed in accordance with IFRS S2.33-35, disclose: (a) which greenhouse gases are covered by the target; (b) whether Scope 1, Scope 2 or Scope 3 greenhouse gas emissions are covered by the target; (c) whether the target is a gross greenhouse gas emissions target or net greenhouse gas emissions target (if net, separately disclose its associated gross greenhouse gas emissions target); (d) whether the target was derived using a sectoral decarbonisation approach; and (e) the entity's planned use of carbon credits to offset greenhouse gas emissions to achieve any net greenhouse gas emissions target, including disclosing information about: (i) the extent to which, and how, achieving any net greenhouse gas emissions target relies on the use of carbon credits; (ii) which third-party scheme(s) will verify or certify the carbon credits; (iii) the type of carbon credit, including whether the underlying offset will be nature-based or based on technological carbon removals, and whether the underlying offset is achieved through carbon reduction or removal; and (iv) any other factors necessary for users of general purpose financial reports to understand the credibility and integrity of the carbon credits the entity plans to use.",
+    "is_mandatory": true,
+    "display_order": 85
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S1.26",
+    "requirement_text": "The objective of sustainability-related financial disclosures on governance is to enable users of general purpose financial reports to understand the governance processes, controls and procedures an entity uses to monitor, manage and oversee sustainability-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 86
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S1.27(a)",
+    "requirement_text": "Identify the governance body (or bodies) (which can include a board, committee or equivalent body charged with governance) or individual(s) responsible for oversight of sustainability-related risks and opportunities and disclose how it: (a) reflects responsibilities for sustainability-related risks and opportunities in the terms of reference, mandates, role descriptions and other related policies applicable to it; (b) determines whether appropriate skills and competencies are available or will be developed to oversee strategies designed to respond to sustainability-related risks and opportunities; (c) is informed about sustainability-related risks and opportunities, including how often it is informed; (d) takes into account sustainability-related risks and opportunities when overseeing the entity's strategy, its decisions on major transactions, and its risk management processes and related policies, including whether it has considered trade-offs associated with those risks and opportunities; and (e) oversees the setting of targets related to sustainability-related risks and opportunities, and monitors progress towards those targets (see IFRS S1.51), including whether and how related performance metrics are included in remuneration policies.",
+    "is_mandatory": true,
+    "display_order": 87
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Governance",
+    "paragraph_ref": "IFRS S1.27(b)",
+    "requirement_text": "Disclose management's role in the governance processes, controls and procedures used to monitor, manage and oversee sustainability-related risks and opportunities, including information about: (a) whether the role is delegated to a specific management-level position or management-level committee and how oversight is exercised over that position or committee; and (b) whether management uses controls and procedures to support the oversight of sustainability-related risks and opportunities and, if so, how these controls and procedures are integrated with other internal functions.",
+    "is_mandatory": true,
+    "display_order": 88
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy",
+    "paragraph_ref": "IFRS S1.28",
+    "requirement_text": "The objective of sustainability-related financial disclosures on strategy is to enable users of general purpose financial reports to understand an entity's strategy for managing sustainability-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 89
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Sustainability-related risks and opportunities",
+    "paragraph_ref": "IFRS S1.29(a), 30",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the sustainability-related risks and opportunities that could reasonably be expected to affect the entity's prospects, including: (a) a description of the sustainability-related risks and opportunities that could reasonably be expected to affect the entity's prospects; (b) the time horizons—short, medium or long term—over which the effects of each of those sustainability-related risks and opportunities could reasonably be expected to occur; and (c) how the entity defines 'short term', 'medium term' and 'long term' and how these definitions are linked to the planning horizons used by the entity for strategic decision-making.",
+    "is_mandatory": true,
+    "display_order": 90
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Business model and value chain",
+    "paragraph_ref": "IFRS S1.29(b), 32",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the current and anticipated effects of sustainability-related risks and opportunities on the entity's business model and value chain, including a description of: (a) the current and anticipated effects of sustainability-related risks and opportunities on the entity's business model and value chain; and (b) where in the entity's business model and value chain sustainability-related risks and opportunities are concentrated (e.g. geographical areas, facilities and types of assets).",
+    "is_mandatory": true,
+    "display_order": 91
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Strategy and decision-making",
+    "paragraph_ref": "IFRS S1.29(c), 33",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the effects of sustainability-related risks and opportunities on its strategy and decision-making, including: (a) how the entity has responded to, and plans to respond to, sustainability-related risks and opportunities in its strategy and decision-making; (b) the progress against plans the entity has disclosed in previous reporting periods, including quantitative and qualitative information; and (c) trade-offs between sustainability-related risks and opportunities that the entity considered.",
+    "is_mandatory": true,
+    "display_order": 92
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.29(d), 34",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand: (a) the effects of sustainability-related risks and opportunities on the entity's financial position, financial performance and cash flows for the reporting period (current financial effects); and (b) the anticipated effects of sustainability-related risks and opportunities on the entity's financial position, financial performance and cash flows over the short, medium and long term, taking into consideration how sustainability-related risks and opportunities are included in the entity's financial planning (anticipated financial effects).",
+    "is_mandatory": true,
+    "display_order": 93
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.35",
+    "requirement_text": "Disclose quantitative and qualitative information about: (a) how sustainability-related risks and opportunities have affected the entity's financial position, financial performance and cash flows for the reporting period; (b) the sustainability-related risks and opportunities identified in IFRS S1.35(a) for which there is a significant risk of a material adjustment within the next annual reporting period to the carrying amounts of assets and liabilities reported in the related financial statements; (c) how the entity expects its financial position to change over the short, medium and long term, given its strategy to manage sustainability-related risks and opportunities, taking into consideration: (i) its investment and disposal plans; and (ii) its planned sources of funding to implement its strategy; and (d) how the entity expects its financial performance and cash flows to change over the short, medium and long term, given its strategy to manage sustainability-related risks and opportunities.",
+    "is_mandatory": true,
+    "display_order": 94
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.36",
+    "requirement_text": "When providing quantitative information, disclose a single amount or a range.",
+    "is_mandatory": true,
+    "display_order": 95
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.38",
+    "requirement_text": "An entity need not provide quantitative information about the current or anticipated financial effects of a sustainability-related risk or opportunity if it determines that: (a) those effects are not separately identifiable; or (b) the level of measurement uncertainty involved in estimating those effects is so high that the resulting quantitative information would not be useful (IFRS S1.77-82).",
+    "is_mandatory": false,
+    "display_order": 96
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.39",
+    "requirement_text": "In addition, an entity need not provide quantitative information about the anticipated financial effects of a sustainability-related risk or opportunity if it does not have the skills, capabilities or resources to provide that quantitative information.",
+    "is_mandatory": false,
+    "display_order": 97
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Financial position, financial performance and cash flows",
+    "paragraph_ref": "IFRS S1.40",
+    "requirement_text": "If an entity determines that it need not provide quantitative information about the current or anticipated financial effects of a sustainability-related risk or opportunity applying the criteria set out in IFRS S1.38-39: (a) explain why it has not provided quantitative information; (b) provide qualitative information about those financial effects, including identifying line items, totals and subtotals within the related financial statements that are likely to be affected, or have been affected, by that sustainability-related risk or opportunity; and (c) provide quantitative information about the combined financial effects of that sustainability-related risk or opportunity with other sustainability-related risks or opportunities and other factors, unless the entity determines that quantitative information about the combined financial effects would not be useful.",
+    "is_mandatory": true,
+    "display_order": 98
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Resilience",
+    "paragraph_ref": "IFRS S1.29(e), 41",
+    "requirement_text": "Disclose information that enables users of general purpose financial reports to understand the entity's capacity to adjust to the uncertainties arising from sustainability-related risks. Disclose a qualitative and, if applicable, quantitative assessment of the resilience of its strategy and business model in relation to its sustainability-related risks, including information about how the assessment was carried out and its time horizon.",
+    "is_mandatory": true,
+    "display_order": 99
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Strategy - Resilience",
+    "paragraph_ref": "IFRS S1.41",
+    "requirement_text": "When providing quantitative information, disclose a single amount or a range.",
+    "is_mandatory": true,
+    "display_order": 100
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S1.43",
+    "requirement_text": "The objective of sustainability-related financial disclosures on risk management is to enable users of general purpose financial reports to: (a) understand an entity's processes to identify, assess, prioritise and monitor sustainability-related risks and opportunities, including whether and how those processes are integrated into and inform the entity's overall risk management process; and (b) assess the entity's overall risk profile and its overall risk management process.",
+    "is_mandatory": true,
+    "display_order": 101
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S1.44(a)",
+    "requirement_text": "Disclose information about the processes and related policies the entity uses to identify, assess, prioritise and monitor sustainability-related risks, including information about: (a) the inputs and parameters the entity uses (e.g. information about data sources and the scope of operations covered in the processes); (b) whether and how the entity uses scenario analysis to inform its identification of sustainability-related risks; (c) how the entity assesses the nature, likelihood and magnitude of the effects of those risks (e.g. whether the entity considers qualitative factors, quantitative thresholds or other criteria); (d) whether and how the entity prioritises sustainability-related risks relative to other types of risk; (e) how the entity monitors sustainability-related risks; and (f) whether and how the entity has changed the processes it uses compared with the previous reporting period.",
+    "is_mandatory": true,
+    "display_order": 102
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S1.44(b)",
+    "requirement_text": "Disclose information about the processes the entity uses to identify, assess, prioritise and monitor sustainability-related opportunities.",
+    "is_mandatory": true,
+    "display_order": 103
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Risk management",
+    "paragraph_ref": "IFRS S1.44(c)",
+    "requirement_text": "Disclose information about the extent to which, and how, the processes for identifying, assessing, prioritising and monitoring sustainability-related risks and opportunities are integrated into and inform the entity's overall risk management process.",
+    "is_mandatory": true,
+    "display_order": 104
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.45",
+    "requirement_text": "The objective of sustainability-related financial disclosures on metrics and targets is to enable users of general purpose financial reports to understand an entity's performance in relation to its sustainability-related risks and opportunities, including progress towards any targets the entity has set, and any targets it is required to meet by law or regulation.",
+    "is_mandatory": true,
+    "display_order": 105
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.46",
+    "requirement_text": "For each sustainability-related risk and opportunity that could reasonably be expected to affect the entity's prospects, disclose: (a) metrics required by an applicable IFRS Sustainability Disclosure Standard; and (b) metrics the entity uses to measure and monitor: (i) that sustainability-related risk or opportunity; and (ii) the entity's performance in relation to that sustainability-related risk or opportunity, including progress towards any targets it has set, and any targets it is required to meet by law or regulation.",
+    "is_mandatory": true,
+    "display_order": 106
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.48",
+    "requirement_text": "Metrics disclosed by an entity applying IFRS S1.45-46 include metrics associated with particular business models, activities or other common features that characterise participation in an industry.",
+    "is_mandatory": true,
+    "display_order": 107
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.49.2",
+    "requirement_text": "If an entity discloses a metric taken from a source other than IFRS Sustainability Disclosure Standards, identify the source and the metric taken.",
+    "is_mandatory": true,
+    "display_order": 108
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.50",
+    "requirement_text": "If a metric has been developed by an entity, disclose information about: (a) how the metric is defined, including whether it is derived by adjusting a metric taken from a source other than IFRS Sustainability Disclosure Standards and, if so, which source and how the metric disclosed by the entity differs from the metric specified in that source; (b) whether the metric is an absolute measure, a measure expressed in relation to another metric or a qualitative measure (such as a red, amber, green—or RAG—status); (c) whether the metric is validated by a third party and, if so, which party; and (d) the method used to calculate the metric and the inputs to the calculation, including the limitations of the method used and the significant assumptions made.",
+    "is_mandatory": true,
+    "display_order": 109
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.51",
+    "requirement_text": "Disclose information about the targets the entity has set to monitor progress towards achieving its strategic goals, and any targets it is required to meet by law or regulation. For each target, disclose: (a) the metric used to set the target and to monitor progress towards reaching the target; (b) the specific quantitative or qualitative target the entity has set or is required to meet; (c) the period over which the target applies; (d) the base period from which progress is measured; (e) any milestones and interim targets; (f) performance against each target and an analysis of trends or changes in the entity's performance; and (g) any revisions to the target and an explanation for those revisions.",
+    "is_mandatory": true,
+    "display_order": 110
+  },
+  {
+    "standard": "IFRS S1",
+    "chapter": "Other Topics",
+    "section": "Metrics and targets",
+    "paragraph_ref": "IFRS S1.53.2",
+    "requirement_text": "Label and define metrics and targets using meaningful, clear and precise names and descriptions.",
+    "is_mandatory": true,
+    "display_order": 111
+  }
+]

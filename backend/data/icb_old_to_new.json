@@ -1,0 +1,897 @@
+{
+  "9000": {
+    "new_code": "10",
+    "old_desc": "Technology",
+    "new_desc": "Technology"
+  },
+  "6000": {
+    "new_code": "15",
+    "old_desc": "Telecommunications",
+    "new_desc": "Telecommunications"
+  },
+  "4000": {
+    "new_code": "20",
+    "old_desc": "Health Care",
+    "new_desc": "Health Care"
+  },
+  "8000": {
+    "new_code": "30",
+    "old_desc": "Financials",
+    "new_desc": "Financials"
+  },
+  "2000": {
+    "new_code": "50",
+    "old_desc": "Industrials",
+    "new_desc": "Industrials"
+  },
+  "1000": {
+    "new_code": "55",
+    "old_desc": "Basic Materials",
+    "new_desc": "Basic Materials"
+  },
+  "0001": {
+    "new_code": "60",
+    "old_desc": "Oil & Gas",
+    "new_desc": "Energy"
+  },
+  "7000": {
+    "new_code": "65",
+    "old_desc": "Utilities",
+    "new_desc": "Utilities"
+  },
+  "9500": {
+    "new_code": "1010",
+    "old_desc": "Technology",
+    "new_desc": "Technology"
+  },
+  "6500": {
+    "new_code": "1510",
+    "old_desc": "Telecommunications",
+    "new_desc": "Telecommunications"
+  },
+  "4500": {
+    "new_code": "2010",
+    "old_desc": "Health Care",
+    "new_desc": "Health Care"
+  },
+  "8300": {
+    "new_code": "3010",
+    "old_desc": "Banks",
+    "new_desc": "Banks"
+  },
+  "8700": {
+    "new_code": "3020",
+    "old_desc": "Financial Services",
+    "new_desc": "Financial Services"
+  },
+  "8500": {
+    "new_code": "3030",
+    "old_desc": "Insurance",
+    "new_desc": "Insurance"
+  },
+  "8600": {
+    "new_code": "3510",
+    "old_desc": "Real Estate",
+    "new_desc": "Real Estate"
+  },
+  "3300": {
+    "new_code": "4010",
+    "old_desc": "Automobiles & Parts",
+    "new_desc": "Automobiles and Parts"
+  },
+  "3700": {
+    "new_code": "4020",
+    "old_desc": "Personal & Household Goods",
+    "new_desc": "Consumer Products and Services"
+  },
+  "5500": {
+    "new_code": "4030",
+    "old_desc": "Media",
+    "new_desc": "Media"
+  },
+  "5300": {
+    "new_code": "4040",
+    "old_desc": "Retail",
+    "new_desc": "Retail"
+  },
+  "5700": {
+    "new_code": "4050",
+    "old_desc": "Travel & Leisure",
+    "new_desc": "Travel and Leisure"
+  },
+  "3500": {
+    "new_code": "4510",
+    "old_desc": "Food & Beverage",
+    "new_desc": "Food, Beverage and Tobacco"
+  },
+  "2300": {
+    "new_code": "5010",
+    "old_desc": "Construction & Materials",
+    "new_desc": "Construction and Materials"
+  },
+  "2700": {
+    "new_code": "5020",
+    "old_desc": "Industrial Goods & Services",
+    "new_desc": "Industrial Goods and Services"
+  },
+  "1700": {
+    "new_code": "5510",
+    "old_desc": "Basic Resources",
+    "new_desc": "Basic Resources"
+  },
+  "1300": {
+    "new_code": "5520",
+    "old_desc": "Chemicals",
+    "new_desc": "Chemicals"
+  },
+  "0500": {
+    "new_code": "6010",
+    "old_desc": "Oil & Gas",
+    "new_desc": "Energy"
+  },
+  "7500": {
+    "new_code": "6510",
+    "old_desc": "Utilities",
+    "new_desc": "Utilities"
+  },
+  "9530": {
+    "new_code": "101010",
+    "old_desc": "Software & Computer Services",
+    "new_desc": "Software and Computer Services"
+  },
+  "9570": {
+    "new_code": "101020",
+    "old_desc": "Technology Hardware & Equipment",
+    "new_desc": "Technology Hardware and Equipment"
+  },
+  "9578": {
+    "new_code": "15101010",
+    "old_desc": "Telecommunications Equipment",
+    "new_desc": "Telecommunications Equipment"
+  },
+  "6530": {
+    "new_code": "151020",
+    "old_desc": "Fixed Line Telecommunications",
+    "new_desc": "Telecommunications Service Providers"
+  },
+  "4530": {
+    "new_code": "201020",
+    "old_desc": "Health Care Equipment & Services",
+    "new_desc": "Medical Equipment and Services"
+  },
+  "4570": {
+    "new_code": "201030",
+    "old_desc": "Pharmaceuticals & Biotechnology",
+    "new_desc": "Pharmaceuticals and Biotechnology"
+  },
+  "8350": {
+    "new_code": "301010",
+    "old_desc": "Banks",
+    "new_desc": "Banks"
+  },
+  "8770": {
+    "new_code": "302020",
+    "old_desc": "Financial Services",
+    "new_desc": "Investment Banking and Brokerage Services"
+  },
+  "8980": {
+    "new_code": "302040",
+    "old_desc": "Equity Investment Instruments",
+    "new_desc": "Closed End Investments"
+  },
+  "8990": {
+    "new_code": "302050",
+    "old_desc": "Nonequity Investment Instruments",
+    "new_desc": "Open End and Miscellaneous Investment Vehicles"
+  },
+  "8570": {
+    "new_code": "303010",
+    "old_desc": "Life Insurance",
+    "new_desc": "Life Insurance"
+  },
+  "8530": {
+    "new_code": "303020",
+    "old_desc": "Nonlife Insurance",
+    "new_desc": "Non-life Insurance"
+  },
+  "8630": {
+    "new_code": "351010",
+    "old_desc": "Real Estate Investment & Services",
+    "new_desc": "Real Estate Investment and Services"
+  },
+  "8670": {
+    "new_code": "351020",
+    "old_desc": "Real Estate Investment Trusts",
+    "new_desc": "Real Estate Investment Trusts"
+  },
+  "3350": {
+    "new_code": "401010",
+    "old_desc": "Automobiles & Parts",
+    "new_desc": "Automobiles and Parts"
+  },
+  "3720": {
+    "new_code": "402020",
+    "old_desc": "Household Goods & Home Construction",
+    "new_desc": "Household Goods and Home Construction"
+  },
+  "3740": {
+    "new_code": "402030",
+    "old_desc": "Leisure Goods",
+    "new_desc": "Leisure Goods"
+  },
+  "3760": {
+    "new_code": "402040",
+    "old_desc": "Personal Goods",
+    "new_desc": "Personal Goods"
+  },
+  "5550": {
+    "new_code": "403010",
+    "old_desc": "Media",
+    "new_desc": "Media"
+  },
+  "5370": {
+    "new_code": "404010",
+    "old_desc": "General Retailers",
+    "new_desc": "Retailers"
+  },
+  "5750": {
+    "new_code": "405010",
+    "old_desc": "Travel & Leisure",
+    "new_desc": "Travel and Leisure"
+  },
+  "3530": {
+    "new_code": "451010",
+    "old_desc": "Beverages",
+    "new_desc": "Beverages"
+  },
+  "3570": {
+    "new_code": "451020",
+    "old_desc": "Food Producers",
+    "new_desc": "Food Producers"
+  },
+  "3780": {
+    "new_code": "451030",
+    "old_desc": "Tobacco",
+    "new_desc": "Tobacco"
+  },
+  "5330": {
+    "new_code": "452010",
+    "old_desc": "Food & Drug Retailers",
+    "new_desc": "Personal Care, Drug and Grocery Stores"
+  },
+  "2350": {
+    "new_code": "501010",
+    "old_desc": "Construction & Materials",
+    "new_desc": "Construction and Materials"
+  },
+  "2710": {
+    "new_code": "502010",
+    "old_desc": "Aerospace & Defense",
+    "new_desc": "Aerospace and Defense"
+  },
+  "2730": {
+    "new_code": "502020",
+    "old_desc": "Electronic & Electrical Equipment",
+    "new_desc": "Electronic and Electrical Equipment"
+  },
+  "2720": {
+    "new_code": "502030",
+    "old_desc": "General Industrials",
+    "new_desc": "General Industrials"
+  },
+  "2750": {
+    "new_code": "502040",
+    "old_desc": "Industrial Engineering",
+    "new_desc": "Industrial Engineering"
+  },
+  "2790": {
+    "new_code": "502050",
+    "old_desc": "Support Services",
+    "new_desc": "Industrial Support Services"
+  },
+  "2770": {
+    "new_code": "502060",
+    "old_desc": "Industrial Transportation",
+    "new_desc": "Industrial Transportation"
+  },
+  "1730": {
+    "new_code": "551010",
+    "old_desc": "Forestry & Paper",
+    "new_desc": "Industrial Materials"
+  },
+  "1750": {
+    "new_code": "551020",
+    "old_desc": "Industrial Metals & Mining",
+    "new_desc": "Industrial Metals and Mining"
+  },
+  "1770": {
+    "new_code": "551030",
+    "old_desc": "Mining",
+    "new_desc": "Precious Metals and Mining"
+  },
+  "1350": {
+    "new_code": "552010",
+    "old_desc": "Chemicals",
+    "new_desc": "Chemicals"
+  },
+  "0530": {
+    "new_code": "601010",
+    "old_desc": "Oil & Gas Producers",
+    "new_desc": "Oil, Gas and Coal"
+  },
+  "0580": {
+    "new_code": "601020",
+    "old_desc": "Alternative Energy",
+    "new_desc": "Alternative Energy"
+  },
+  "7530": {
+    "new_code": "651010",
+    "old_desc": "Electricity",
+    "new_desc": "Electricity"
+  },
+  "7570": {
+    "new_code": "651020",
+    "old_desc": "Gas, Water & Multi-utilities",
+    "new_desc": "Gas, Water and Multi-utilities"
+  },
+  "9533": {
+    "new_code": "10101010",
+    "old_desc": "Computer Services",
+    "new_desc": "Computer Services"
+  },
+  "9537": {
+    "new_code": "10101015",
+    "old_desc": "Software",
+    "new_desc": "Software"
+  },
+  "9535": {
+    "new_code": "10101020",
+    "old_desc": "Internet",
+    "new_desc": "Consumer Digital Services"
+  },
+  "9576": {
+    "new_code": "10102010",
+    "old_desc": "Semiconductors",
+    "new_desc": "Semiconductors"
+  },
+  "2733": {
+    "new_code": "10102015",
+    "old_desc": "Electrical Components & Equipment",
+    "new_desc": "Electronic Components"
+  },
+  "9572": {
+    "new_code": "10102030",
+    "old_desc": "Computer Hardware",
+    "new_desc": "Computer Hardware"
+  },
+  "9574": {
+    "new_code": "10102035",
+    "old_desc": "Electronic Office Equipment",
+    "new_desc": "Electronic Office Equipment"
+  },
+  "5553": {
+    "new_code": "15102010",
+    "old_desc": "Broadcasting & Entertainment",
+    "new_desc": "Cable Television Services"
+  },
+  "6535": {
+    "new_code": "15102015",
+    "old_desc": "Fixed Line Telecommunications",
+    "new_desc": "Telecommunications Services"
+  },
+  "4533": {
+    "new_code": "20101020",
+    "old_desc": "Health Care Providers",
+    "new_desc": "Health Care Management Services"
+  },
+  "4535": {
+    "new_code": "20102010",
+    "old_desc": "Medical Equipment",
+    "new_desc": "Medical Equipment"
+  },
+  "4537": {
+    "new_code": "20102015",
+    "old_desc": "Medical Supplies",
+    "new_desc": "Medical Supplies"
+  },
+  "4573": {
+    "new_code": "20103010",
+    "old_desc": "Biotechnology",
+    "new_desc": "Biotechnology"
+  },
+  "4577": {
+    "new_code": "20103015",
+    "old_desc": "Pharmaceuticals",
+    "new_desc": "Pharmaceuticals"
+  },
+  "8355": {
+    "new_code": "30101010",
+    "old_desc": "Banks",
+    "new_desc": "Banks"
+  },
+  "8773": {
+    "new_code": "30201020",
+    "old_desc": "Consumer Finance",
+    "new_desc": "Consumer Lending"
+  },
+  "8779": {
+    "new_code": "30201025",
+    "old_desc": "Mortgage Finance",
+    "new_desc": "Mortgage Finance"
+  },
+  "8775": {
+    "new_code": "30202000",
+    "old_desc": "Specialty Finance",
+    "new_desc": "Diversified Financial Services"
+  },
+  "8771": {
+    "new_code": "30202010",
+    "old_desc": "Asset Managers",
+    "new_desc": "Asset Managers and Custodians"
+  },
+  "8777": {
+    "new_code": "30202015",
+    "old_desc": "Investment Services",
+    "new_desc": "Investment Services"
+  },
+  "8676": {
+    "new_code": "30203020",
+    "old_desc": "Mortgage REITs",
+    "new_desc": "Mortgage REITs: Residential"
+  },
+  "8985": {
+    "new_code": "30204000",
+    "old_desc": "Equity Investment Instruments",
+    "new_desc": "Closed End Investments"
+  },
+  "8995": {
+    "new_code": "30205000",
+    "old_desc": "Nonequity Investment Instruments",
+    "new_desc": "Open End and Miscellaneous Investment Vehicles"
+  },
+  "8575": {
+    "new_code": "30301010",
+    "old_desc": "Life Insurance",
+    "new_desc": "Life Insurance"
+  },
+  "8532": {
+    "new_code": "30302010",
+    "old_desc": "Full Line Insurance",
+    "new_desc": "Full Line Insurance"
+  },
+  "8534": {
+    "new_code": "30302015",
+    "old_desc": "Insurance Brokers",
+    "new_desc": "Insurance Brokers"
+  },
+  "8538": {
+    "new_code": "30302020",
+    "old_desc": "Reinsurance",
+    "new_desc": "Reinsurance"
+  },
+  "8536": {
+    "new_code": "30302025",
+    "old_desc": "Property & Casualty Insurance",
+    "new_desc": "Property and Casualty Insurance"
+  },
+  "8633": {
+    "new_code": "35101010",
+    "old_desc": "Real Estate Holding & Development",
+    "new_desc": "Real Estate Holding and Development"
+  },
+  "8637": {
+    "new_code": "35101015",
+    "old_desc": "Real Estate Services",
+    "new_desc": "Real Estate Services"
+  },
+  "8674": {
+    "new_code": "35102000",
+    "old_desc": "Diversified REITs",
+    "new_desc": "Diversified REITs"
+  },
+  "8677": {
+    "new_code": "35102015",
+    "old_desc": "Hotel & Lodging REITs",
+    "new_desc": "Hotel and Lodging REITs"
+  },
+  "8671": {
+    "new_code": "35102030",
+    "old_desc": "Industrial & Office REITs",
+    "new_desc": "Office REITs"
+  },
+  "8673": {
+    "new_code": "35102040",
+    "old_desc": "Residential REITs",
+    "new_desc": "Residential REITs"
+  },
+  "8672": {
+    "new_code": "35102045",
+    "old_desc": "Retail REITs",
+    "new_desc": "Retail REITs"
+  },
+  "8675": {
+    "new_code": "35102070",
+    "old_desc": "Specialty REITs",
+    "new_desc": "Other Specialty REITs"
+  },
+  "3357": {
+    "new_code": "40101015",
+    "old_desc": "Tires",
+    "new_desc": "Tires"
+  },
+  "3353": {
+    "new_code": "40101020",
+    "old_desc": "Automobiles",
+    "new_desc": "Automobiles"
+  },
+  "3355": {
+    "new_code": "40101025",
+    "old_desc": "Auto Parts",
+    "new_desc": "Auto Parts"
+  },
+  "5377": {
+    "new_code": "40201070",
+    "old_desc": "Specialized Consumer Services",
+    "new_desc": "Consumer Services: Misc."
+  },
+  "3728": {
+    "new_code": "40202010",
+    "old_desc": "Home Construction",
+    "new_desc": "Home Construction"
+  },
+  "3726": {
+    "new_code": "40202015",
+    "old_desc": "Furnishings",
+    "new_desc": "Household Furnishings"
+  },
+  "3722": {
+    "new_code": "40202025",
+    "old_desc": "Durable Household Products",
+    "new_desc": "Household Equipment and Products"
+  },
+  "3743": {
+    "new_code": "40203010",
+    "old_desc": "Consumer Electronics",
+    "new_desc": "Consumer Electronics"
+  },
+  "3747": {
+    "new_code": "40203045",
+    "old_desc": "Toys",
+    "new_desc": "Toys"
+  },
+  "3745": {
+    "new_code": "40203050",
+    "old_desc": "Recreational Products",
+    "new_desc": "Recreational Products"
+  },
+  "3763": {
+    "new_code": "40204020",
+    "old_desc": "Clothing & Accessories",
+    "new_desc": "Clothing and Accessories"
+  },
+  "3765": {
+    "new_code": "40204025",
+    "old_desc": "Footwear",
+    "new_desc": "Footwear"
+  },
+  "5555": {
+    "new_code": "40301020",
+    "old_desc": "Media Agencies",
+    "new_desc": "Media Agencies"
+  },
+  "5557": {
+    "new_code": "40301030",
+    "old_desc": "Publishing",
+    "new_desc": "Publishing"
+  },
+  "5373": {
+    "new_code": "40401010",
+    "old_desc": "Broadline Retailers",
+    "new_desc": "Diversified Retailers"
+  },
+  "5371": {
+    "new_code": "40401020",
+    "old_desc": "Apparel Retailers",
+    "new_desc": "Apparel Retailers"
+  },
+  "5375": {
+    "new_code": "40401025",
+    "old_desc": "Home Improvement Retailers",
+    "new_desc": "Home Improvement Retailers"
+  },
+  "5379": {
+    "new_code": "40401030",
+    "old_desc": "Specialty Retailers",
+    "new_desc": "Specialty Retailers"
+  },
+  "5751": {
+    "new_code": "40501010",
+    "old_desc": "Airlines",
+    "new_desc": "Airlines"
+  },
+  "5759": {
+    "new_code": "40501015",
+    "old_desc": "Travel & Tourism",
+    "new_desc": "Travel and Tourism"
+  },
+  "5752": {
+    "new_code": "40501020",
+    "old_desc": "Gambling",
+    "new_desc": "Casinos and Gambling"
+  },
+  "5753": {
+    "new_code": "40501025",
+    "old_desc": "Hotels",
+    "new_desc": "Hotels and Motels"
+  },
+  "5755": {
+    "new_code": "40501030",
+    "old_desc": "Recreational Services",
+    "new_desc": "Recreational Services"
+  },
+  "5757": {
+    "new_code": "40501040",
+    "old_desc": "Restaurants & Bars",
+    "new_desc": "Restaurants and Bars"
+  },
+  "3533": {
+    "new_code": "45101010",
+    "old_desc": "Brewers",
+    "new_desc": "Brewers"
+  },
+  "3535": {
+    "new_code": "45101015",
+    "old_desc": "Distillers & Vintners",
+    "new_desc": "Distillers and Vintners"
+  },
+  "3537": {
+    "new_code": "45101020",
+    "old_desc": "Soft Drinks",
+    "new_desc": "Soft Drinks"
+  },
+  "3573": {
+    "new_code": "45102010",
+    "old_desc": "Farming, Fishing & Plantations",
+    "new_desc": "Farming, Fishing, Ranching and Plantations"
+  },
+  "3577": {
+    "new_code": "45102020",
+    "old_desc": "Food Products",
+    "new_desc": "Food Products"
+  },
+  "3785": {
+    "new_code": "45103010",
+    "old_desc": "Tobacco",
+    "new_desc": "Tobacco"
+  },
+  "5337": {
+    "new_code": "45201010",
+    "old_desc": "Food Retailers & Wholesalers",
+    "new_desc": "Food Retailers and Wholesalers"
+  },
+  "5333": {
+    "new_code": "45201015",
+    "old_desc": "Drug Retailers",
+    "new_desc": "Drug Retailers"
+  },
+  "3767": {
+    "new_code": "45201020",
+    "old_desc": "Personal Products",
+    "new_desc": "Personal Products"
+  },
+  "3724": {
+    "new_code": "45201030",
+    "old_desc": "Nondurable Household Products",
+    "new_desc": "Nondurable Household Products"
+  },
+  "2357": {
+    "new_code": "50101010",
+    "old_desc": "Heavy Construction",
+    "new_desc": "Construction"
+  },
+  "2353": {
+    "new_code": "50101035",
+    "old_desc": "Building Materials & Fixtures",
+    "new_desc": "Building Materials: Other"
+  },
+  "2713": {
+    "new_code": "50201010",
+    "old_desc": "Aerospace",
+    "new_desc": "Aerospace"
+  },
+  "2717": {
+    "new_code": "50201020",
+    "old_desc": "Defense",
+    "new_desc": "Defense"
+  },
+  "2737": {
+    "new_code": "50202025",
+    "old_desc": "Electronic Equipment",
+    "new_desc": "Electronic Equipment: Gauges and Meters"
+  },
+  "2727": {
+    "new_code": "50203000",
+    "old_desc": "Diversified Industrials",
+    "new_desc": "Diversified Industrials"
+  },
+  "2723": {
+    "new_code": "50203030",
+    "old_desc": "Containers & Packaging",
+    "new_desc": "Containers and Packaging"
+  },
+  "2757": {
+    "new_code": "50204000",
+    "old_desc": "Industrial Machinery",
+    "new_desc": "Machinery: Industrial"
+  },
+  "2797": {
+    "new_code": "50205010",
+    "old_desc": "Industrial Suppliers",
+    "new_desc": "Industrial Suppliers"
+  },
+  "2795": {
+    "new_code": "50205015",
+    "old_desc": "Financial Administration",
+    "new_desc": "Transaction Processing Services"
+  },
+  "2791": {
+    "new_code": "50205020",
+    "old_desc": "Business Support Services",
+    "new_desc": "Professional Business Support Services"
+  },
+  "2793": {
+    "new_code": "50205025",
+    "old_desc": "Business Training & Employment Agencies",
+    "new_desc": "Business Training and Employment Agencies"
+  },
+  "2779": {
+    "new_code": "50206010",
+    "old_desc": "Trucking",
+    "new_desc": "Trucking"
+  },
+  "2753": {
+    "new_code": "50206015",
+    "old_desc": "Commercial Vehicles & Trucks",
+    "new_desc": "Commercial Vehicles and Parts"
+  },
+  "2775": {
+    "new_code": "50206020",
+    "old_desc": "Railroads",
+    "new_desc": "Railroads"
+  },
+  "2773": {
+    "new_code": "50206030",
+    "old_desc": "Marine Transportation",
+    "new_desc": "Marine Transportation"
+  },
+  "2771": {
+    "new_code": "50206040",
+    "old_desc": "Delivery Services",
+    "new_desc": "Delivery Services"
+  },
+  "2777": {
+    "new_code": "50206060",
+    "old_desc": "Transportation Services",
+    "new_desc": "Transportation Services"
+  },
+  "1733": {
+    "new_code": "55101010",
+    "old_desc": "Forestry",
+    "new_desc": "Forestry"
+  },
+  "1737": {
+    "new_code": "55101015",
+    "old_desc": "Paper",
+    "new_desc": "Paper"
+  },
+  "1775": {
+    "new_code": "55102000",
+    "old_desc": "General Mining",
+    "new_desc": "General Mining"
+  },
+  "1757": {
+    "new_code": "55102010",
+    "old_desc": "Iron & Steel",
+    "new_desc": "Iron and Steel"
+  },
+  "1753": {
+    "new_code": "55102035",
+    "old_desc": "Aluminum",
+    "new_desc": "Aluminum"
+  },
+  "1755": {
+    "new_code": "55102050",
+    "old_desc": "Nonferrous Metals",
+    "new_desc": "Nonferrous Metals"
+  },
+  "1773": {
+    "new_code": "55103020",
+    "old_desc": "Diamonds & Gemstones",
+    "new_desc": "Diamonds and Gemstones"
+  },
+  "1777": {
+    "new_code": "55103025",
+    "old_desc": "Gold Mining",
+    "new_desc": "Gold Mining"
+  },
+  "1779": {
+    "new_code": "55103030",
+    "old_desc": "Platinum & Precious Metals",
+    "new_desc": "Platinum and Precious Metals"
+  },
+  "1353": {
+    "new_code": "55201000",
+    "old_desc": "Commodity Chemicals",
+    "new_desc": "Chemicals: Diversified"
+  },
+  "1357": {
+    "new_code": "55201020",
+    "old_desc": "Specialty Chemicals",
+    "new_desc": "Specialty Chemicals"
+  },
+  "0537": {
+    "new_code": "60101000",
+    "old_desc": "Integrated Oil & Gas",
+    "new_desc": "Integrated Oil and Gas"
+  },
+  "0533": {
+    "new_code": "60101010",
+    "old_desc": "Exploration & Production",
+    "new_desc": "Oil: Crude Producers"
+  },
+  "0573": {
+    "new_code": "60101030",
+    "old_desc": "Oil Equipment & Services",
+    "new_desc": "Oil Equipment and Services"
+  },
+  "0577": {
+    "new_code": "60101035",
+    "old_desc": "Pipelines",
+    "new_desc": "Pipelines"
+  },
+  "1771": {
+    "new_code": "60101040",
+    "old_desc": "Coal",
+    "new_desc": "Coal"
+  },
+  "0587": {
+    "new_code": "60102010",
+    "old_desc": "Alternative Fuels",
+    "new_desc": "Alternative Fuels"
+  },
+  "0583": {
+    "new_code": "60102020",
+    "old_desc": "Renewable Energy Equipment",
+    "new_desc": "Renewable Energy Equipment"
+  },
+  "7537": {
+    "new_code": "65101010",
+    "old_desc": "Alternative Electricity",
+    "new_desc": "Alternative Electricity"
+  },
+  "7535": {
+    "new_code": "65101015",
+    "old_desc": "Conventional Electricity",
+    "new_desc": "Conventional Electricity"
+  },
+  "7575": {
+    "new_code": "65102000",
+    "old_desc": "Multi-utilities",
+    "new_desc": "Multi-utilities"
+  },
+  "7573": {
+    "new_code": "65102020",
+    "old_desc": "Gas Distribution",
+    "new_desc": "Gas Distribution"
+  },
+  "7577": {
+    "new_code": "65102030",
+    "old_desc": "Water",
+    "new_desc": "Water"
+  },
+  "2799": {
+    "new_code": "65103035",
+    "old_desc": "Waste & Disposal Services",
+    "new_desc": "Waste and Disposal Services"
+  }
+}
