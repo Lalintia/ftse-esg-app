@@ -335,6 +335,7 @@ def _save_ftse_results(
         for row in indicator_rows.data
     }
 
+    valid_statuses = {"found", "partial", "missing"}
     seen: dict[str, dict[str, str | float | int | None]] = {}
     for r in results:
         indicator_id = code_to_id.get(r.indicator_code)
@@ -342,10 +343,12 @@ def _save_ftse_results(
             logger.warning("No DB record for indicator %s — skipping", r.indicator_code)
             continue
 
+        status = r.status if r.status in valid_statuses else "missing"
+
         seen[indicator_id] = {
             "analysis_id": analysis_id,
             "indicator_id": indicator_id,
-            "status": r.status,
+            "status": status,
             "score": r.score,
             "evidence": r.evidence or None,
             "confidence": r.confidence,
@@ -386,6 +389,7 @@ def _save_ifrs_results(
         for row in req_rows.data
     }
 
+    valid_statuses = {"found", "partial", "missing"}
     seen: dict[str, dict[str, str | float | None]] = {}
     for r in results:
         requirement_id = ref_to_id.get(r.paragraph_ref)
@@ -393,10 +397,13 @@ def _save_ifrs_results(
             logger.warning("No DB record for requirement %s — skipping", r.paragraph_ref)
             continue
 
+        # Sanitize status — AI sometimes returns unexpected values
+        status = r.status if r.status in valid_statuses else "missing"
+
         seen[requirement_id] = {
             "analysis_id": analysis_id,
             "requirement_id": requirement_id,
-            "status": r.status,
+            "status": status,
             "evidence": r.evidence or None,
             "confidence": r.confidence,
             "ai_reasoning": r.reasoning or None,
