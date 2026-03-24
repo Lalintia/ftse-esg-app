@@ -138,7 +138,7 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
                     <span className="text-xs">{r.ftse_indicators.indicator_name}</span>
                   </div>
                   {r.evidence && (
-                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
                       {r.evidence}
                     </p>
                   )}
