@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     MAX_PAGES_TO_CRAWL: int = 50
     MAX_PDFS_TO_READ: int = 5
     MAX_PDF_CHARS: int = 200_000
-    ANALYSIS_CONCURRENCY: int = 3
+    ANALYSIS_CONCURRENCY: int = 2
 
     model_config = {
         "env_file": str(PROJECT_ROOT / ".env"),

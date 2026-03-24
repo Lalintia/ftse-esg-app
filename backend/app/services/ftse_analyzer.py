@@ -183,15 +183,33 @@ async def _analyze_theme(
             len(indicators),
         )
         try:
-            response = await openai_client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": FTSE_SYSTEM_PROMPT},
-                    {"role": "user", "content": user_prompt},
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.1,
-            )
+            max_retries = 3
+            response = None
+            for attempt in range(max_retries):
+                try:
+                    response = await openai_client.chat.completions.create(
+                        model=settings.OPENAI_MODEL,
+                        messages=[
+                            {"role": "system", "content": FTSE_SYSTEM_PROMPT},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                        response_format={"type": "json_object"},
+                        temperature=0.1,
+                    )
+                    break
+                except Exception as retry_exc:
+                    if "429" in str(retry_exc) and attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 5
+                        logger.warning(
+                            "Rate limit for theme %s — retrying in %ds (attempt %d/%d)",
+                            theme_name, wait_time, attempt + 1, max_retries,
+                        )
+                        await asyncio.sleep(wait_time)
+                    else:
+                        raise
+
+            if response is None:
+                raise RuntimeError(f"No response after {max_retries} retries")
 
             usage = response.usage
             if usage:

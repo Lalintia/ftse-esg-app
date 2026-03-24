@@ -81,9 +81,26 @@ _SKIP_SCHEMES = {"javascript:", "mailto:", "tel:", "data:"}
 
 _PDF_MAX_BYTES = 50 * 1024 * 1024  # 50 MB
 _PDF_MAX_CHARS_PER_FILE = 200_000
-_PDF_MAX_CHARS_TOTAL = 800_000
-_PDF_MAX_FILES = 7
+_PDF_MAX_CHARS_TOTAL = 500_000
+_PDF_MAX_FILES = 3
 _PDF_DOWNLOAD_TIMEOUT = 120.0
+
+# Only download core ESG reports — SD Report and One Report / Annual Report
+_CORE_REPORT_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r"sustainability[_-]?report", re.IGNORECASE),
+    re.compile(r"sd[_-]?report", re.IGNORECASE),
+    re.compile(r"annual[_-]?report", re.IGNORECASE),
+    re.compile(r"56-1", re.IGNORECASE),
+    re.compile(r"one[_-]?report", re.IGNORECASE),
+    re.compile(r"integrated[_-]?report", re.IGNORECASE),
+]
+
+# Skip Thai language PDFs — prefer English versions
+_THAI_PDF_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r"[-_]th\b", re.IGNORECASE),
+    re.compile(r"[-_]thai\b", re.IGNORECASE),
+    re.compile(r"[-_]tha\b", re.IGNORECASE),
+]
 
 _ESG_PDF_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"sustainability[_-]?report", re.IGNORECASE),
@@ -437,6 +454,31 @@ async def _scrape_page(
 
     logger.info("Scraped: %s (%d chars)", title, len(body_text))
     return PageContent(url=url, title=title, markdown_text=markdown_text)
+
+
+def _is_core_report(url: str) -> bool:
+    """Check if a PDF URL is a core ESG report (SD Report or Annual/One Report).
+
+    Args:
+        url: The URL to check.
+
+    Returns:
+        True if the PDF matches core report patterns.
+    """
+    return any(pattern.search(url) for pattern in _CORE_REPORT_PATTERNS)
+
+
+def _is_thai_pdf(url: str) -> bool:
+    """Check if a PDF URL is a Thai language version.
+
+    Args:
+        url: The URL to check.
+
+    Returns:
+        True if the filename suggests a Thai version.
+    """
+    fname = _pdf_filename(url).lower().replace(".pdf", "")
+    return any(pattern.search(fname) for pattern in _THAI_PDF_PATTERNS)
 
 
 def _is_esg_pdf(url: str) -> bool:
@@ -851,76 +893,37 @@ async def crawl_website(
                 if pdf_url not in pdf_urls:
                     pdf_urls.append(pdf_url)
 
-            # Step 4c: Auto-discover annex + TCFD + policy PDFs
-            # Find the latest year from sd-report PDFs and generate
-            # annex/TCFD candidates for that year only
-            sd_years: list[int] = []
-            for pdf_url in list(pdf_urls):
-                year_match = re.search(r"sd-report-(\d{4})", pdf_url, re.IGNORECASE)
-                if year_match:
-                    sd_years.append(int(year_match.group(1)))
+            # Step 4c: Filter PDFs — keep only core reports (SD + OR/Annual), English only
+            core_pdf_urls: list[str] = []
+            for pdf_url in pdf_urls:
+                fname = _pdf_filename(pdf_url)
+                if not _is_core_report(pdf_url):
+                    logger.info("Skipping non-core PDF: %s", fname)
+                    continue
+                if _is_thai_pdf(pdf_url):
+                    logger.info("Skipping Thai PDF: %s (prefer EN)", fname)
+                    continue
+                core_pdf_urls.append(pdf_url)
 
-            extra_candidates: list[str] = []
-            if sd_years:
-                latest_year = max(sd_years)
-                parsed_base = urlparse(url)
-                base = f"{parsed_base.scheme}://{parsed_base.netloc}"
-
-                # Annex for latest year only
-                annex_paths = [
-                    f"{base}/files/download/sustainability/sd-report-{latest_year}-annex.pdf",
-                ]
-                # TCFD Report
-                tcfd_paths = [
-                    f"{base}/files/download/sustainability/TCFD-Report-{latest_year}.pdf",
-                    f"{base}/files/download/sustainability/tu-tcfd-report-{latest_year}.pdf",
-                ]
-                # Common policy PDFs
-                policy_paths = [
-                    f"{base}/files/download/sustainability/SupplyChainProgressReport.pdf",
-                    f"{base}/files/download/policy/TU-global-tax-policy.pdf",
-                ]
-
-                for candidate in annex_paths + tcfd_paths + policy_paths:
-                    if candidate not in pdf_urls and candidate not in extra_candidates:
-                        extra_candidates.append(candidate)
-                        logger.info("Auto-discovered PDF candidate: %s", candidate)
-
-            for extra_url in extra_candidates:
-                pdf_urls.append(extra_url)
-
-            # Remove older year duplicates — keep only latest year
-            # for sd-report and annex (e.g. keep 2024, drop 2023)
-            if sd_years:
-                latest_year_str = str(max(sd_years))
-                filtered_pdf_urls: list[str] = []
-                for pdf_url in pdf_urls:
-                    fname_lower = _pdf_filename(pdf_url).lower()
-                    is_sd = "sd-report" in fname_lower
-                    if is_sd:
-                        if latest_year_str in fname_lower:
-                            filtered_pdf_urls.append(pdf_url)
-                        else:
-                            logger.info("Dropping older PDF: %s (keeping %s only)", fname_lower, latest_year_str)
-                    else:
-                        filtered_pdf_urls.append(pdf_url)
-                pdf_urls = filtered_pdf_urls
-
-            # Dedup PDFs by filename (different URLs, same file)
+            # Dedup by filename
             seen_filenames: set[str] = set()
             deduped_pdf_urls: list[str] = []
-            for pdf_url in pdf_urls:
+            for pdf_url in core_pdf_urls:
                 fname = _pdf_filename(pdf_url).lower()
                 if fname not in seen_filenames:
                     seen_filenames.add(fname)
                     deduped_pdf_urls.append(pdf_url)
-                else:
-                    logger.info("Dedup: skipping duplicate PDF %s", fname)
             pdf_urls = deduped_pdf_urls
 
-            # Sort PDFs by priority and limit
+            # Sort by priority and limit
             pdf_urls.sort(key=_pdf_priority_score, reverse=True)
             pdf_urls = pdf_urls[:_PDF_MAX_FILES]
+
+            logger.info(
+                "Selected %d core report PDF(s): %s",
+                len(pdf_urls),
+                [_pdf_filename(u) for u in pdf_urls],
+            )
 
             # Step 5: Scrape HTML pages
             pages: list[PageContent] = []
