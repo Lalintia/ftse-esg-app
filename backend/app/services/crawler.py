@@ -484,36 +484,27 @@ def _pdf_filename(url: str) -> str:
 
 
 async def _download_pdf_via_playwright(url: str) -> bytes | None:
-    """Fallback PDF download using Playwright headless browser.
+    """Fallback PDF download using Playwright's API request context.
 
-    Some websites block non-browser HTTP clients (returning 404).
-    This uses a real browser to trigger the download.
+    Some websites block non-browser HTTP clients (returning 405/404).
+    This uses Playwright's request API which sends real browser headers.
     """
     try:
         from playwright.async_api import async_playwright
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(accept_downloads=True)
-            page = await context.new_page()
+            context = await browser.new_context()
 
-            download_future = asyncio.ensure_future(
-                page.wait_for_event("download", timeout=60000),
-            )
-
-            try:
-                await page.goto(url, wait_until="commit", timeout=60000)
-            except Exception:
-                pass
-
-            download = await download_future
-            tmp_path = await download.path()
-            if tmp_path:
-                with open(tmp_path, "rb") as f:
-                    pdf_bytes = f.read()
+            response = await context.request.get(url, timeout=60000)
+            if response.ok:
+                pdf_bytes = await response.body()
                 await browser.close()
-                return pdf_bytes
+                if pdf_bytes and len(pdf_bytes) > 100:
+                    logger.info("Playwright API download succeeded for %s (%d bytes)", url, len(pdf_bytes))
+                    return pdf_bytes
 
+            logger.info("Playwright API download got status %d for %s", response.status, url)
             await browser.close()
     except Exception as exc:
         logger.warning("Playwright PDF download failed for %s: %s", url, exc)
@@ -544,10 +535,21 @@ async def _download_and_extract_pdf(
     pdf_bytes: bytes | None = None
     download_method = "httpx"
 
+    _browser_headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "application/pdf,*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+
     try:
         async with httpx.AsyncClient(
             timeout=_PDF_DOWNLOAD_TIMEOUT,
             follow_redirects=True,
+            headers=_browser_headers,
         ) as client:
             response = await client.get(url)
             if response.status_code == 200:
