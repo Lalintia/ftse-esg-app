@@ -2,58 +2,43 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Leaf, History, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/', label: 'Analyze', icon: BarChart3 },
-  { href: '/history', label: 'History', icon: History },
-];
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const isHome = pathname === '/';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Leaf className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-bold leading-tight tracking-tight">
-              FTSE ESG
-            </span>
-            <span className="text-[10px] font-medium uppercase leading-none tracking-widest text-muted-foreground">
-              Analyzer
-            </span>
-          </div>
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+        <Link href="/" className="flex items-baseline gap-1.5">
+          <span className="text-sm font-bold uppercase tracking-[0.2em]">
+            FTSE
+          </span>
+          <span className="text-xs font-normal uppercase tracking-[0.15em] text-muted-foreground">
+            ESG
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
-          {navItems.map((item) => {
-            const isActive =
-              item.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(item.href);
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex items-center gap-6">
+          <Link
+            href="/"
+            className={cn(
+              'text-xs font-medium uppercase tracking-[0.1em] transition-colors',
+              isHome ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            Analyse
+          </Link>
+          <Link
+            href="/history"
+            className={cn(
+              'text-xs font-medium uppercase tracking-[0.1em] transition-colors',
+              pathname === '/history' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            History
+          </Link>
         </nav>
       </div>
     </header>

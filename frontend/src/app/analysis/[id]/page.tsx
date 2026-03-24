@@ -1,31 +1,159 @@
 'use client';
 
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback, useRef, use } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Download,
-  ExternalLink,
+  ChevronDown,
   Globe,
-  MapPin,
-  Shield,
-  TreePine,
-  Users,
+  ExternalLink,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { ScoreCard } from '@/components/ScoreCard';
-import { PillarChart } from '@/components/PillarChart';
-import { FtseGapTable, IfrsGapTable } from '@/components/GapTable';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
+import { IfrsGapTable } from '@/components/GapTable';
 import { getAnalysis } from '@/lib/api';
-import type { AnalysisDetail, PriorityType } from '@/lib/types';
+import type { AnalysisDetail, FtseResultItem, StatusType } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 const POLL_INTERVAL_MS = 5000;
 const IN_PROGRESS_STATUSES = new Set(['pending', 'crawling', 'analyzing', 'scoring']);
+
+interface ThemeGroup {
+  theme: string;
+  pillar: string;
+  results: FtseResultItem[];
+  found: number;
+  partial: number;
+  missing: number;
+  avgScore: number;
+}
+
+const groupByTheme = (results: FtseResultItem[]): ThemeGroup[] => {
+  const map = new Map<string, FtseResultItem[]>();
+  for (const r of results) {
+    if (!r.ftse_indicators?.ftse_themes) { continue; }
+    const theme = r.ftse_indicators.ftse_themes.theme_name;
+    if (!map.has(theme)) { map.set(theme, []); }
+    map.get(theme)!.push(r);
+  }
+
+  const groups: ThemeGroup[] = [];
+  for (const [theme, items] of map) {
+    const pillar = items[0].ftse_indicators.ftse_themes.pillar;
+    const found = items.filter((i) => i.status === 'found').length;
+    const partial = items.filter((i) => i.status === 'partial').length;
+    const missing = items.filter((i) => i.status === 'missing').length;
+    const scores = items.map((i) => i.score ?? 0);
+    const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+    groups.push({ theme, pillar, results: items, found, partial, missing, avgScore });
+  }
+
+  return groups;
+};
+
+const groupByPillar = (themes: ThemeGroup[]): Record<string, ThemeGroup[]> => {
+  const result: Record<string, ThemeGroup[]> = {
+    Environmental: [],
+    Social: [],
+    Governance: [],
+  };
+  for (const t of themes) {
+    if (result[t.pillar]) {
+      result[t.pillar].push(t);
+    }
+  }
+  return result;
+};
+
+const StatusIcon = ({ status }: { status: StatusType }) => {
+  if (status === 'found') {
+    return <CheckCircle2 className="h-3.5 w-3.5 text-[#1a5632]" />;
+  }
+  if (status === 'partial') {
+    return <AlertTriangle className="h-3.5 w-3.5 text-[#92400e]" />;
+  }
+  return <XCircle className="h-3.5 w-3.5 text-[#991b1b]" />;
+};
+
+const StatusBadge = ({ status }: { status: StatusType }) => {
+  const styles: Record<StatusType, string> = {
+    found: 'bg-[#ecfdf5] text-[#1a5632]',
+    partial: 'bg-[#fffbeb] text-[#92400e]',
+    missing: 'bg-[#fef2f2] text-[#991b1b]',
+  };
+  return (
+    <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium', styles[status])}>
+      <StatusIcon status={status} />
+      {status}
+    </span>
+  );
+};
+
+const ThemeCard = ({ group }: { group: ThemeGroup }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const total = group.results.length;
+  const mainStatus: StatusType = group.found > total / 2 ? 'found' : group.missing > total / 2 ? 'missing' : 'partial';
+
+  return (
+    <div className="rounded-lg border bg-card transition-all hover:border-foreground/20">
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex w-full items-start justify-between p-4 text-left"
+      >
+        <div className="flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <StatusBadge status={mainStatus} />
+          </div>
+          <h4 className="text-sm font-semibold">{group.theme}</h4>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {total} indicators — {group.found} found, {group.partial} partial, {group.missing} missing
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-bold tracking-tight">
+            {group.avgScore.toFixed(1)}
+          </span>
+          <ChevronDown className={cn(
+            'h-4 w-4 text-muted-foreground transition-transform',
+            isExpanded && 'rotate-180',
+          )} />
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="border-t px-4 py-3">
+          <div className="space-y-2">
+            {group.results.map((r) => (
+              <div key={r.id} className="flex items-start gap-3 rounded-md bg-muted/30 px-3 py-2">
+                <StatusIcon status={r.status} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-medium text-muted-foreground">
+                      {r.ftse_indicators.indicator_code}
+                    </span>
+                    <span className="text-xs">{r.ftse_indicators.indicator_name}</span>
+                  </div>
+                  {r.evidence && (
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
+                      {r.evidence}
+                    </p>
+                  )}
+                </div>
+                {r.score !== null && (
+                  <span className="shrink-0 text-xs font-semibold">{r.score}/5</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function AnalysisDashboard({
   params,
@@ -35,6 +163,8 @@ export default function AnalysisDashboard({
   const { id } = use(params);
   const [data, setData] = useState<AnalysisDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'ftse' | 'ifrs' | 'sitemap'>('ftse');
+  const tabBarRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -66,27 +196,21 @@ export default function AnalysisDashboard({
 
   if (error) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-12">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600">Error</h2>
-          <p className="mt-2 text-muted-foreground">{error}</p>
-          <Link href="/">
-            <Button variant="outline" className="mt-6">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
+      <div className="mx-auto max-w-3xl px-6 py-20 text-center">
+        <h2 className="text-lg font-semibold">Error</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+        <Link href="/" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Link>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-12">
-        <div className="flex items-center justify-center py-24">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+      <div className="flex items-center justify-center py-32">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
       </div>
     );
   }
@@ -96,250 +220,213 @@ export default function AnalysisDashboard({
 
   if (isInProgress) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
+      <div className="mx-auto max-w-lg px-6 py-12">
+        <Link href="/" className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-3 w-3" />
+          Back
         </Link>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Analyzing Website</CardTitle>
-            <CardDescription>
-              {analysis.company_name ?? analysis.company_url}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AnalysisProgress
-              status={analysis.status}
-              pagesCrawled={analysis.pages_crawled}
-            />
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <h2 className="text-2xl font-bold tracking-tight">Analysing</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {analysis.company_name ?? analysis.company_url}
+          </p>
+        </div>
+        <AnalysisProgress status={analysis.status} pagesCrawled={analysis.pages_crawled} />
       </div>
     );
   }
 
-  const priorityBadge: Record<PriorityType, string> = {
-    high: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    low: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  };
+  const companyDisplayName = analysis.company_name ?? (() => {
+    try { return new URL(analysis.company_url).hostname; } catch { return analysis.company_url; }
+  })();
 
-  const companyDisplayName = analysis.company_name ?? new URL(analysis.company_url).hostname;
+  const themeGroups = groupByTheme(ftse_results);
+  const pillarGroups = groupByPillar(themeGroups);
+
+  const tabs = [
+    { key: 'ftse' as const, label: 'FTSE Themes', count: ftse_results.length },
+    { key: 'ifrs' as const, label: 'IFRS', count: ifrs_results.length },
+    { key: 'sitemap' as const, label: 'Sitemap', count: sitemap_recommendations.length },
+  ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      {/* Nav */}
+      <Link href="/" className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-3 w-3" />
+        Back
+      </Link>
+
       {/* Header */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Link href="/" className="mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">{companyDisplayName}</h1>
-          <div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
-            <a
-              href={analysis.company_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-foreground"
-            >
-              <Globe className="h-4 w-4" />
-              {analysis.company_url}
-              <ExternalLink className="h-3 w-3" />
-            </a>
-            <span>{analysis.pages_crawled} pages crawled</span>
-          </div>
+      <div className="mb-12 animate-fade-up">
+        <h1 className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl">{companyDisplayName}</h1>
+        <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+          <a
+            href={analysis.company_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 hover:text-foreground"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {analysis.company_url}
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          <span>{analysis.pages_crawled} pages</span>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => {
-            /* PDF export placeholder */
-          }}
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export PDF
-        </Button>
       </div>
 
-      {/* Score Overview */}
-      <div className="mb-8 grid gap-6 md:grid-cols-2">
-        {/* Overall + Pillar Scores */}
-        <Card>
-          <CardHeader>
-            <CardTitle>ESG Score Overview</CardTitle>
-            <CardDescription>FTSE Russell scoring methodology (0-5 scale)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center gap-6">
-              <ScoreCard
-                score={analysis.overall_score ?? 0}
-                label="Overall ESG Score"
-                subtitle="out of 5.0"
-                size="lg"
-              />
-              <Separator />
-              <div className="grid w-full grid-cols-3 gap-4">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                    <TreePine className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <ScoreCard
-                    score={analysis.environmental_score ?? 0}
-                    label="Environmental"
-                    size="sm"
-                  />
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <ScoreCard
-                    score={analysis.social_score ?? 0}
-                    label="Social"
-                    size="sm"
-                  />
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                    <Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <ScoreCard
-                    score={analysis.governance_score ?? 0}
-                    label="Governance"
-                    size="sm"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Radar + IFRS */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pillar Analysis</CardTitle>
-            <CardDescription>ESG pillar scores and IFRS compliance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PillarChart
-              environmental={analysis.environmental_score ?? 0}
-              social={analysis.social_score ?? 0}
-              governance={analysis.governance_score ?? 0}
-            />
-            <Separator className="my-4" />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-sm font-medium text-muted-foreground">IFRS S1</p>
-                <p className="mt-1 text-2xl font-bold text-primary">
-                  {analysis.ifrs_s1_score !== null
-                    ? `${Math.min(analysis.ifrs_s1_score, 100).toFixed(0)}%`
-                    : 'N/A'}
-                </p>
-                <p className="text-xs text-muted-foreground">Compliance</p>
-              </div>
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-sm font-medium text-muted-foreground">IFRS S2</p>
-                <p className="mt-1 text-2xl font-bold text-primary">
-                  {analysis.ifrs_s2_score !== null
-                    ? `${Math.min(analysis.ifrs_s2_score, 100).toFixed(0)}%`
-                    : 'N/A'}
-                </p>
-                <p className="text-xs text-muted-foreground">Compliance</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Score Hero */}
+      <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-4 animate-fade-up-d1">
+        <div className="flex justify-center sm:justify-start">
+          <ScoreCard
+            score={analysis.overall_score ?? 0}
+            label="Overall"
+            subtitle="out of 5.0"
+            size="xl"
+          />
+        </div>
+        <div className="flex justify-center">
+          <ScoreCard
+            score={analysis.environmental_score ?? 0}
+            label="Environmental"
+            size="md"
+          />
+        </div>
+        <div className="flex justify-center">
+          <ScoreCard
+            score={analysis.social_score ?? 0}
+            label="Social"
+            size="md"
+          />
+        </div>
+        <div className="flex justify-center">
+          <ScoreCard
+            score={analysis.governance_score ?? 0}
+            label="Governance"
+            size="md"
+          />
+        </div>
       </div>
 
-      {/* Detailed Results Tabs */}
-      <Tabs defaultValue="ftse" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="ftse">
-            FTSE Results
-            {ftse_results.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {ftse_results.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="ifrs">
-            IFRS Results
-            {ifrs_results.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {ifrs_results.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="sitemap">
-            Sitemap
-            {sitemap_recommendations.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {sitemap_recommendations.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
+      {/* IFRS Quick Stats */}
+      <div className="mb-12 flex gap-4 animate-fade-up-d2">
+        <div className="rounded-lg border bg-card px-5 py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">IFRS S1</p>
+          <p className="text-2xl font-bold tracking-tight">
+            {analysis.ifrs_s1_score !== null
+              ? `${Math.min(analysis.ifrs_s1_score, 100).toFixed(0)}%`
+              : 'N/A'}
+          </p>
+        </div>
+        <div className="rounded-lg border bg-card px-5 py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">IFRS S2</p>
+          <p className="text-2xl font-bold tracking-tight">
+            {analysis.ifrs_s2_score !== null
+              ? `${Math.min(analysis.ifrs_s2_score, 100).toFixed(0)}%`
+              : 'N/A'}
+          </p>
+        </div>
+      </div>
 
-        <TabsContent value="ftse">
-          {ftse_results.length > 0 ? (
-            <FtseGapTable results={ftse_results} />
-          ) : (
-            <EmptyState message="No FTSE indicator results available." />
-          )}
-        </TabsContent>
+      {/* Tabs — sticky so switching tabs doesn't scroll away */}
+      <div ref={tabBarRef} className="sticky top-14 z-40 -mx-6 mb-8 flex gap-1 border-b bg-background/95 backdrop-blur-sm px-6 animate-fade-up-d3">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => {
+              const scrollY = window.scrollY;
+              setActiveTab(tab.key);
+              requestAnimationFrame(() => {
+                window.scrollTo(0, scrollY);
+              });
+            }}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
+              activeTab === tab.key
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {tab.label}
+            {tab.count > 0 && (
+              <span className="ml-1.5 text-xs text-muted-foreground">({tab.count})</span>
+            )}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value="ifrs">
-          {ifrs_results.length > 0 ? (
+      {/* Tab Content — min-height prevents scroll jump when switching tabs */}
+      <div className="min-h-screen animate-fade-up-d4">
+        {activeTab === 'ftse' && (
+          <div className="space-y-10">
+            {(['Environmental', 'Social', 'Governance'] as const).map((pillar) => {
+              const themes = pillarGroups[pillar];
+              if (!themes || themes.length === 0) { return null; }
+
+              return (
+                <div key={pillar}>
+                  <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                    {pillar}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {themes.map((group) => (
+                      <ThemeCard key={group.theme} group={group} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            {ftse_results.length === 0 && (
+              <EmptyState message="No FTSE indicator results available." />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'ifrs' && (
+          ifrs_results.length > 0 ? (
             <IfrsGapTable results={ifrs_results} />
           ) : (
             <EmptyState message="No IFRS requirement results available." />
-          )}
-        </TabsContent>
+          )
+        )}
 
-        <TabsContent value="sitemap">
-          {sitemap_recommendations.length > 0 ? (
-            <div className="space-y-3">
+        {activeTab === 'sitemap' && (
+          sitemap_recommendations.length > 0 ? (
+            <div className="space-y-2">
               {sitemap_recommendations.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="flex items-start gap-4 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <MapPin className="h-5 w-5 text-primary" />
+                <div key={item.id} className="flex items-start gap-4 rounded-lg border bg-card p-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-semibold">{item.page_title}</h4>
+                      <span className={cn(
+                        'rounded-full px-2 py-0.5 text-[11px] font-medium',
+                        item.priority === 'high' && 'bg-red-50 text-red-700',
+                        item.priority === 'medium' && 'bg-amber-50 text-amber-700',
+                        item.priority === 'low' && 'bg-blue-50 text-blue-700',
+                      )}>
+                        {item.priority}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold">{item.page_title}</h4>
-                        <Badge
-                          variant="outline"
-                          className={priorityBadge[item.priority]}
-                        >
-                          {item.priority}
-                        </Badge>
-                      </div>
-                      {item.page_path && (
-                        <p className="mt-1 font-mono text-sm text-muted-foreground">
-                          {item.page_path}
-                        </p>
-                      )}
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {item.reason}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    {item.page_path && (
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">{item.page_path}</p>
+                    )}
+                    <p className="mt-1.5 text-xs text-muted-foreground">{item.reason}</p>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
             <EmptyState message="No sitemap recommendations available." />
-          )}
-        </TabsContent>
-      </Tabs>
+          )
+        )}
+      </div>
     </div>
   );
 }
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
+  <div className="flex items-center justify-center rounded-lg border border-dashed py-16">
     <p className="text-sm text-muted-foreground">{message}</p>
   </div>
 );

@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: 'Helvetica Neue', 'Helvetica', 'Arial', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  --font-heading: 'Helvetica Neue', 'Helvetica', 'Arial', system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,18 +39,12 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-emerald-50: oklch(0.979 0.035 166.3);
-  --color-emerald-100: oklch(0.951 0.065 159.1);
-  --color-emerald-200: oklch(0.905 0.112 155.5);
-  --color-emerald-300: oklch(0.845 0.143 152.5);
-  --color-emerald-400: oklch(0.765 0.158 150.5);
-  --color-emerald-500: oklch(0.696 0.17 162.48);
-  --color-emerald-600: oklch(0.596 0.145 163.22);
-  --color-emerald-700: oklch(0.508 0.118 165.61);
-  --color-emerald-800: oklch(0.432 0.095 166.91);
-  --color-emerald-900: oklch(0.378 0.077 168.94);
-  --color-teal-500: oklch(0.704 0.14 181.07);
-  --color-teal-600: oklch(0.6 0.118 184.7);
+  --color-status-found: #1a5632;
+  --color-status-found-bg: #ecfdf5;
+  --color-status-partial: #92400e;
+  --color-status-partial-bg: #fffbeb;
+  --color-status-missing: #991b1b;
+  --color-status-missing-bg: #fef2f2;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -61,72 +55,38 @@
 }
 
 :root {
-  --background: oklch(0.985 0.002 166);
-  --foreground: oklch(0.145 0.01 166);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.01 166);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0.01 166);
-  --primary: oklch(0.508 0.118 165.61);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.951 0.065 159.1);
-  --secondary-foreground: oklch(0.378 0.077 168.94);
-  --muted: oklch(0.97 0.01 166);
-  --muted-foreground: oklch(0.5 0.02 166);
-  --accent: oklch(0.951 0.065 159.1);
-  --accent-foreground: oklch(0.378 0.077 168.94);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0.01 166);
-  --input: oklch(0.922 0.01 166);
-  --ring: oklch(0.696 0.17 162.48);
-  --chart-1: oklch(0.696 0.17 162.48);
-  --chart-2: oklch(0.6 0.118 184.7);
-  --chart-3: oklch(0.508 0.118 165.61);
-  --chart-4: oklch(0.765 0.158 150.5);
-  --chart-5: oklch(0.845 0.143 152.5);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.002 166);
-  --sidebar-foreground: oklch(0.145 0.01 166);
-  --sidebar-primary: oklch(0.508 0.118 165.61);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.951 0.065 159.1);
-  --sidebar-accent-foreground: oklch(0.378 0.077 168.94);
-  --sidebar-border: oklch(0.922 0.01 166);
-  --sidebar-ring: oklch(0.696 0.17 162.48);
-}
-
-.dark {
-  --background: oklch(0.145 0.015 166);
-  --foreground: oklch(0.985 0.005 166);
-  --card: oklch(0.195 0.015 166);
-  --card-foreground: oklch(0.985 0.005 166);
-  --popover: oklch(0.195 0.015 166);
-  --popover-foreground: oklch(0.985 0.005 166);
-  --primary: oklch(0.696 0.17 162.48);
-  --primary-foreground: oklch(0.145 0.015 166);
-  --secondary: oklch(0.269 0.03 166);
-  --secondary-foreground: oklch(0.905 0.112 155.5);
-  --muted: oklch(0.269 0.02 166);
-  --muted-foreground: oklch(0.708 0.03 166);
-  --accent: oklch(0.269 0.03 166);
-  --accent-foreground: oklch(0.905 0.112 155.5);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.696 0.17 162.48);
-  --chart-1: oklch(0.696 0.17 162.48);
-  --chart-2: oklch(0.704 0.14 181.07);
-  --chart-3: oklch(0.765 0.158 150.5);
-  --chart-4: oklch(0.845 0.143 152.5);
-  --chart-5: oklch(0.596 0.145 163.22);
-  --sidebar: oklch(0.195 0.015 166);
-  --sidebar-foreground: oklch(0.985 0.005 166);
-  --sidebar-primary: oklch(0.696 0.17 162.48);
-  --sidebar-primary-foreground: oklch(0.145 0.015 166);
-  --sidebar-accent: oklch(0.269 0.03 166);
-  --sidebar-accent-foreground: oklch(0.905 0.112 155.5);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.696 0.17 162.48);
+  --background: #f5f5f0;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #1a1a1a;
+  --primary-foreground: #f5f5f0;
+  --secondary: #e8e8e3;
+  --secondary-foreground: #1a1a1a;
+  --muted: #eaeae5;
+  --muted-foreground: #737373;
+  --accent: #e8e8e3;
+  --accent-foreground: #1a1a1a;
+  --destructive: #dc2626;
+  --border: #d4d4cf;
+  --input: #d4d4cf;
+  --ring: #1a1a1a;
+  --chart-1: #1a1a1a;
+  --chart-2: #525252;
+  --chart-3: #737373;
+  --chart-4: #a3a3a3;
+  --chart-5: #d4d4d4;
+  --radius: 0.5rem;
+  --sidebar: #f5f5f0;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #1a1a1a;
+  --sidebar-primary-foreground: #f5f5f0;
+  --sidebar-accent: #e8e8e3;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #d4d4cf;
+  --sidebar-ring: #1a1a1a;
 }
 
 @layer base {
@@ -138,5 +98,61 @@
   }
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ─── Animations ─── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-up-d1 {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-d2 {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-d3 {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-d4 {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-in-out forwards;
+}
+
+/* ─── Parallax ─── */
+.parallax-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.parallax-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 70%);
+  will-change: transform;
 }

@@ -36,22 +36,27 @@ async def create_analysis(
     """
     company_url = str(body.company_url)
 
-    # Look up subsector
+    # Look up subsector (skip for "auto" — will be detected during analysis)
     subsector_id: str | None = None
-    subsector_result = (
-        supabase.table("icb_subsectors")
-        .select("id")
-        .eq("code", body.subsector_code)
-        .limit(1)
-        .execute()
-    )
-    if subsector_result.data:
-        subsector_id = subsector_result.data[0]["id"]
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid subsector code: {body.subsector_code}",
+    subsector_code_to_use: str | None = body.subsector_code
+
+    if body.subsector_code != "auto":
+        subsector_result = (
+            supabase.table("icb_subsectors")
+            .select("id")
+            .eq("code", body.subsector_code)
+            .limit(1)
+            .execute()
         )
+        if subsector_result.data:
+            subsector_id = subsector_result.data[0]["id"]
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid subsector code: {body.subsector_code}",
+            )
+    else:
+        subsector_code_to_use = None
 
     # Create analysis record
     try:
@@ -75,7 +80,7 @@ async def create_analysis(
         _run_analysis_wrapper,
         analysis_id=analysis_id,
         company_url=company_url,
-        subsector_code=body.subsector_code,
+        subsector_code=subsector_code_to_use,
     )
 
     logger.info("Analysis %s created for %s", analysis_id, company_url)

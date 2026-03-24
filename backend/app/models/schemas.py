@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
 class AnalysisRequest(BaseModel):
@@ -11,16 +11,26 @@ class AnalysisRequest(BaseModel):
 
     Attributes:
         company_url: The company website URL to crawl and analyze.
-        subsector_code: ICB subsector code (e.g. "10101010").
+        subsector_code: ICB subsector code or 'auto' for auto-detection.
     """
 
     company_url: HttpUrl
     subsector_code: str = Field(
         ...,
-        min_length=4,
         max_length=10,
-        description="ICB subsector code",
+        description="ICB subsector code or 'auto' for auto-detection",
     )
+
+    @field_validator("subsector_code")
+    @classmethod
+    def validate_subsector_code(cls, v: str) -> str:
+        """Allow 'auto' as a special value, otherwise require min 4 chars."""
+        if v == "auto":
+            return v
+        if len(v) < 4:
+            msg = "subsector_code must be at least 4 characters or 'auto'"
+            raise ValueError(msg)
+        return v
 
 
 class AnalysisCreateResponse(BaseModel):
