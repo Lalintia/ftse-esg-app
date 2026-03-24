@@ -142,14 +142,29 @@ FTSE reads ALL publicly available documents:
 - [x] Fixed: Content filtering keywords too generic → keyword density scoring
 - [x] Fixed: PDF content diluting AI analysis → per-theme filtering
 
-### Phase 5 — Deployment ✅ READY TO DEPLOY
+### Phase 5 — Deployment ✅ DEPLOYED
 - [x] backend/Dockerfile (Python 3.11 + Playwright + Chromium)
 - [x] frontend/Dockerfile (Multi-stage Next.js standalone)
 - [x] nginx/nginx.conf (Reverse proxy, 300s timeout)
 - [x] docker-compose.yml (3 services)
 - [x] .env.production template
 - [x] deploy.sh helper script
-- [ ] Deploy to AWS EC2
+- [x] Deploy to AWS EC2 (t3.medium, Singapore)
+- [x] Domain: esg.ohmai.me (Cloudflare DNS + SSL via Let's Encrypt)
+- [x] Host nginx proxies esg.ohmai.me → Docker port 8080
+
+### Phase 6 — UI Redesign ✅ DONE (24 March 2569)
+- [x] Devialet-inspired editorial design (Helvetica Neue, off-white/warm gray)
+- [x] Simplified industry dropdown (20 categories in plain English)
+- [x] AI auto-detect industry from crawled content (OpenAI, ~1000 tokens)
+- [x] Theme card grid layout (3 columns, grouped by E/S/G pillar)
+- [x] Expandable indicator details per theme
+- [x] Sticky tab bar with scroll position preservation
+- [x] Sitemap recommendations with page title + path
+- [x] Status sanitization (handle AI returning unexpected values)
+- [x] Fixed 7 truncated Thai indicator names
+- [x] Removed Recent Analyses from input page
+- [x] Added ESG project card to ohmai.me portfolio
 
 ---
 
@@ -163,9 +178,10 @@ FTSE reads ALL publicly available documents:
 | v8 | 2.86 | 3.0 | 2.64 | 3.0 | 218 | 45 | +Subsector mapping, Playwright |
 | v10 | 2.75 | 3.0 | 2.57 | 2.62 | 238 | 47 | +PDF reading |
 | Latest | **3.11** | 3.0 | **3.07** | **3.38** | 218 | 51 | +BMS removed, content filtering |
+| v12 (auto) | **2.86** | 2.79 | **2.86** | **3.0** | 214 | 48 | +Auto-detect industry, redesign UI |
 | **REAL** | **4.3** | ~4+ | ~4+ | ~4+ | ~240 | — | FTSE Russell official |
 
-**Best achieved: 3.11/5.0 (72% of real score)**
+**Best achieved: 3.11/5.0 (72% of real score)** — v12 auto-detect: 2.86/5.0 (67%)
 
 ### Score Gap Analysis
 | Factor | Estimated Impact |
@@ -208,4 +224,4 @@ FTSE reads ALL publicly available documents:
 
 ---
 
-*Created by Claude from conversations with P'Ohm — 23 March 2569*
+*Created by Claude from conversations with P'Ohm — Updated 24 March 2569*
