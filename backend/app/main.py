@@ -7,8 +7,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.dependencies import get_supabase
 from app.routers import analyses, health, subsectors
-from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements
+from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements, sync_indicator_names_to_db
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,6 +33,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         len(indicators),
         len(requirements),
     )
+
+    try:
+        supabase = get_supabase()
+        updated = sync_indicator_names_to_db(supabase)
+        if updated:
+            logger.info("Synced %d indicator names on startup", updated)
+    except Exception as exc:
+        logger.warning("Failed to sync indicator names: %s", exc)
+
     yield
     logger.info("Shutting down FTSE ESG Analyzer")
 
