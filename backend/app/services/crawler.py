@@ -494,18 +494,17 @@ async def _download_pdf_via_playwright(url: str) -> bytes | None:
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context()
-
-            response = await context.request.get(url, timeout=60000)
-            if response.ok:
-                pdf_bytes = await response.body()
+            try:
+                context = await browser.new_context()
+                response = await context.request.get(url, timeout=60000)
+                if response.ok:
+                    pdf_bytes = await response.body()
+                    if pdf_bytes and len(pdf_bytes) > 100:
+                        logger.info("Playwright API download succeeded for %s (%d bytes)", url, len(pdf_bytes))
+                        return pdf_bytes
+                logger.info("Playwright API download got status %d for %s", response.status, url)
+            finally:
                 await browser.close()
-                if pdf_bytes and len(pdf_bytes) > 100:
-                    logger.info("Playwright API download succeeded for %s (%d bytes)", url, len(pdf_bytes))
-                    return pdf_bytes
-
-            logger.info("Playwright API download got status %d for %s", response.status, url)
-            await browser.close()
     except Exception as exc:
         logger.warning("Playwright PDF download failed for %s: %s", url, exc)
 
