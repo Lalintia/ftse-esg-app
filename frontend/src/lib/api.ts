@@ -9,7 +9,7 @@ import type {
   SubsectorItem,
 } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 class ApiError extends Error {
   constructor(
