@@ -9,6 +9,7 @@ from supabase import Client
 from app.dependencies import get_supabase
 from app.models.schemas import AnalysisCreateResponse, AnalysisRequest
 from app.services.analyzer import run_analysis
+from app.services.crawler import is_safe_url
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,13 @@ async def create_analysis(
         HTTPException: If subsector code is invalid or database insert fails.
     """
     company_url = str(body.company_url)
+
+    # SSRF protection: block private/internal IPs
+    if not is_safe_url(company_url):
+        raise HTTPException(
+            status_code=400,
+            detail="URL resolves to a private or internal address. Only public URLs are allowed.",
+        )
 
     # Look up subsector (skip for "auto" — will be detected during analysis)
     subsector_id: str | None = None

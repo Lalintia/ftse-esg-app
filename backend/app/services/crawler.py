@@ -2,8 +2,10 @@
 
 import asyncio
 import io
+import ipaddress
 import logging
 import re
+import socket
 import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass, field as dataclass_field
@@ -15,6 +17,49 @@ import pdfplumber
 from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
+
+# SSRF protection: block private/internal IP ranges
+_BLOCKED_NETWORKS = [
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+]
+
+
+def is_safe_url(url: str) -> bool:
+    """Check if URL resolves to a public IP (not private/internal).
+
+    Blocks access to localhost, private networks, and AWS metadata
+    service (169.254.169.254) to prevent SSRF attacks.
+
+    Args:
+        url: URL to validate.
+
+    Returns:
+        True if safe to fetch, False if potentially dangerous.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    hostname = parsed.hostname
+    if not hostname:
+        return False
+    try:
+        resolved_ip = socket.gethostbyname(hostname)
+        ip = ipaddress.ip_address(resolved_ip)
+        if any(ip in net for net in _BLOCKED_NETWORKS):
+            logger.warning(
+                "SSRF blocked: %s resolves to private IP %s",
+                hostname, resolved_ip,
+            )
+            return False
+        return True
+    except (socket.gaierror, ValueError):
+        return False
 
 ESG_KEYWORDS: list[str] = [
     "sustainability",
