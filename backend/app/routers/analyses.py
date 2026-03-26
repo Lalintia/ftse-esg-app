@@ -3,7 +3,7 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from supabase import Client
 
 from app.dependencies import get_supabase
@@ -129,8 +129,8 @@ async def _run_analysis_wrapper(
 
 @router.get("")
 async def list_analyses(
-    limit: int = 20,
-    offset: int = 0,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     supabase: Client = Depends(get_supabase),
 ) -> dict[str, list[dict[str, str | float | int | None]] | int]:
     """List all analyses ordered by creation date (newest first).

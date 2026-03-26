@@ -29,8 +29,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN playwright install --with-deps chromium
 
+# Create non-root user for security
+RUN addgroup --system --gid 1001 appgroup && \
+    adduser --system --uid 1001 --ingroup appgroup appuser
+
 COPY app/ ./app/
 COPY data/ ./data/
+
+# Playwright needs writable cache dir
+RUN mkdir -p /home/appuser/.cache && chown -R appuser:appgroup /home/appuser
+
+USER appuser
 
 EXPOSE 8000
 
