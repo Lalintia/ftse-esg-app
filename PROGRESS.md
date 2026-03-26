@@ -266,6 +266,75 @@ FTSE reads ALL publicly available documents:
 
 ---
 
+### Phase 9 — Agent Skills Installation (26 March 2569)
+- [x] Installed 10 agent skills via skills.sh (`npx skills add`)
+- [x] 4 project-specific (`.agents/skills/`) + 6 global (`~/.agents/skills/`)
+
+**Project Skills** (FTSE only — `.agents/skills/`):
+| Skill | Source | Purpose |
+|-------|--------|---------|
+| supabase-postgres-best-practices | supabase/agent-skills (Official) | Database best practices |
+| next-best-practices | vercel-labs/next-skills (Official) | Next.js patterns |
+| shadcn | shadcn/ui (Official) | UI component usage |
+| vercel-react-best-practices | vercel-labs/agent-skills | React patterns |
+
+**Global Skills** (all projects — `~/.agents/skills/`):
+| Skill | Source | Purpose |
+|-------|--------|---------|
+| systematic-debugging | obra/superpowers | Structured debugging |
+| frontend-design | anthropics/skills (Official) | Frontend design guidelines |
+| pdf | anthropics/skills (Official) | PDF handling |
+| python-error-handling | wshobson/agents | Error handling patterns |
+| python-performance-optimization | wshobson/agents | Python optimization |
+| agent-browser | vercel-labs/agent-browser | Browser automation |
+
+---
+
+### Phase 10 — PTG Energy Calibration (26 March 2569)
+Calibrated the entire analysis pipeline against real FTSE Russell data for PTG Energy (Oil & Gas — Integrated Oil & Gas).
+
+**Reference data:** FTSE CPC PDF (Dec 2024) + Excel CDD (May 2025) — ESG 3.3, E 2.3, S 3.3, G 4.6
+
+**Changes made:**
+- [x] Fixed Oil & Gas theme mapping — removed 3 NAP themes (Biodiversity, Supply Chain Env/Social), kept Climate Change as zero-indicator theme (score=1)
+- [x] Fixed indicator applicability — 142 indicators match PTG reference exactly
+- [x] Added `exclude_subsectors` mechanism for core/performance indicators NAP at subsector level
+- [x] Added `indicators_applicable: False` flag for themes with 0 indicators (FTSE minimum score = 1)
+- [x] Crawler: subdomain auto-discovery (investor.X, ir.X, sustainability.X)
+- [x] Crawler: smart PDF reading — scan TOC first, read only ESG-relevant pages (127/359 vs 85/359 sequential)
+- [x] Added Thai keywords for content filtering (กำกับดูแลกิจการ, ต่อต้านทุจริต, อาชีวอนามัย, etc.)
+- [x] Upgraded AI model: gpt-4.1-nano → **gpt-4.1-mini** (major accuracy improvement)
+
+**Test Results — PTG Energy Benchmark:**
+
+| Run | Model | Overall | E | S | G | Found | Key Change |
+|---|---|---|---|---|---|---|---|
+| R1 | nano | 2.00 | 1.33 | 3.33 | 1.25 | 58/142 | Baseline (web only) |
+| R4 | nano | 1.85 | 1.33 | 2.00 | 2.25 | 58/142 | +Thai keywords |
+| R5 | nano | 1.62 | 1.00 | 1.33 | 2.62 | 49/142 | +Smart PDF, inconsistent |
+| **R6** | **mini** | **3.65** | **2.67** | **4.33** | **4.00** | **112/142** | **+gpt-4.1-mini** |
+| **REAL** | **FTSE** | **3.3** | **2.3** | **3.3** | **4.6** | **96/142** | **FTSE Russell official** |
+
+**Key findings:**
+- Indicator mapping: 100% accurate (142/142 match PTG reference)
+- AI model was the bottleneck: nano found 58 indicators, mini found 112
+- gpt-4.1-nano highly inconsistent (18% variance between runs)
+- PTG itself has data for 96/142 indicators — we found 112 (some false positives to calibrate)
+- Smart PDF reading critical: PTG One Report is 359 pages, governance data starts at page 149
+
+**Token cost per analysis (gpt-4.1-mini):**
+- Input: ~200K tokens × $0.40/1M = ~$0.08
+- Output: ~25K tokens × $1.60/1M = ~$0.04
+- **Total: ~$0.12 per analysis (~4.2 บาท)**
+
+**Remaining work:**
+- [ ] Score band calibration (scores slightly high: 3.65 vs 3.3 target)
+- [ ] Reduce false positives (found 112 but PTG only has 96)
+- [ ] Test consistency by running multiple times with gpt-4.1-mini
+- [ ] Test with other companies to validate changes don't break other sectors
+
+---
+
 ### Research: FTSE Methodology (24 March 2569)
 - FTSE Russell uses 600+ human analysts (manual extraction, ~5 hrs/company)
 - They read BOTH website HTML AND PDF documents (Annual Report, Sustainability Report, etc.)
@@ -273,4 +342,4 @@ FTSE reads ALL publicly available documents:
 - LSEG signed deals with Anthropic, Microsoft, OpenAI (GBP 1.9 billion)
 - Thai Union website analysis (HTML only, no PDF): ~75% of indicators are qualitative (policy/commitment) which website covers well, but 92 quantitative indicators (Water Security, H&S, Pollution, Climate) need numbers from PDFs
 
-*Created by Claude from conversations with P'Ohm — Updated 24 March 2569*
+*Created by Claude from conversations with P'Ohm — Updated 26 March 2569*
