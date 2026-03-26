@@ -356,10 +356,25 @@ Security audit using `security-auditor` skill — found 12 issues, fixed 9:
 | **MED-3** | **XML sitemap DoS** | **Fixed** — 10MB limit |
 | **MED-4** | **CORS wildcard** | **Fixed** — esg.ohmai.me only |
 
+**Additional fixes (same session):**
+- [x] Fixed frontend subsector code 60101010 → 60101000 — indicator counts now match ref exactly
+- [x] Fixed Dockerfile: Playwright browsers in /opt/playwright-browsers for non-root user
+- [x] Fixed nginx rate limit: merged zones to avoid strict limit on GET requests
+- [x] Fixed count query: limit(0) to avoid fetching all rows
+- [x] Fixed EmptyState component declaration order
+- [x] Code review with `performance-error-reviewer` + `react-typescript-reviewer` skills (3 rounds)
+
+**Final verified result (deployed on esg.ohmai.me):**
+- ESG Overall: **3.4** vs target **3.3** (+0.1)
+- Environmental: **2.0** vs target **2.3** (-0.3)
+- Social: **4.3** vs target **3.3** (+1.0)
+- Governance: **4.0** vs target **4.6** (-0.6)
+- Indicator counts: **142/142 match PTG reference — all 8 themes correct**
+
 **Remaining work:**
 - [ ] Add API authentication (HIGH-1)
-- [ ] Score band calibration (scores slightly high: 3.31 vs 3.3 target)
-- [ ] Reduce false positives (found 109 but PTG only has 96 — 31 false positives)
+- [ ] Score band calibration (Social 4.3 vs target 3.3 — still high)
+- [ ] Reduce false positives (~31 false positives remain)
 - [ ] Test consistency by running multiple times with gpt-4.1-mini
 - [ ] Test with other companies to validate changes don't break other sectors
 - [ ] Re-enable IFRS when verified reference data is available
