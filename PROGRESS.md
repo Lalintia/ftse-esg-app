@@ -333,9 +333,33 @@ Calibrated the entire analysis pipeline against real FTSE Russell data for PTG E
 - [x] Code review fixes: log bug (path→target_url), duplicate @dataclass, double-count guard in scoring, PDF fallback fix
 - [x] Token cost reduced: ~$0.096/analysis (~3.4 บาท) without IFRS
 
+**PTG-Calibrated Prompt (same session):**
+- [x] Analyzed 30 false positive patterns (37% wrong metric, 30% report mention, 13% committee, 10% training, 7% general policy)
+- [x] Added 5 common false positive patterns with real examples to prompt
+- [x] Added theme-specific guidance for CG, Anti-Corruption, Pollution, Water
+- [x] Fixed frontend subsector code: 60101010 → 60101000 (Integrated Oil & Gas)
+- [x] Run 8 result: ESG **3.31** vs target 3.30 (**ห่างแค่ 0.01!**)
+
+### Phase 11 — Security Hardening (26 March 2569)
+Security audit using `security-auditor` skill — found 12 issues, fixed 9:
+
+| Severity | Issue | Status |
+|---|---|---|
+| CRIT-1 | API keys in .env | No issue (never committed) |
+| **CRIT-2** | **SSRF — private IP access** | **Fixed** — block 127.x, 10.x, 172.16.x, 169.254.x |
+| HIGH-1 | No authentication | Deferred |
+| **HIGH-2** | **No rate limiting** | **Fixed** — 5 req/min analysis, 30 req/min API |
+| **HIGH-3** | **No query limit cap** | **Fixed** — max 100 |
+| **HIGH-4** | **Docker runs as root** | **Fixed** — appuser:1001 |
+| **MED-1** | **No security headers** | **Fixed** — nosniff, DENY, XSS, HSTS |
+| **MED-2** | **No HTTPS enforcement** | **Fixed** — HSTS header |
+| **MED-3** | **XML sitemap DoS** | **Fixed** — 10MB limit |
+| **MED-4** | **CORS wildcard** | **Fixed** — esg.ohmai.me only |
+
 **Remaining work:**
-- [ ] Score band calibration (scores slightly high: 3.42 vs 3.3 target)
-- [ ] Reduce false positives (found 108 but PTG only has 96 — 30 false positives)
+- [ ] Add API authentication (HIGH-1)
+- [ ] Score band calibration (scores slightly high: 3.31 vs 3.3 target)
+- [ ] Reduce false positives (found 109 but PTG only has 96 — 31 false positives)
 - [ ] Test consistency by running multiple times with gpt-4.1-mini
 - [ ] Test with other companies to validate changes don't break other sectors
 - [ ] Re-enable IFRS when verified reference data is available
