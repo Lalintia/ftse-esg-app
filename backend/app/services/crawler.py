@@ -439,6 +439,12 @@ async def _fetch_sitemap_urls(base_url: str) -> list[str]:
                 logger.info("No sitemap found at %s (status %d)", sitemap_url, response.status_code)
                 return []
 
+            # Limit sitemap size to prevent XML DoS (billion laughs)
+            _MAX_SITEMAP_BYTES = 10 * 1024 * 1024
+            if len(response.content) > _MAX_SITEMAP_BYTES:
+                logger.warning("Sitemap too large (%d bytes), skipping", len(response.content))
+                return []
+
             root = ET.fromstring(response.text)
             namespace = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
             urls = [
