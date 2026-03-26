@@ -235,16 +235,16 @@ export default function AboutPage() {
         <Card className="mt-4">
           <p className="mb-2 text-xs font-semibold">Agent Skills (10)</p>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <div><strong className="text-foreground">supabase-postgres-best-practices</strong> — Database best practices</div>
-            <div><strong className="text-foreground">next-best-practices</strong> — Next.js patterns (Vercel)</div>
-            <div><strong className="text-foreground">shadcn</strong> — UI components (Official)</div>
-            <div><strong className="text-foreground">vercel-react-best-practices</strong> — React patterns</div>
-            <div><strong className="text-foreground">systematic-debugging</strong> — Structured debugging</div>
-            <div><strong className="text-foreground">frontend-design</strong> — Design guidelines (Anthropic)</div>
-            <div><strong className="text-foreground">pdf</strong> — PDF handling (Anthropic)</div>
-            <div><strong className="text-foreground">python-error-handling</strong> — Error patterns</div>
-            <div><strong className="text-foreground">python-performance-optimization</strong> — Performance</div>
-            <div><strong className="text-foreground">agent-browser</strong> — Browser automation (Vercel)</div>
+            <div><strong className="text-foreground">supabase-postgres-best-practices</strong> — {lang === 'th' ? 'เขียน query, RLS, migration ตามแนวทางของ Supabase' : 'Write queries, RLS, migrations following Supabase guidelines'}</div>
+            <div><strong className="text-foreground">next-best-practices</strong> — {lang === 'th' ? 'ใช้ App Router, Server Components, data fetching ตามมาตรฐาน Vercel' : 'App Router, Server Components, data fetching per Vercel standards'}</div>
+            <div><strong className="text-foreground">shadcn</strong> — {lang === 'th' ? 'ใช้ UI components อย่างถูกวิธี ตาม design system ของ shadcn/ui' : 'Use UI components correctly per shadcn/ui design system'}</div>
+            <div><strong className="text-foreground">vercel-react-best-practices</strong> — {lang === 'th' ? 'เขียน React components ที่ปลอดภัย มี performance ดี' : 'Write safe, performant React components'}</div>
+            <div><strong className="text-foreground">systematic-debugging</strong> — {lang === 'th' ? 'วิเคราะห์ bug อย่างเป็นขั้นตอน หาสาเหตุที่แท้จริง' : 'Analyze bugs systematically, find root causes'}</div>
+            <div><strong className="text-foreground">frontend-design</strong> — {lang === 'th' ? 'ออกแบบ UI/UX ตามหลัก accessibility และ responsive design' : 'Design UI/UX with accessibility and responsive principles'}</div>
+            <div><strong className="text-foreground">pdf</strong> — {lang === 'th' ? 'อ่าน สร้าง และจัดการไฟล์ PDF' : 'Read, create, and manage PDF files'}</div>
+            <div><strong className="text-foreground">python-error-handling</strong> — {lang === 'th' ? 'จัดการ error, retry, logging ใน Python อย่างถูกต้อง' : 'Handle errors, retries, logging in Python properly'}</div>
+            <div><strong className="text-foreground">python-performance-optimization</strong> — {lang === 'th' ? 'ลด memory usage, ใช้ async/await, optimize algorithm' : 'Reduce memory usage, use async/await, optimize algorithms'}</div>
+            <div><strong className="text-foreground">agent-browser</strong> — {lang === 'th' ? 'ควบคุม browser อัตโนมัติ เปิดเว็บ กรอกฟอร์ม ตรวจผลลัพธ์' : 'Automate browser — navigate, fill forms, verify results'}</div>
           </div>
         </Card>
         <Card className="mt-4">
