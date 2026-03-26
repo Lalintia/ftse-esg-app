@@ -21,3 +21,8 @@ frontend/node_modules/
 # Misc
 .DS_Store
 *.log
+
+# Agent skills (installed via npx skills add)
+.agents/
+.claude/skills/
+skills-lock.json
