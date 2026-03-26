@@ -90,19 +90,21 @@ export default function AboutPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
-      {/* Top bar */}
-      <div className="mb-8 flex items-center justify-between">
+      {/* Back button */}
+      <div className="mb-8">
         <Link href="/" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3 w-3" />
           Back
         </Link>
-        <button
-          onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
-          className="rounded-full border border-border px-4 py-1.5 text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
-        >
-          {lang === 'th' ? 'EN' : 'TH'}
-        </button>
       </div>
+
+      {/* Floating language toggle */}
+      <button
+        onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
+        className="fixed right-6 top-20 z-50 rounded-full border border-border bg-background/90 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-foreground hover:text-background"
+      >
+        {lang === 'th' ? 'EN' : 'TH'}
+      </button>
 
       {/* Hero */}
       <div className="mb-16 text-center animate-fade-up">
