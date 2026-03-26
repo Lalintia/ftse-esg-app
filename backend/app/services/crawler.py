@@ -217,11 +217,47 @@ def _get_domain(url: str) -> str:
     return parsed.hostname or ""
 
 
+def _get_root_domain(domain: str) -> str:
+    """Extract root domain (e.g. 'ptgenergy.co.th' from 'investor.ptgenergy.co.th').
+
+    Handles common TLDs like .co.th, .com, .org, etc.
+
+    Args:
+        domain: Full hostname.
+
+    Returns:
+        Root domain string.
+    """
+    parts = domain.lower().split(".")
+    if len(parts) >= 3 and parts[-2] in ("co", "or", "ac", "go", "in", "net"):
+        return ".".join(parts[-3:])
+    if len(parts) >= 2:
+        return ".".join(parts[-2:])
+    return domain
+
+
+def _is_same_root_domain(domain1: str, domain2: str) -> bool:
+    """Check if two domains share the same root domain.
+
+    e.g. 'investor.ptgenergy.co.th' and 'www.ptgenergy.co.th' → True
+
+    Args:
+        domain1: First hostname.
+        domain2: Second hostname.
+
+    Returns:
+        True if same root domain.
+    """
+    return _get_root_domain(domain1) == _get_root_domain(domain2)
+
+
 def _is_valid_link(href: str, base_domain: str) -> bool:
     """Check if a link is valid for crawling.
 
     Filters out anchors, javascript/mailto/tel links,
-    and links to different domains.
+    and links to completely different domains.
+    Allows subdomains of the same root domain
+    (e.g. investor.company.co.th when crawling www.company.co.th).
 
     Args:
         href: The href value from an anchor tag.
@@ -238,7 +274,7 @@ def _is_valid_link(href: str, base_domain: str) -> bool:
         return False
 
     parsed = urlparse(href)
-    if parsed.hostname and parsed.hostname != base_domain:
+    if parsed.hostname and not _is_same_root_domain(parsed.hostname, base_domain):
         return False
 
     return True
@@ -525,6 +561,133 @@ def _pdf_filename(url: str) -> str:
     return path.name or "document.pdf"
 
 
+_ESG_TOC_KEYWORDS: list[tuple[str, int]] = [
+    # (keyword, priority_weight) — higher weight = read more pages from this section
+    ("corporate governance", 3),
+    ("governance", 2),
+    ("board of director", 3),
+    ("anti-corruption", 3),
+    ("anti-bribery", 2),
+    ("whistleblow", 2),
+    ("risk management", 2),
+    ("sustainability", 3),
+    ("environment", 2),
+    ("water", 2),
+    ("pollution", 2),
+    ("waste management", 2),
+    ("health and safety", 2),
+    ("occupational", 2),
+    ("human rights", 2),
+    ("labour", 2),
+    ("labor", 2),
+    ("employee", 2),
+    ("supply chain", 2),
+    ("climate", 2),
+    ("emission", 2),
+    ("ghg", 2),
+    # Thai keywords
+    ("กำกับดูแลกิจการ", 3),
+    ("คณะกรรมการบริษัท", 3),
+    ("ต่อต้านการทุจริต", 3),
+    ("จริยธรรม", 2),
+    ("ความยั่งยืน", 3),
+    ("สิ่งแวดล้อม", 2),
+    ("อาชีวอนามัย", 2),
+    ("ความปลอดภัย", 2),
+    ("สิทธิมนุษยชน", 2),
+    ("พนักงาน", 2),
+    ("น้ำ", 2),
+    ("ของเสีย", 2),
+    ("บริหารความเสี่ยง", 2),
+    ("แจ้งเบาะแส", 2),
+]
+
+
+def _find_relevant_pdf_pages(
+    pdf: "pdfplumber.PDF",
+    filename: str,
+) -> list[int]:
+    """Scan PDF table of contents and first pages to find ESG-relevant sections.
+
+    Reads the first 15 pages to find TOC entries, then selects page ranges
+    that match ESG keywords. Also always includes the first 5 pages (intro/overview).
+
+    Args:
+        pdf: Opened pdfplumber PDF object.
+        filename: PDF filename for logging.
+
+    Returns:
+        Sorted list of 0-indexed page numbers to read. Empty if no TOC found.
+    """
+    total_pages = len(pdf.pages)
+    if total_pages <= 100:
+        return list(range(total_pages))
+
+    # Step 1: Read first 15 pages to find TOC
+    toc_text = ""
+    for i in range(min(15, total_pages)):
+        page_text = pdf.pages[i].extract_text()
+        if page_text:
+            toc_text += f"\n--- Page {i+1} ---\n{page_text}"
+
+    if not toc_text:
+        return []
+
+    # Step 2: Find page number references in TOC
+    # Pattern: "topic name ... 123" or "topic name 123"
+    page_refs: list[tuple[int, int]] = []
+    for keyword, weight in _ESG_TOC_KEYWORDS:
+        for match in re.finditer(
+            rf"(?i){re.escape(keyword)}[^\n]*?(\d{{1,3}})\s*$",
+            toc_text,
+            re.MULTILINE,
+        ):
+            page_num = int(match.group(1))
+            if 1 <= page_num <= total_pages:
+                page_refs.append((page_num - 1, weight))
+
+    if not page_refs:
+        # No TOC page refs found — try keyword scanning every 20th page
+        logger.info("PDF %s: no TOC page refs — scanning sampled pages", filename)
+        sampled_pages: set[int] = set(range(min(10, total_pages)))
+        for i in range(0, total_pages, 20):
+            page_text = pdf.pages[i].extract_text() or ""
+            page_lower = page_text.lower()
+            for keyword, weight in _ESG_TOC_KEYWORDS:
+                if keyword.lower() in page_lower:
+                    # Read this page and surrounding pages
+                    for j in range(max(0, i - 2), min(total_pages, i + 10)):
+                        sampled_pages.add(j)
+                    break
+        if len(sampled_pages) > 10:
+            logger.info("PDF %s: keyword scan found %d relevant pages", filename, len(sampled_pages))
+            return sorted(sampled_pages)
+        return []
+
+    # Step 3: Build page ranges from TOC refs
+    relevant_pages: set[int] = set()
+
+    # Always include first 5 pages (overview/intro)
+    for i in range(min(5, total_pages)):
+        relevant_pages.add(i)
+
+    # For each TOC reference, read that page + surrounding pages
+    for page_idx, weight in page_refs:
+        pages_to_read = weight * 5
+        for i in range(page_idx, min(total_pages, page_idx + pages_to_read)):
+            relevant_pages.add(i)
+
+    logger.info(
+        "PDF %s: TOC scan found %d refs → reading %d/%d pages",
+        filename,
+        len(page_refs),
+        len(relevant_pages),
+        total_pages,
+    )
+
+    return sorted(relevant_pages)
+
+
 async def _download_pdf_via_playwright(url: str) -> bytes | None:
     """Fallback PDF download using Playwright's API request context.
 
@@ -630,13 +793,29 @@ async def _download_and_extract_pdf(
         total_chars = 0
         with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
             total_pdf_pages = len(pdf.pages)
-            logger.info(
-                "PDF %s: %d pages total, reading all pages",
-                filename,
-                total_pdf_pages,
-            )
 
-            for i in range(total_pdf_pages):
+            # Smart PDF reading: scan TOC first, then read relevant pages
+            relevant_pages = _find_relevant_pdf_pages(pdf, filename)
+
+            if relevant_pages:
+                logger.info(
+                    "PDF %s: %d pages total, smart-reading %d relevant pages",
+                    filename,
+                    total_pdf_pages,
+                    len(relevant_pages),
+                )
+                pages_to_read = relevant_pages
+            else:
+                logger.info(
+                    "PDF %s: %d pages total, no TOC found — reading sequentially",
+                    filename,
+                    total_pdf_pages,
+                )
+                pages_to_read = list(range(total_pdf_pages))
+
+            for i in pages_to_read:
+                if i >= total_pdf_pages:
+                    continue
                 page_text = pdf.pages[i].extract_text()
                 if page_text and page_text.strip():
                     part = f"--- Page {i + 1} ---\n{page_text.strip()}"
@@ -644,10 +823,9 @@ async def _download_and_extract_pdf(
                     total_chars += len(part)
                     if total_chars >= max_chars:
                         logger.info(
-                            "PDF %s: char limit reached at page %d/%d",
+                            "PDF %s: char limit reached after %d pages",
                             filename,
-                            i + 1,
-                            total_pdf_pages,
+                            len(extracted_parts),
                         )
                         break
 
@@ -734,10 +912,34 @@ async def _discover_report_pdfs(
         List of PDF URLs sorted by FTSE relevance priority.
     """
     base_domain = _get_domain(base_url)
+    root_domain = _get_root_domain(base_domain)
     discovered_pdfs: set[str] = set()
 
+    # Auto-discover common IR/sustainability subdomains
+    _SUBDOMAIN_PREFIXES = ["investor", "ir", "sustainability", "esg", "csr"]
+    subdomain_base_urls: list[str] = []
+    parsed_base = urlparse(base_url)
+    for prefix in _SUBDOMAIN_PREFIXES:
+        sub_host = f"{prefix}.{root_domain}"
+        if sub_host != base_domain:
+            sub_url = f"{parsed_base.scheme}://{sub_host}"
+            subdomain_base_urls.append(sub_url)
+
+    # Combine: main site paths + subdomain paths
+    all_targets: list[str] = []
     for path in _REPORT_PAGE_PATHS:
-        target_url = urljoin(base_url.rstrip("/") + "/", path.lstrip("/"))
+        all_targets.append(urljoin(base_url.rstrip("/") + "/", path.lstrip("/")))
+    for sub_url in subdomain_base_urls:
+        all_targets.append(sub_url)
+        for path in ["/", "/downloads", "/reports", "/publications", "/annual-report"]:
+            all_targets.append(urljoin(sub_url.rstrip("/") + "/", path.lstrip("/")))
+
+    logger.info(
+        "Discovering report PDFs: %d targets (%d subdomain bases)",
+        len(all_targets), len(subdomain_base_urls),
+    )
+
+    for target_url in all_targets:
         try:
             response = await page.goto(
                 target_url,
@@ -757,7 +959,7 @@ async def _discover_report_pdfs(
                     continue
                 absolute_url = urljoin(base_url, link)
                 link_domain = _get_domain(absolute_url)
-                if link_domain == base_domain or _is_esg_pdf(absolute_url):
+                if _is_same_root_domain(link_domain, base_domain) or _is_esg_pdf(absolute_url):
                     discovered_pdfs.add(absolute_url)
 
             logger.info(
