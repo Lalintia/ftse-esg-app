@@ -163,7 +163,7 @@ export default function AnalysisDashboard({
   const { id } = use(params);
   const [data, setData] = useState<AnalysisDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'ftse' | 'ifrs' | 'sitemap'>('ftse');
+  const [activeTab, setActiveTab] = useState<'ftse' | 'sitemap'>('ftse');
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
@@ -245,7 +245,8 @@ export default function AnalysisDashboard({
 
   const tabs = [
     { key: 'ftse' as const, label: 'FTSE Themes', count: ftse_results.length },
-    { key: 'ifrs' as const, label: 'IFRS', count: ifrs_results.length },
+    // IFRS temporarily hidden — no verified reference data yet
+    // { key: 'ifrs' as const, label: 'IFRS', count: ifrs_results.length },
     { key: 'sitemap' as const, label: 'Sitemap', count: sitemap_recommendations.length },
   ];
 
@@ -308,25 +309,7 @@ export default function AnalysisDashboard({
         </div>
       </div>
 
-      {/* IFRS Quick Stats */}
-      <div className="mb-12 flex gap-4 animate-fade-up-d2">
-        <div className="rounded-lg border bg-card px-5 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">IFRS S1</p>
-          <p className="text-2xl font-bold tracking-tight">
-            {analysis.ifrs_s1_score !== null
-              ? `${Math.min(analysis.ifrs_s1_score, 100).toFixed(0)}%`
-              : 'N/A'}
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card px-5 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">IFRS S2</p>
-          <p className="text-2xl font-bold tracking-tight">
-            {analysis.ifrs_s2_score !== null
-              ? `${Math.min(analysis.ifrs_s2_score, 100).toFixed(0)}%`
-              : 'N/A'}
-          </p>
-        </div>
-      </div>
+      {/* IFRS Quick Stats — temporarily hidden, no verified reference data yet */}
 
       {/* Tabs — sticky so switching tabs doesn't scroll away */}
       <div ref={tabBarRef} className="sticky top-14 z-40 -mx-6 mb-8 flex gap-1 border-b bg-background/95 backdrop-blur-sm px-6 animate-fade-up-d3">
@@ -383,13 +366,7 @@ export default function AnalysisDashboard({
           </div>
         )}
 
-        {activeTab === 'ifrs' && (
-          ifrs_results.length > 0 ? (
-            <IfrsGapTable results={ifrs_results} />
-          ) : (
-            <EmptyState message="No IFRS requirement results available." />
-          )
-        )}
+        {/* IFRS tab temporarily hidden — no verified reference data yet */}
 
         {activeTab === 'sitemap' && (
           sitemap_recommendations.length > 0 ? (

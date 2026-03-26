@@ -174,7 +174,6 @@ class PageContent:
 
 
 @dataclass
-@dataclass
 class PdfDownloadInfo:
     """Metadata about a downloaded PDF."""
 
@@ -659,7 +658,7 @@ def _find_relevant_pdf_pages(
                     for j in range(max(0, i - 2), min(total_pages, i + 10)):
                         sampled_pages.add(j)
                     break
-        if len(sampled_pages) > 10:
+        if sampled_pages:
             logger.info("PDF %s: keyword scan found %d relevant pages", filename, len(sampled_pages))
             return sorted(sampled_pages)
         return []
@@ -964,7 +963,7 @@ async def _discover_report_pdfs(
 
             logger.info(
                 "Report page %s: found %d PDF links",
-                path,
+                target_url,
                 len(pdf_links),
             )
 

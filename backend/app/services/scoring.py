@@ -291,7 +291,16 @@ def calculate_ftse_scores(
                 theme_score=1,
             ))
 
+    zero_theme_names = {zt["theme"] for zt in (zero_indicator_themes or [])}
+
     for theme_name, indicators in indicators_by_theme.items():
+        if theme_name in zero_theme_names:
+            logger.warning(
+                "Theme '%s' in both zero_indicator and indicators_by_theme — skipping",
+                theme_name,
+            )
+            continue
+
         if subsector_code:
             exposure = get_theme_exposure(subsector_code, theme_name)
         else:

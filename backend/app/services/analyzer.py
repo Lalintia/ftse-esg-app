@@ -768,18 +768,19 @@ async def run_analysis(
         )
 
         # FTSE: two-round (website first, PDF for gaps)
-        # IFRS: single-round with all content combined
-        all_content = (website_content + "\n\n---\n\n" + pdf_content) if pdf_content else website_content
-
-        ftse_results, ifrs_results = await asyncio.gather(
-            analyze_ftse(openai_client, website_content, indicators_by_theme, pdf_content=pdf_content),
-            analyze_ifrs(openai_client, all_content, requirements_by_chapter),
+        # IFRS: temporarily disabled to save tokens (~20% cost reduction)
+        logger.warning(
+            "IFRS analysis disabled (cost saving). Scores will be zero for %s.",
+            analysis_id,
         )
+        ftse_results = await analyze_ftse(
+            openai_client, website_content, indicators_by_theme, pdf_content=pdf_content,
+        )
+        ifrs_results: list[IfrsResult] = []
 
         # Step 4: Save raw results
-        _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE + {len(ifrs_results)} IFRS results...")
+        _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE results...")
         _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
-        _save_ifrs_results(supabase, analysis_id, ifrs_results)
 
         # Step 5: Calculate scores
         ftse_result_dicts = [
@@ -790,13 +791,6 @@ async def run_analysis(
             }
             for r in ftse_results
         ]
-        ifrs_result_dicts = [
-            {
-                "paragraph_ref": r.paragraph_ref,
-                "status": r.status,
-            }
-            for r in ifrs_results
-        ]
 
         _update_message(supabase, analysis_id, "Calculating ESG scores...")
         ftse_scores = calculate_ftse_scores(
@@ -805,18 +799,17 @@ async def run_analysis(
             subsector_code=subsector_code,
             zero_indicator_themes=zero_indicator_themes_list if subsector_code else None,
         )
-        ifrs_scores = calculate_ifrs_scores(ifrs_result_dicts, ifrs_requirements)
+        ifrs_scores = calculate_ifrs_scores([], ifrs_requirements)
         _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)
 
         # Step 6: Generate sitemap recommendations
         _update_message(supabase, analysis_id, "Generating sitemap recommendations...")
         ftse_gaps = _extract_ftse_gaps(ftse_results, indicators_by_theme)
-        ifrs_gaps = _extract_ifrs_gaps(ifrs_results, ifrs_requirements)
 
         recommendations = await generate_sitemap(
             openai_client=openai_client,
             ftse_gaps=ftse_gaps,
-            ifrs_gaps=ifrs_gaps,
+            ifrs_gaps=[],
         )
         _save_sitemap(supabase, analysis_id, recommendations)
 

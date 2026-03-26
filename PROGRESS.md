@@ -327,11 +327,18 @@ Calibrated the entire analysis pipeline against real FTSE Russell data for PTG E
 - Output: ~25K tokens × $1.60/1M = ~$0.04
 - **Total: ~$0.12 per analysis (~4.2 บาท)**
 
+**Additional changes (same session):**
+- [x] IFRS analysis temporarily disabled (save ~20% tokens, no verified reference data)
+- [x] IFRS tab + quick stats hidden in frontend
+- [x] Code review fixes: log bug (path→target_url), duplicate @dataclass, double-count guard in scoring, PDF fallback fix
+- [x] Token cost reduced: ~$0.096/analysis (~3.4 บาท) without IFRS
+
 **Remaining work:**
-- [ ] Score band calibration (scores slightly high: 3.65 vs 3.3 target)
-- [ ] Reduce false positives (found 112 but PTG only has 96)
+- [ ] Score band calibration (scores slightly high: 3.42 vs 3.3 target)
+- [ ] Reduce false positives (found 108 but PTG only has 96 — 30 false positives)
 - [ ] Test consistency by running multiple times with gpt-4.1-mini
 - [ ] Test with other companies to validate changes don't break other sectors
+- [ ] Re-enable IFRS when verified reference data is available
 
 ---
 
