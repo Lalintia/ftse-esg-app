@@ -39,6 +39,15 @@ export const Navbar = () => {
           >
             History
           </Link>
+          <Link
+            href="/about"
+            className={cn(
+              'text-xs font-medium uppercase tracking-[0.1em] transition-colors',
+              pathname === '/about' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            About
+          </Link>
         </nav>
       </div>
     </header>
