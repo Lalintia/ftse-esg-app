@@ -151,11 +151,15 @@ export default function AboutPage() {
       {/* 4. Pipeline */}
       <Section num={4} title={s.pipeline[lang]} desc={s.pipelineDesc[lang]}>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-          {[
+          {(lang === 'th' ? [
+            { n: '1', l: 'ค้นหา Sitemap' }, { n: '2', l: 'อ่านเว็บ' }, { n: '3', l: 'ค้นหา PDF' },
+            { n: '4', l: 'ระบุหมวดธุรกิจ' }, { n: '5', l: 'กรอง Indicators' }, { n: '6', l: 'วิเคราะห์จากเว็บ' },
+            { n: '7', l: 'เติมข้อมูลจาก PDF' }, { n: '8', l: 'คำนวณคะแนน' }, { n: '9', l: 'แนะนำ Sitemap' },
+          ] : [
             { n: '1', l: 'Sitemap Scan' }, { n: '2', l: 'Web Crawl' }, { n: '3', l: 'PDF Discovery' },
-            { n: '4', l: 'Auto-detect' }, { n: '5', l: 'Filter' }, { n: '6', l: 'Round 1' },
-            { n: '7', l: 'Round 2' }, { n: '8', l: 'Score' }, { n: '9', l: 'Sitemap' },
-          ].map((p) => (
+            { n: '4', l: 'Detect Industry' }, { n: '5', l: 'Filter Indicators' }, { n: '6', l: 'Analyze Website' },
+            { n: '7', l: 'Fill Gaps from PDF' }, { n: '8', l: 'Calculate Scores' }, { n: '9', l: 'Recommend Sitemap' },
+          ]).map((p) => (
             <div key={p.n} className="rounded-lg border border-border bg-card p-3 text-center text-xs">
               <span className="mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-[10px] text-background">{p.n}</span>
               <span className="mt-1 block font-semibold">{p.l}</span>
