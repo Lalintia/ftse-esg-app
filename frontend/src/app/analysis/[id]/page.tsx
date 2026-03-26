@@ -221,7 +221,7 @@ export default function AnalysisDashboard({
     );
   }
 
-  const { analysis, ftse_results, sitemap_recommendations } = data;
+  const { analysis, ftse_results, sitemap_recommendations, ifrs_results: _ifrs } = data;
   const isInProgress = IN_PROGRESS_STATUSES.has(analysis.status);
 
   if (isInProgress) {
