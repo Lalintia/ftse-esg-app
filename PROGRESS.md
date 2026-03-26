@@ -1,6 +1,6 @@
 # FTSE ESG Web App — Progress & Notes
 
-Updated: 23 March 2569
+Updated: 24 March 2569
 
 ---
 
@@ -166,6 +166,43 @@ FTSE reads ALL publicly available documents:
 - [x] Removed Recent Analyses from input page
 - [x] Added ESG project card to ohmai.me portfolio
 
+### Phase 7 — Bug Fixes & UX Improvements ✅ DONE (24 March 2569)
+- [x] Auto-sync truncated indicator names from JSON → Supabase on startup (7 names fixed)
+- [x] Live progress messages during analysis (status_message field in DB)
+  - Sitemap discovery, page scraping (X/Y), PDF download with filename
+  - Auto-detect industry, analyzing indicators, scoring, sitemap generation
+  - Frontend displays message below progress bar with pulse animation
+- [x] Fixed PDF download failing with 405 Not Allowed (missing browser headers)
+  - httpx was sending requests without User-Agent → websites block it
+  - Added browser-like headers (User-Agent, Accept, Accept-Language)
+  - Confirmed: Thai Union PDFs download successfully (SD Report 15MB, etc.)
+- [x] Replaced Playwright PDF fallback from download-event to API request context
+  - Old method waited for "download" event → timeout on PDFs that open in browser
+  - New method uses `context.request.get()` — more reliable
+  - Added try/finally to prevent browser process leak
+- [x] PDF strategy: web-first, PDF supplements — only core reports EN
+  - Only download SD Report + One Report/Annual Report (max 3 files)
+  - Skip Thai language PDFs (EN preferred — TH was duplicating content, wasting 200K chars)
+  - Removed auto-discover of TCFD/annex/policy PDFs (SupplyChainProgressReport, shark finning, etc.)
+  - Reduced max PDF chars from 800K → 500K
+- [x] Fixed OpenAI 429 rate limit errors (Water Security, Risk Management, Labour Standards all failed)
+  - Root cause: PDF content increased tokens per request → hit 200K TPM limit on gpt-4.1-nano
+  - Added retry with backoff (3 attempts, wait 5/10/15s)
+  - Reduced analysis concurrency from 3 → 2 to spread token usage
+
+### Phase 8 — Two-Round Analysis (Website-first, PDF supplements) ✅ DONE (24 March 2569)
+- [x] FTSE analysis now runs 2 rounds instead of 1
+  - Round 1: Analyze all themes using **website HTML content only**
+  - Round 2: Re-analyze themes with >50% missing/partial indicators using **website + PDF combined**
+  - Merge results: keep the higher score per indicator (PDF can only improve, never lower)
+- [x] HTML and PDF content separated in crawler output (`analyzer.py`)
+  - HTML pages → `website_content` (primary source)
+  - PDF reports → `pdf_content` (supplement for gap-filling)
+- [x] IFRS analysis unchanged — still uses all content combined (single round)
+- [x] Progress message shows "(Round 1: website → Round 2: PDF for gaps)" when PDFs available
+- **Expected improvement:** Better accuracy because website data is analyzed first without PDF noise, then PDF fills in quantitative data gaps (water usage, emissions, H&S stats, etc.)
+- **Trade-off:** ~1.5-2x slower for FTSE analysis when PDFs are available (2 rounds instead of 1), but only re-analyzes themes that actually need it
+
 ---
 
 ## Test Results — Thai Union Benchmark
@@ -179,9 +216,14 @@ FTSE reads ALL publicly available documents:
 | v10 | 2.75 | 3.0 | 2.57 | 2.62 | 238 | 47 | +PDF reading |
 | Latest | **3.11** | 3.0 | **3.07** | **3.38** | 218 | 51 | +BMS removed, content filtering |
 | v12 (auto) | **2.86** | 2.79 | **2.86** | **3.0** | 214 | 48 | +Auto-detect industry, redesign UI |
+| v13 | 1.20 | 1.20 | 1.75 | 0.38 | 214 | 49 | PDF download broken (0 PDFs, 405 error) |
+| v14 | 1.60 | 1.90 | 1.40 | 1.40 | 214 | 49 | Same PDF bug, Food & Beverages selected |
+| v15 | 1.50 | 1.40 | 1.80 | 1.10 | 196 | 52 | PDF fixed but 429 rate limit killed 3 themes (Water, Risk, Labour = 0.0) |
 | **REAL** | **4.3** | ~4+ | ~4+ | ~4+ | ~240 | — | FTSE Russell official |
 
 **Best achieved: 3.11/5.0 (72% of real score)** — v12 auto-detect: 2.86/5.0 (67%)
+
+**Note:** v13-v14: PDF broken (405). v15: PDF works but rate limit (429) failed 3 themes. Fixed: core reports EN only + retry + concurrency 2. Awaiting v16 re-test.
 
 ### Score Gap Analysis
 | Factor | Estimated Impact |
@@ -223,5 +265,12 @@ FTSE reads ALL publicly available documents:
 - [ ] Score trend tracking over time
 
 ---
+
+### Research: FTSE Methodology (24 March 2569)
+- FTSE Russell uses 600+ human analysts (manual extraction, ~5 hrs/company)
+- They read BOTH website HTML AND PDF documents (Annual Report, Sustainability Report, etc.)
+- LSEG announced new "LSEG Sustainability Ratings and Data" (9 March 2026) — rules-based, AI-ready
+- LSEG signed deals with Anthropic, Microsoft, OpenAI (GBP 1.9 billion)
+- Thai Union website analysis (HTML only, no PDF): ~75% of indicators are qualitative (policy/commitment) which website covers well, but 92 quantitative indicators (Water Security, H&S, Pollution, Climate) need numbers from PDFs
 
 *Created by Claude from conversations with P'Ohm — Updated 24 March 2569*

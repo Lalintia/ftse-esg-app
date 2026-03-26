@@ -290,20 +290,93 @@ async def _analyze_theme(
             ]
 
 
+def _themes_needing_pdf(
+    results: list[FtseResult],
+    indicators_by_theme: dict[str, list[dict[str, str | bool]]],
+    missing_threshold: float = 0.5,
+) -> dict[str, list[dict[str, str | bool]]]:
+    """Identify themes where website-only analysis left too many gaps.
+
+    A theme qualifies for PDF round 2 if more than `missing_threshold`
+    of its indicators are missing or partial.
+
+    Args:
+        results: Round 1 FTSE results (website only).
+        indicators_by_theme: All indicators grouped by theme.
+        missing_threshold: Fraction of missing/partial to trigger round 2.
+
+    Returns:
+        Subset of indicators_by_theme that need PDF supplementation.
+    """
+    code_to_result: dict[str, FtseResult] = {r.indicator_code: r for r in results}
+
+    themes_for_round2: dict[str, list[dict[str, str | bool]]] = {}
+    for theme_name, indicators in indicators_by_theme.items():
+        total = len(indicators)
+        if total == 0:
+            continue
+        gap_count = sum(
+            1 for ind in indicators
+            if code_to_result.get(ind["indicator_code"], FtseResult(
+                indicator_code="", status="missing", score=0,
+                evidence="", confidence=0.0, reasoning="",
+            )).status in ("missing", "partial")
+        )
+        gap_ratio = gap_count / total
+        if gap_ratio >= missing_threshold:
+            themes_for_round2[theme_name] = indicators
+            logger.info(
+                "Theme %s needs PDF supplement: %d/%d (%.0f%%) missing/partial",
+                theme_name, gap_count, total, gap_ratio * 100,
+            )
+
+    return themes_for_round2
+
+
+def _merge_results(
+    round1: list[FtseResult],
+    round2: list[FtseResult],
+) -> list[FtseResult]:
+    """Merge round 1 and round 2 results, keeping the better score.
+
+    For indicators analyzed in both rounds, keep the result with the
+    higher score. This ensures PDF data only improves results.
+
+    Args:
+        round1: Results from website-only analysis.
+        round2: Results from website+PDF analysis.
+
+    Returns:
+        Merged list with best result per indicator.
+    """
+    best: dict[str, FtseResult] = {}
+    for r in round1:
+        best[r.indicator_code] = r
+    for r in round2:
+        existing = best.get(r.indicator_code)
+        if existing is None or r.score > existing.score:
+            best[r.indicator_code] = r
+
+    return list(best.values())
+
+
 async def analyze_ftse(
     openai_client: AsyncOpenAI,
     website_content: str,
     indicators_by_theme: dict[str, list[dict[str, str | bool]]],
+    pdf_content: str = "",
 ) -> list[FtseResult]:
-    """Analyze website content against all FTSE indicators grouped by theme.
+    """Analyze website content against all FTSE indicators (two-round).
 
-    Sends parallel requests (limited by concurrency semaphore) for each
-    of the 14 FTSE themes.
+    Round 1: Analyze using website HTML content only.
+    Round 2: For themes with >50% missing/partial indicators, re-analyze
+             with website + PDF content combined to fill gaps.
 
     Args:
         openai_client: AsyncOpenAI client.
-        website_content: Concatenated markdown from all crawled pages.
+        website_content: Concatenated markdown from HTML pages only.
         indicators_by_theme: Dict mapping theme_name to list of indicator dicts.
+        pdf_content: Concatenated markdown from PDF reports (separate from website).
 
     Returns:
         Flat list of FtseResult for all indicators across all themes.
@@ -311,6 +384,8 @@ async def analyze_ftse(
     settings = get_settings()
     semaphore = asyncio.Semaphore(settings.ANALYSIS_CONCURRENCY)
 
+    # --- Round 1: Website HTML only ---
+    logger.info("FTSE Round 1: analyzing %d themes with website content only", len(indicators_by_theme))
     tasks = [
         _analyze_theme(
             openai_client=openai_client,
@@ -322,16 +397,15 @@ async def analyze_ftse(
         for theme_name, indicators in indicators_by_theme.items()
     ]
 
-    logger.info("Starting FTSE analysis: %d themes in parallel", len(tasks))
     theme_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    all_results: list[FtseResult] = []
+    round1_results: list[FtseResult] = []
     for idx, result in enumerate(theme_results):
         if isinstance(result, Exception):
             theme_name = list(indicators_by_theme.keys())[idx]
-            logger.error("Theme %s raised exception: %s", theme_name, result)
+            logger.error("Round 1 theme %s raised exception: %s", theme_name, result)
             for ind in indicators_by_theme[theme_name]:
-                all_results.append(FtseResult(
+                round1_results.append(FtseResult(
                     indicator_code=ind["indicator_code"],
                     status="missing",
                     score=0,
@@ -340,7 +414,59 @@ async def analyze_ftse(
                     reasoning=f"Analysis failed with exception: {result}",
                 ))
         else:
-            all_results.extend(result)
+            round1_results.extend(result)
 
-    logger.info("FTSE analysis complete: %d total results", len(all_results))
-    return all_results
+    found_count = sum(1 for r in round1_results if r.status == "found")
+    logger.info(
+        "FTSE Round 1 complete: %d results (%d found, %d missing/partial)",
+        len(round1_results), found_count, len(round1_results) - found_count,
+    )
+
+    # --- Round 2: Website + PDF for gap themes ---
+    if not pdf_content:
+        logger.info("No PDF content available — skipping Round 2")
+        return round1_results
+
+    gap_themes = _themes_needing_pdf(round1_results, indicators_by_theme)
+    if not gap_themes:
+        logger.info("All themes sufficiently covered by website — skipping Round 2")
+        return round1_results
+
+    combined_content = website_content + "\n\n---\n\n" + pdf_content
+
+    logger.info("FTSE Round 2: re-analyzing %d themes with website + PDF content", len(gap_themes))
+    round2_tasks = [
+        _analyze_theme(
+            openai_client=openai_client,
+            theme_name=theme_name,
+            indicators=indicators,
+            website_content=combined_content,
+            semaphore=semaphore,
+        )
+        for theme_name, indicators in gap_themes.items()
+    ]
+
+    round2_theme_results = await asyncio.gather(*round2_tasks, return_exceptions=True)
+
+    round2_results: list[FtseResult] = []
+    for idx, result in enumerate(round2_theme_results):
+        if isinstance(result, Exception):
+            theme_name = list(gap_themes.keys())[idx]
+            logger.error("Round 2 theme %s raised exception: %s", theme_name, result)
+        else:
+            round2_results.extend(result)
+
+    round2_found = sum(1 for r in round2_results if r.status == "found")
+    logger.info(
+        "FTSE Round 2 complete: %d results (%d found)",
+        len(round2_results), round2_found,
+    )
+
+    merged = _merge_results(round1_results, round2_results)
+    final_found = sum(1 for r in merged if r.status == "found")
+    logger.info(
+        "FTSE merged: %d total results (%d found — was %d after Round 1)",
+        len(merged), final_found, found_count,
+    )
+
+    return merged

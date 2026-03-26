@@ -627,10 +627,31 @@ async def run_analysis(
             "status_message": f"Crawled {crawl_result.pages_crawled} pages from {company_name or company_url}",
         }).eq("id", analysis_id).execute()
 
-        # Concatenate all page content
+        # Separate HTML pages from PDF pages
+        html_pages = [
+            p for p in crawl_result.pages
+            if not p.title.startswith("PDF:")
+        ]
+        pdf_pages = [
+            p for p in crawl_result.pages
+            if p.title.startswith("PDF:")
+        ]
+
+        # Website content = HTML only (used for Round 1)
         website_content = "\n\n---\n\n".join(
             f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
-            for page in crawl_result.pages
+            for page in html_pages
+        )
+
+        # PDF content = separate (used for Round 2 gap-filling)
+        pdf_content = "\n\n---\n\n".join(
+            f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
+            for page in pdf_pages
+        ) if pdf_pages else ""
+
+        logger.info(
+            "Content split: %d HTML pages, %d PDF documents",
+            len(html_pages), len(pdf_pages),
         )
 
         # Step 1.5: Auto-detect subsector if not provided
@@ -715,14 +736,20 @@ async def run_analysis(
         # Step 3: Analyze FTSE + IFRS in parallel
         total_themes = len(indicators_by_theme)
         total_indicators = sum(len(inds) for inds in indicators_by_theme.values())
+        has_pdf = bool(pdf_content)
+        round_info = " (Round 1: website → Round 2: PDF for gaps)" if has_pdf else " (website only)"
         _update_status(
             supabase, analysis_id, "analyzing",
-            status_message=f"Analyzing {total_indicators} indicators across {total_themes} themes...",
+            status_message=f"Analyzing {total_indicators} indicators across {total_themes} themes{round_info}",
         )
 
+        # FTSE: two-round (website first, PDF for gaps)
+        # IFRS: single-round with all content combined
+        all_content = (website_content + "\n\n---\n\n" + pdf_content) if pdf_content else website_content
+
         ftse_results, ifrs_results = await asyncio.gather(
-            analyze_ftse(openai_client, website_content, indicators_by_theme),
-            analyze_ifrs(openai_client, website_content, requirements_by_chapter),
+            analyze_ftse(openai_client, website_content, indicators_by_theme, pdf_content=pdf_content),
+            analyze_ifrs(openai_client, all_content, requirements_by_chapter),
         )
 
         # Step 4: Save raw results
