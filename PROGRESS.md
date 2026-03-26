@@ -378,6 +378,7 @@ Security audit using `security-auditor` skill — found 12 issues, fixed 9:
 - [ ] Test consistency by running multiple times with gpt-4.1-mini
 - [ ] Test with other companies to validate changes don't break other sectors
 - [ ] Re-enable IFRS when verified reference data is available
+- [ ] About page: เพิ่ม section อธิบายที่มาของ indicators/themes — ว่ามาจากเอกสาร FTSE Russell ฉบับไหน (381 indicators, 14 themes จาก FTSE ESG Methodology PDF) ไม่ได้สร้างขึ้นเอง
 
 ---
 
