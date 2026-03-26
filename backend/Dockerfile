@@ -36,6 +36,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 RUN mkdir -p /opt/playwright-browsers && \
     playwright install --with-deps chromium && \
+    chown -R appuser:appgroup /opt/playwright-browsers && \
     chmod -R 755 /opt/playwright-browsers
 
 COPY app/ ./app/

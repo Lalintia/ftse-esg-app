@@ -92,6 +92,12 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
   );
 };
 
+const EmptyState = ({ message }: { message: string }) => (
+  <div className="flex items-center justify-center rounded-lg border border-dashed py-16">
+    <p className="text-sm text-muted-foreground">{message}</p>
+  </div>
+);
+
 const ThemeCard = ({ group }: { group: ThemeGroup }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const total = group.results.length;
@@ -403,9 +409,3 @@ export default function AnalysisDashboard({
     </div>
   );
 }
-
-const EmptyState = ({ message }: { message: string }) => (
-  <div className="flex items-center justify-center rounded-lg border border-dashed py-16">
-    <p className="text-sm text-muted-foreground">{message}</p>
-  </div>
-);

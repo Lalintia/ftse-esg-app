@@ -144,10 +144,11 @@ async def list_analyses(
         Dict with analyses list and total count.
     """
 
-    # Get total count
+    # Get total count (limit 0 to avoid fetching rows)
     count_result = (
         supabase.table("analyses")
         .select("id", count="exact")
+        .limit(0)
         .execute()
     )
     total = count_result.count or 0
