@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_ROLE_KEY: str
     OPENAI_API_KEY: str
-    OPENAI_MODEL: str = "gpt-4.1-nano"
+    OPENAI_MODEL: str = "gpt-4.1-mini"
     FIRECRAWL_API_KEY: str = ""  # Deprecated: no longer used (switched to Playwright)
     MAX_PAGES_TO_CRAWL: int = 50
     MAX_PDFS_TO_READ: int = 5
