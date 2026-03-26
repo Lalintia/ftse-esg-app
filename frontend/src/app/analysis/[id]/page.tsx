@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { ScoreCard } from '@/components/ScoreCard';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
-import { IfrsGapTable } from '@/components/GapTable';
+// IfrsGapTable temporarily removed — re-enable when IFRS is verified
 import { getAnalysis } from '@/lib/api';
 import type { AnalysisDetail, FtseResultItem, StatusType } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -215,7 +215,7 @@ export default function AnalysisDashboard({
     );
   }
 
-  const { analysis, ftse_results, ifrs_results, sitemap_recommendations } = data;
+  const { analysis, ftse_results, sitemap_recommendations } = data;
   const isInProgress = IN_PROGRESS_STATUSES.has(analysis.status);
 
   if (isInProgress) {

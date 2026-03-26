@@ -244,7 +244,9 @@ def get_applicable_themes(
 
         # Apply Thailand high-exposure overrides
         if entry["theme"] in THAILAND_HIGH_EXPOSURE_OVERRIDES:
-            result.append({"theme": entry["theme"], "exposure": "High"})
+            merged = entry.copy()
+            merged["exposure"] = "High"
+            result.append(merged)
         else:
             result.append(entry.copy())
 

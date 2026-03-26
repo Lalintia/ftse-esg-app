@@ -728,7 +728,7 @@ async def run_analysis(
                         applicable_inds.append(ind)
                     else:
                         subs = m.get("subsectors", [])
-                        if any(subsector_code.endswith(s) or s == subsector_code for s in subs):
+                        if any(subsector_code.startswith(s) or s == subsector_code for s in subs):
                             applicable_inds.append(ind)
 
                 if applicable_inds:

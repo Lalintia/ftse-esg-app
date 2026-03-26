@@ -228,7 +228,8 @@ def _get_root_domain(domain: str) -> str:
         Root domain string.
     """
     parts = domain.lower().split(".")
-    if len(parts) >= 3 and parts[-2] in ("co", "or", "ac", "go", "in", "net"):
+    _SECOND_LEVEL_TLDS = {"co", "com", "or", "org", "ac", "go", "gov", "in", "net", "ne", "ed", "edu"}
+    if len(parts) >= 3 and parts[-2] in _SECOND_LEVEL_TLDS:
         return ".".join(parts[-3:])
     if len(parts) >= 2:
         return ".".join(parts[-2:])
@@ -938,12 +939,17 @@ async def _discover_report_pdfs(
         len(all_targets), len(subdomain_base_urls),
     )
 
+    _DISCOVERY_TIMEOUT_MS = 7_000
+
     for target_url in all_targets:
+        if len(discovered_pdfs) >= 15:
+            logger.info("PDF discovery: found %d PDFs, stopping early", len(discovered_pdfs))
+            break
         try:
             response = await page.goto(
                 target_url,
                 wait_until="domcontentloaded",
-                timeout=_PAGE_TIMEOUT_MS,
+                timeout=_DISCOVERY_TIMEOUT_MS,
             )
             if response is None or response.status >= 400:
                 continue
