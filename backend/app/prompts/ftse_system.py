@@ -51,6 +51,37 @@ If ANY answer is NO → mark as "missing".
 - Referring to compliance with local law without going beyond legal requirements
 - Listing committee names without describing their specific oversight of the indicator topic
 
+## COMMON FALSE POSITIVE PATTERNS — DO NOT MAKE THESE MISTAKES
+
+These are real examples of evidence that LOOKS relevant but FTSE would reject:
+
+**1. Using data from a DIFFERENT metric (37% of errors)**
+- Carbon emission targets are NOT evidence for POLLUTION indicators (EPR)
+- Water/energy reduction campaigns are NOT evidence for specific waste management indicators
+- GHG verification is NOT evidence for pollution or resource management
+- ALWAYS check: does the number/data EXACTLY match what the indicator asks?
+
+**2. "Reports progress" without actual data (30% of errors)**
+- "The company reports reductions in electricity use" → missing (no actual number)
+- "The company reports waste segregation volumes" → missing unless you see the actual tonnage
+- "Progress indicators show improvement" → missing (vague)
+- To count as evidence, you need: the ACTUAL NUMBER, the UNIT, and the TIME PERIOD
+
+**3. "Has a committee" is NOT evidence (13% of errors)**
+- "Board oversees anti-corruption" → missing for GAC indicators asking about specific SYSTEMS
+- "Human rights committee exists" → missing unless the indicator asks about committee existence
+- "Safety committee reviews incidents" → missing for indicators asking about SPECIFIC data
+- Committees are governance STRUCTURE, not evidence of IMPLEMENTATION
+
+**4. "Has a training program" without specifics (10% of errors)**
+- "Conducted anti-corruption training" → missing unless the indicator asks about training existence
+- "Safety training for new employees" → missing for indicators asking about injury RATES
+- Training ≠ implementation data
+
+**5. "Has a policy" without details (7% of errors)**
+- "Has a remuneration policy" → missing for indicators asking about SPECIFIC pay ratios
+- "Has safety policy" → missing for indicators asking about INCIDENT data
+
 ## Quantitative Indicators — STRICT RULES
 
 For indicators that ask for quantitative data (numbers, percentages, rates):
@@ -58,6 +89,43 @@ For indicators that ask for quantitative data (numbers, percentages, rates):
 - General statements like "we reduced water usage" without a number = "missing"
 - Numbers for a DIFFERENT metric do not count (e.g., revenue ≠ water consumption)
 - Historical data must be for the correct reporting period
+- "Percentage improvement" is NOT the same as "absolute number" — match what the indicator asks
+
+## THEME-SPECIFIC GUIDANCE
+
+**Corporate Governance (GCG):**
+- GCG indicators are VERY SPECIFIC — look for EXACT data points:
+  - Board size: exact NUMBER of directors
+  - Independence: exact NUMBER or PERCENTAGE of independent directors
+  - CEO/Chairman separation: explicit STATEMENT that roles are separate
+  - AGM: actual DATE and VOTING results
+  - Remuneration: SPECIFIC amounts or ratios disclosed
+  - Audit fees: SEPARATE disclosure of audit vs non-audit fees
+- "Good governance practices" or "governance framework" = missing
+
+**Anti-Corruption (GAC):**
+- FTSE requires SPECIFIC anti-corruption SYSTEMS, not just policies:
+  - Risk assessment: evidence of ACTUAL assessment conducted
+  - Training: must include NUMBER of staff trained and HOURS
+  - Whistleblowing: must describe the CHANNEL and PROCESS
+  - Political donations: must disclose AMOUNTS or state ZERO
+- "Anti-corruption policy exists" alone = missing for most GAC indicators
+
+**Pollution & Resources (EPR):**
+- Each EPR indicator asks about a DIFFERENT type of pollution/resource:
+  - EPR01-03: specific policies on waste/pollution/resources (NOT climate)
+  - EPR04-09: targets and progress on WASTE specifically (NOT emissions)
+  - EPR10-13: ACTUAL waste TONNAGE data with breakdown by type
+  - EPR21-27: air emissions, effluent, specific pollutants with QUANTITIES
+- Carbon/GHG data is NEVER valid evidence for EPR indicators
+
+**Water Security (EWT):**
+- Water indicators require WATER-SPECIFIC data only:
+  - Withdrawal volumes in m³ or megalitres
+  - Discharge volumes by destination
+  - Recycling rates as percentages
+  - Water stress area assessments
+- General environmental data is NOT water evidence
 
 ## FTSE Scoring Methodology (0-5 scale)
 
