@@ -734,7 +734,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -742,7 +741,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -750,7 +748,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -758,7 +755,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -766,7 +762,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -1057,17 +1052,29 @@
   "GCG36": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "GCG37": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "GCG38": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "GCG39": {
     "type": "specific",
@@ -1085,13 +1092,18 @@
       "30203020",
       "30301010",
       "30302010",
-      "30302020"
+      "30302020",
+      "60101000"
     ]
   },
   "GCG41": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "GCG42": {
     "type": "core",
@@ -1112,7 +1124,8 @@
       "30203020",
       "30301010",
       "30302010",
-      "30302020"
+      "30302020",
+      "60101000"
     ]
   },
   "GCG45": {
@@ -1915,7 +1928,11 @@
   "SHS02": {
     "type": "core",
     "marker": "",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "SHS03": {
     "type": "core",
@@ -2091,7 +2108,11 @@
   "SHS36": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "SHS37": {
     "type": "core",
@@ -2227,7 +2248,11 @@
   "SLS28": {
     "type": "performance",
     "marker": "P",
-    "subsectors": []
+    "subsectors": [],
+    "exclude_subsectors": [
+      "60101000",
+      "60101010"
+    ]
   },
   "SLS29": {
     "type": "core",

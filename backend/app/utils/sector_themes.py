@@ -56,18 +56,18 @@ SECTOR_THEME_MAPPING: dict[str, list[dict[str, str]]] = {
         {"theme": "Tax Transparency", "exposure": "Medium"},
     ],
     # Energy (Oil Gas Coal) (Supersector 6010)
+    # Calibrated against PTG Energy CPC (Dec 2024): ESG 3.3, E 2.3, S 3.3, G 4.6
+    # NAP themes removed: Biodiversity, Supply Chain: Environmental, Supply Chain: Social
+    # Climate Change kept: applicable at theme level but 0 indicators for Integrated Oil & Gas
     "6010": [
-        {"theme": "Biodiversity", "exposure": "High"},
-        {"theme": "Climate Change", "exposure": "High"},
+        {"theme": "Climate Change", "exposure": "High", "indicators_applicable": False},
         {"theme": "Pollution & Resources", "exposure": "High"},
-        {"theme": "Supply Chain: Environmental", "exposure": "High"},
         {"theme": "Water Security", "exposure": "High"},
         {"theme": "Health & Safety", "exposure": "High"},
         {"theme": "Human Rights & Community", "exposure": "High"},
         {"theme": "Labour Standards", "exposure": "High"},
-        {"theme": "Supply Chain: Social", "exposure": "High"},
         {"theme": "Anti-Corruption", "exposure": "High"},
-        {"theme": "Corporate Governance", "exposure": "Medium"},
+        {"theme": "Corporate Governance", "exposure": "High"},
         {"theme": "Risk Management", "exposure": "Medium"},
     ],
     # Basic Materials / Chemicals (Supersector 5520)

@@ -683,6 +683,7 @@ async def run_analysis(
         requirements_by_chapter = get_requirements_by_chapter()
 
         # Filter indicators by subsector mapping (theme applicability + indicator-subsector)
+        zero_indicator_themes_list: list[dict[str, str]] = []
         if subsector_code:
             applicable_themes = get_applicable_themes(subsector_code)
             applicable_theme_names = {t["theme"] for t in applicable_themes}
@@ -699,19 +700,33 @@ async def run_analysis(
                 with open(mapping_path, encoding="utf-8") as f:
                     indicator_mapping = _json.load(f)
 
+            # Build lookup for themes with indicators_applicable=False
+            # (e.g., Climate Change for Oil & Gas: theme applies but 0 indicators)
+            no_indicator_themes: set[str] = set()
+            for t in applicable_themes:
+                if not t.get("indicators_applicable", True):
+                    no_indicator_themes.add(t["theme"])
+
             filtered_by_theme: dict[str, list[dict[str, str | bool]]] = {}
             for theme, inds in indicators_by_theme.items():
                 if theme not in applicable_theme_names:
+                    continue
+                if theme in no_indicator_themes:
                     continue
 
                 applicable_inds: list[dict[str, str | bool]] = []
                 for ind in inds:
                     code = ind["indicator_code"]
                     m = indicator_mapping.get(code, {"type": "core", "subsectors": []})
+
+                    # Check exclude_subsectors (indicators NAP for specific subsectors)
+                    exclude = m.get("exclude_subsectors", [])
+                    if any(subsector_code.startswith(s) or s == subsector_code for s in exclude):
+                        continue
+
                     if m["type"] in ("core", "performance"):
                         applicable_inds.append(ind)
                     else:
-                        # Match full code or partial (subsector codes vary in length)
                         subs = m.get("subsectors", [])
                         if any(subsector_code.endswith(s) or s == subsector_code for s in subs):
                             applicable_inds.append(ind)
@@ -723,13 +738,22 @@ async def run_analysis(
                 len(inds) for inds in filtered_by_theme.values()
             )
 
+            # Collect zero-indicator themes for scoring (FTSE minimum score = 1)
+            zero_indicator_themes_list = [
+                {"theme": t["theme"], "exposure": t["exposure"]}
+                for t in applicable_themes
+                if not t.get("indicators_applicable", True)
+            ]
+
             logger.info(
-                "Subsector %s: evaluating %d/%d indicators across %d/%d themes",
+                "Subsector %s: evaluating %d/%d indicators across %d/%d themes"
+                " (%d zero-indicator themes)",
                 subsector_code,
                 filtered_count,
                 all_theme_count,
                 len(filtered_by_theme),
                 len(indicators_by_theme),
+                len(zero_indicator_themes_list),
             )
             indicators_by_theme = filtered_by_theme
 
@@ -779,6 +803,7 @@ async def run_analysis(
             ftse_result_dicts,
             indicators_by_theme,
             subsector_code=subsector_code,
+            zero_indicator_themes=zero_indicator_themes_list if subsector_code else None,
         )
         ifrs_scores = calculate_ifrs_scores(ifrs_result_dicts, ifrs_requirements)
         _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)

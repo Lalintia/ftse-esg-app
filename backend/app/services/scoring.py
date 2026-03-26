@@ -244,6 +244,7 @@ def calculate_ftse_scores(
     results: list[dict[str, str | int | float]],
     indicators_by_theme: dict[str, list[dict[str, str | bool]]],
     subsector_code: str | None = None,
+    zero_indicator_themes: list[dict[str, str]] | None = None,
 ) -> FtseScores:
     """Calculate FTSE ESG scores using the 5-step methodology.
 
@@ -259,6 +260,9 @@ def calculate_ftse_scores(
         indicators_by_theme: Dict mapping theme_name to indicator dicts.
         subsector_code: Optional ICB subsector code for sector-specific
             exposure levels.
+        zero_indicator_themes: Themes that are applicable but have 0
+            indicators (e.g., Climate Change for Integrated Oil & Gas).
+            FTSE assigns a minimum score of 1 for these themes.
 
     Returns:
         FtseScores with complete breakdown.
@@ -269,6 +273,23 @@ def calculate_ftse_scores(
     }
 
     theme_scores: list[ThemeScore] = []
+
+    # Handle themes with 0 applicable indicators (FTSE minimum score = 1)
+    if zero_indicator_themes:
+        for zt in zero_indicator_themes:
+            theme_scores.append(ThemeScore(
+                theme_name=zt["theme"],
+                pillar=_get_pillar_for_theme(zt["theme"]),
+                exposure=zt["exposure"],
+                indicators_total=0,
+                indicators_found=0,
+                indicators_partial=0,
+                indicators_missing=0,
+                points_scored=0,
+                points_possible=0,
+                pct_points=0,
+                theme_score=1,
+            ))
 
     for theme_name, indicators in indicators_by_theme.items():
         if subsector_code:
