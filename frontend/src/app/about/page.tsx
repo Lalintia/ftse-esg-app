@@ -250,9 +250,9 @@ export default function AboutPage() {
         <Card className="mt-4">
           <p className="mb-2 text-xs font-semibold">{lang === 'th' ? 'Review Agents ที่ใช้ตรวจ code' : 'Code Review Agents'}</p>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <div><strong className="text-foreground">performance-error-reviewer</strong> — {lang === 'th' ? 'แก้ 8 bugs ใน backend' : 'Fixed 8 backend bugs'}</div>
-            <div><strong className="text-foreground">react-typescript-reviewer</strong> — {lang === 'th' ? 'แก้ 5 issues ใน frontend' : 'Fixed 5 frontend issues'}</div>
-            <div><strong className="text-foreground">security-auditor</strong> — {lang === 'th' ? 'พบ 12 จุดเสี่ยง แก้แล้ว 9' : 'Found 12 risks, fixed 9'}</div>
+            <div><strong className="text-foreground">performance-error-reviewer</strong> — {lang === 'th' ? 'ตรวจ memory leaks, error handling, timeout, algorithm complexity' : 'Checks memory leaks, error handling, timeout, algorithm complexity'}</div>
+            <div><strong className="text-foreground">react-typescript-reviewer</strong> — {lang === 'th' ? 'ตรวจ accessibility, type safety, unused imports, re-render issues' : 'Checks accessibility, type safety, unused imports, re-render issues'}</div>
+            <div><strong className="text-foreground">security-auditor</strong> — {lang === 'th' ? 'ตรวจ SSRF, XSS, rate limiting, secrets exposure, Docker security' : 'Checks SSRF, XSS, rate limiting, secrets exposure, Docker security'}</div>
           </div>
         </Card>
       </Section>
