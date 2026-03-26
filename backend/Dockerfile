@@ -24,20 +24,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libwayland-client0 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN playwright install --with-deps chromium
-
 # Create non-root user for security
 RUN addgroup --system --gid 1001 appgroup && \
     adduser --system --uid 1001 --ingroup appgroup appuser
 
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright as appuser so browsers go to /home/appuser/.cache
+USER appuser
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/appuser/.cache/ms-playwright
+RUN playwright install chromium
+
+# Switch back to root to copy app files, then back to appuser
+USER root
 COPY app/ ./app/
 COPY data/ ./data/
-
-# Playwright needs writable cache dir
-RUN mkdir -p /home/appuser/.cache && chown -R appuser:appgroup /home/appuser
+RUN chown -R appuser:appgroup /app
 
 USER appuser
 
