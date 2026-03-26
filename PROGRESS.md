@@ -381,6 +381,17 @@ Security audit using `security-auditor` skill — found 12 issues, fixed 9:
 
 ---
 
+### Phase 12 — About Page + Project Report (26 March 2569)
+- [x] Created /about page with full project report (bilingual Thai/English)
+- [x] Floating language toggle button (follows scroll)
+- [x] Added "About" link to navbar (Analyse | History | About)
+- [x] 8 sections: Overview, Tech Stack, User Flow, Pipeline, Accuracy, Security, Cost, Development Process
+- [x] Documents all 10 agent skills + 3 review agents with descriptions
+- [x] Standalone HTML report also available at FTSE-ESG-Project-Report.html
+- [x] Deployed to esg.ohmai.me/about
+
+---
+
 ### Research: FTSE Methodology (24 March 2569)
 - FTSE Russell uses 600+ human analysts (manual extraction, ~5 hrs/company)
 - They read BOTH website HTML AND PDF documents (Annual Report, Sustainability Report, etc.)
