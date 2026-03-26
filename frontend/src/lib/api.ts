@@ -55,7 +55,7 @@ export interface IndustryCategory {
 
 export const INDUSTRY_CATEGORIES: IndustryCategory[] = [
   { label: 'Auto-detect from website', value: 'auto', description: 'AI will determine the industry automatically' },
-  { label: 'Oil, Gas & Energy', value: '60101010', description: 'Oil & gas producers, pipelines, energy services' },
+  { label: 'Oil, Gas & Energy', value: '60101000', description: 'Oil & gas producers, pipelines, energy services' },
   { label: 'Electricity & Utilities', value: '65101010', description: 'Electric utilities, gas distribution, water' },
   { label: 'Renewable Energy', value: '60102020', description: 'Solar, wind, alternative energy' },
   { label: 'Mining & Metals', value: '55101010', description: 'Mining, steel, aluminium, precious metals' },
