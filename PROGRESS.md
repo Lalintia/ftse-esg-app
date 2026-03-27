@@ -525,4 +525,12 @@ Tab 2: Website Blueprint ✨ (เทียบ template มาตรฐาน)
 Tab 3: Sitemap (recommendations เดิม)
 ```
 
+**Tested with PTG Energy (live on esg.ohmai.me):**
+- Overall Score: **3.4** (target 3.3 — ห่างแค่ 0.1)
+- Website Completeness: **9%** (4/23 sections covered — 0 found, 4 partial, 19 missing)
+- Blueprint correctly identified missing pages: ESG Highlights, Climate Change, Anti-corruption, Corporate Governance, etc.
+- All 3 tabs working: FTSE Themes (142), Website Blueprint (23), Sitemap (8)
+
+**Deployed:** Docker rebuilt + restarted on AWS EC2 — verified live at esg.ohmai.me ✅
+
 *Created by Claude from conversations with P'Ohm — Updated 27 March 2569*
