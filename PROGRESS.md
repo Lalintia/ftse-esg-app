@@ -498,4 +498,31 @@ Full codebase cleanup using `simplify` skill with 3 review agents (Code Reuse, C
 - [x] Fix: removed injection warning text, kept `<website_content>` XML boundary tags only
 - [x] Verified: PTG score returned to **3.31** (target 3.3) after fix
 
+---
+
+### Phase 17 — Website Blueprint Tab (27 March 2569)
+
+Added "Website Blueprint" tab to analysis dashboard — compares company website against ESG best-practice template (based on impact ESG Information Architecture).
+
+**What it does:**
+- Compares crawled website against a **23-page ESG template** (from impact's ESG Information Architecture)
+- Shows **Website Completeness** score (%) with progress bar
+- Groups into 7 sections: ESG Overview, Sustainability, Environment, Social, Governance, Reporting, Contact
+- Each section is collapsible (matches existing ThemeCard pattern)
+- Missing pages highlighted with dashed border + FTSE impact score
+- Sale can point to specific missing pages and say "add this page to get +0.5 Environmental"
+
+**Template source:** `SiteMapTemplate.pdf` from impact — NOT made up. 23 recommended pages extracted from the sitemap diagram.
+
+**Files changed:**
+- `frontend/src/app/analysis/[id]/page.tsx` — added BlueprintItem types, ESG_BLUEPRINT_TEMPLATE (23 pages), matchBlueprintToSitemap(), BlueprintCompleteness, BlueprintSectionCard, WebsiteBlueprint components, 3rd tab
+- Design by `frontend-design` skill — matches existing editorial style (Helvetica Neue, warm neutral palette, status badges)
+
+**Tab structure now:**
+```
+Tab 1: FTSE Themes (คะแนน)
+Tab 2: Website Blueprint ✨ (เทียบ template มาตรฐาน)
+Tab 3: Sitemap (recommendations เดิม)
+```
+
 *Created by Claude from conversations with P'Ohm — Updated 27 March 2569*
