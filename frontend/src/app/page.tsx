@@ -89,7 +89,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
+            <label htmlFor="industry-select" className="mb-2 block text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
               Industry
             </label>
             <IndustrySelect

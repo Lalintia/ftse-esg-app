@@ -120,6 +120,8 @@ export const SubsectorSelect = ({
                     <button
                       key={item.code}
                       type="button"
+                      role="option"
+                      aria-selected={value === item.code}
                       onClick={() => {
                         onChange(item.code);
                         setIsOpen(false);

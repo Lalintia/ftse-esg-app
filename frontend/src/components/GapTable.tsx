@@ -183,7 +183,7 @@ interface GroupedIfrs {
 export const IfrsGapTable = ({ results }: IfrsGapTableProps) => {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
 
-  const grouped = results.reduce<Record<string, GroupedIfrs>>((acc, item) => {
+  const grouped = useMemo(() => results.reduce<Record<string, GroupedIfrs>>((acc, item) => {
     const key = `${item.ifrs_requirements.standard} - ${item.ifrs_requirements.chapter}`;
     if (!acc[key]) {
       acc[key] = {
@@ -198,11 +198,11 @@ export const IfrsGapTable = ({ results }: IfrsGapTableProps) => {
     acc[key].items.push(item);
     acc[key][item.status]++;
     return acc;
-  }, {});
+  }, {}), [results]);
 
-  const chapters = Object.values(grouped).sort((a, b) =>
+  const chapters = useMemo(() => Object.values(grouped).sort((a, b) =>
     a.standard.localeCompare(b.standard) || a.chapter.localeCompare(b.chapter),
-  );
+  ), [grouped]);
 
   const toggleChapter = (key: string) => {
     setExpandedChapters((prev) => {

@@ -203,7 +203,7 @@ export default function AnalysisDashboard({
 
   if (error) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-20 text-center">
+      <div role="alert" className="mx-auto max-w-3xl px-6 py-20 text-center">
         <h2 className="text-lg font-semibold">Error</h2>
         <p className="mt-2 text-sm text-muted-foreground">{error}</p>
         <Link href="/" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -351,7 +351,7 @@ export default function AnalysisDashboard({
       </div>
 
       {/* Tab Content — min-height prevents scroll jump when switching tabs */}
-      <div className="min-h-screen animate-fade-up-d4">
+      <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="min-h-screen animate-fade-up-d4">
         {activeTab === 'ftse' && (
           <div className="space-y-10">
             {(['Environmental', 'Social', 'Governance'] as const).map((pillar) => {

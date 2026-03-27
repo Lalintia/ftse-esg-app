@@ -282,7 +282,7 @@ async def _analyze_theme(
                     score=0,
                     evidence="",
                     confidence=0.0,
-                    reasoning=f"Analysis failed: JSON parse error — {exc}",
+                    reasoning="Analysis could not be completed for this indicator.",
                 )
                 for code in indicator_codes
             ]
@@ -295,7 +295,7 @@ async def _analyze_theme(
                     score=0,
                     evidence="",
                     confidence=0.0,
-                    reasoning=f"Analysis failed: {exc}",
+                    reasoning="Analysis could not be completed for this indicator.",
                 )
                 for code in indicator_codes
             ]
@@ -422,7 +422,7 @@ async def analyze_ftse(
                     score=0,
                     evidence="",
                     confidence=0.0,
-                    reasoning=f"Analysis failed with exception: {result}",
+                    reasoning="Analysis could not be completed for this indicator.",
                 ))
         else:
             round1_results.extend(result)
