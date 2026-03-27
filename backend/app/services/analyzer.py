@@ -15,6 +15,7 @@ from app.services.crawler import PageContent, crawl_website
 from app.services.ftse_analyzer import FtseResult, analyze_ftse
 from app.services.ifrs_analyzer import IfrsResult, analyze_ifrs
 from app.services.scoring import (
+    VALID_STATUSES,
     FtseScores,
     IfrsScores,
     calculate_ftse_scores,
@@ -359,7 +360,6 @@ def _save_ftse_results(
         for row in indicator_rows.data
     }
 
-    valid_statuses = {"found", "partial", "missing"}
     seen: dict[str, dict[str, str | float | int | None]] = {}
     for r in results:
         indicator_id = code_to_id.get(r.indicator_code)
@@ -367,7 +367,7 @@ def _save_ftse_results(
             logger.warning("No DB record for indicator %s — skipping", r.indicator_code)
             continue
 
-        status = r.status if r.status in valid_statuses else "missing"
+        status = r.status if r.status in VALID_STATUSES else "missing"
 
         seen[indicator_id] = {
             "analysis_id": analysis_id,
@@ -413,7 +413,6 @@ def _save_ifrs_results(
         for row in req_rows.data
     }
 
-    valid_statuses = {"found", "partial", "missing"}
     seen: dict[str, dict[str, str | float | None]] = {}
     for r in results:
         requirement_id = ref_to_id.get(r.paragraph_ref)
@@ -422,7 +421,7 @@ def _save_ifrs_results(
             continue
 
         # Sanitize status — AI sometimes returns unexpected values
-        status = r.status if r.status in valid_statuses else "missing"
+        status = r.status if r.status in VALID_STATUSES else "missing"
 
         seen[requirement_id] = {
             "analysis_id": analysis_id,
@@ -514,7 +513,6 @@ def _extract_ftse_gaps(
     Returns:
         List of gap dicts with indicator_code, theme_name, indicator_name, status.
     """
-    # Build indicator lookup
     indicator_lookup: dict[str, dict[str, str]] = {}
     for theme_name, indicators in indicators_by_theme.items():
         for ind in indicators:
@@ -640,13 +638,11 @@ async def run_analysis(
             if p.title.startswith("PDF:")
         ]
 
-        # Website content = HTML only (used for Round 1)
         website_content = "\n\n---\n\n".join(
             f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
             for page in html_pages
         )
 
-        # PDF content = separate (used for Round 2 gap-filling)
         pdf_content = "\n\n---\n\n".join(
             f"# {page.title}\nSource: {page.url}\n\n{page.markdown_text}"
             for page in pdf_pages

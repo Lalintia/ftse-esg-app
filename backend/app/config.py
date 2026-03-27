@@ -21,7 +21,7 @@ class Settings(BaseSettings):
         SUPABASE_SERVICE_ROLE_KEY: Supabase service role key for admin ops.
         OPENAI_API_KEY: OpenAI API key for GPT analysis.
         OPENAI_MODEL: OpenAI model to use for analysis.
-        FIRECRAWL_API_KEY: Firecrawl API key for web crawling.
+        ALLOWED_ORIGINS: Comma-separated list of allowed CORS origins.
         MAX_PAGES_TO_CRAWL: Maximum HTML pages to crawl per analysis.
         MAX_PDFS_TO_READ: Maximum number of PDF files to download and extract.
         MAX_PDF_CHARS: Maximum characters to extract per PDF file.
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_ROLE_KEY: str
     OPENAI_API_KEY: str
     OPENAI_MODEL: str = "gpt-4.1-mini"
-    FIRECRAWL_API_KEY: str = ""  # Deprecated: no longer used (switched to Playwright)
+    ALLOWED_ORIGINS: str = "https://esg.ohmai.me,http://localhost:3000"
     MAX_PAGES_TO_CRAWL: int = 50
     MAX_PDFS_TO_READ: int = 5
     MAX_PDF_CHARS: int = 200_000

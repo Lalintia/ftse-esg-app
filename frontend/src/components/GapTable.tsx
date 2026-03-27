@@ -80,7 +80,7 @@ export const FtseGapTable = ({ results }: FtseGapTableProps) => {
     });
   };
 
-  const pillarColor: Record<string, string> = {
+  const pillarColor: Record<'Environmental' | 'Social' | 'Governance', string> = {
     Environmental: 'text-emerald-600 dark:text-emerald-400',
     Social: 'text-blue-600 dark:text-blue-400',
     Governance: 'text-purple-600 dark:text-purple-400',

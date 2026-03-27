@@ -13,6 +13,8 @@ from app.prompts.ftse_system import FTSE_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
+_CONTENT_FILTER_MAX_CHARS = 80_000
+
 
 def _sanitize_text(text: str) -> str:
     """Remove characters that break OpenAI JSON requests.
@@ -82,10 +84,9 @@ def _filter_content_for_theme(theme_name: str, website_content: str) -> str:
         Filtered content with the most relevant pages for the theme.
     """
     keywords = _THEME_KEYWORDS.get(theme_name, [])
-    max_chars = 80_000
 
     if not keywords:
-        return website_content[:max_chars]
+        return website_content[:_CONTENT_FILTER_MAX_CHARS]
 
     pages = website_content.split("\n\n---\n\n")
 
@@ -104,14 +105,14 @@ def _filter_content_for_theme(theme_name: str, website_content: str) -> str:
     selected: list[str] = []
     total_chars = 0
     for score, page in scored_pages:
-        if total_chars + len(page) > max_chars:
+        if total_chars + len(page) > _CONTENT_FILTER_MAX_CHARS:
             continue
         selected.append(page)
         total_chars += len(page)
 
     # Fallback: if too few relevant pages, include all truncated
     if total_chars < 15_000:
-        return website_content[:max_chars]
+        return website_content[:_CONTENT_FILTER_MAX_CHARS]
 
     return "\n\n---\n\n".join(selected)
 

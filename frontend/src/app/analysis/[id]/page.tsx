@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { ScoreCard } from '@/components/ScoreCard';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
-// IfrsGapTable temporarily removed — re-enable when IFRS is verified
 import { getAnalysis } from '@/lib/api';
 import type { AnalysisDetail, FtseResultItem, StatusType } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -226,7 +225,7 @@ export default function AnalysisDashboard({
     );
   }
 
-  const { analysis, sitemap_recommendations, ifrs_results: _ifrs } = data;
+  const { analysis, sitemap_recommendations } = data;
   const isInProgress = IN_PROGRESS_STATUSES.has(analysis.status);
 
   if (isInProgress) {
@@ -253,8 +252,6 @@ export default function AnalysisDashboard({
 
   const tabs = [
     { key: 'ftse' as const, label: 'FTSE Themes', count: ftseResults.length },
-    // IFRS temporarily hidden — no verified reference data yet
-    // { key: 'ifrs' as const, label: 'IFRS', count: ifrs_results.length },
     { key: 'sitemap' as const, label: 'Sitemap', count: sitemap_recommendations.length },
   ];
 
@@ -317,8 +314,6 @@ export default function AnalysisDashboard({
         </div>
       </div>
 
-      {/* IFRS Quick Stats — temporarily hidden, no verified reference data yet */}
-
       {/* Tabs — sticky so switching tabs doesn't scroll away */}
       <div ref={tabBarRef} role="tablist" className="sticky top-14 z-40 -mx-6 mb-8 flex gap-1 border-b bg-background/95 backdrop-blur-sm px-6 animate-fade-up-d3">
         {tabs.map((tab) => (
@@ -377,8 +372,6 @@ export default function AnalysisDashboard({
             )}
           </div>
         )}
-
-        {/* IFRS tab temporarily hidden — no verified reference data yet */}
 
         {activeTab === 'sitemap' && (
           sitemap_recommendations.length > 0 ? (

@@ -12,6 +12,8 @@ from app.prompts.ifrs_system import IFRS_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
+_CONTENT_MAX_LENGTH = 120_000
+
 # Climate chapter has 56 items — split at this threshold
 CLIMATE_BATCH_SPLIT_SIZE = 30
 
@@ -60,9 +62,8 @@ def _build_chapter_prompt(
 
     requirements_text = "\n".join(req_lines)
 
-    max_content_length = 120_000
-    truncated_content = website_content[:max_content_length]
-    if len(website_content) > max_content_length:
+    truncated_content = website_content[:_CONTENT_MAX_LENGTH]
+    if len(website_content) > _CONTENT_MAX_LENGTH:
         truncated_content += "\n\n[Content truncated due to length]"
 
     from app.services.ftse_analyzer import _sanitize_text

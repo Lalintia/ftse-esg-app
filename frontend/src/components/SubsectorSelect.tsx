@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SubsectorItem } from '@/lib/types';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface SubsectorSelectProps {
   subsectors: SubsectorItem[];
@@ -22,6 +23,8 @@ export const SubsectorSelect = ({
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const closeDropdown = useCallback(() => setIsOpen(false), []);
+  useClickOutside(containerRef, closeDropdown);
 
   const selectedItem = subsectors.find((s) => s.code === value);
 
@@ -46,16 +49,6 @@ export const SubsectorSelect = ({
     }
     return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {

@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import get_settings
 from app.dependencies import get_supabase
 from app.routers import analyses, health, subsectors
 from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements, sync_indicator_names_to_db
@@ -53,12 +54,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://esg.ohmai.me",
-        "http://localhost:3000",
-    ],
+    allow_origins=_settings.ALLOWED_ORIGINS.split(","),
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],

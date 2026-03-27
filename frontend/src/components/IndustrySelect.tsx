@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { INDUSTRY_CATEGORIES } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface IndustrySelectProps {
   value: string;
@@ -14,16 +15,8 @@ interface IndustrySelectProps {
 export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const closeDropdown = useCallback(() => setIsOpen(false), []);
+  useClickOutside(containerRef, closeDropdown);
 
   const selectedCategory = INDUSTRY_CATEGORIES.find((c) => c.value === value);
 

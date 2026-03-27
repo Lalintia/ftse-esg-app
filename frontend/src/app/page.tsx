@@ -15,15 +15,21 @@ export default function HomePage() {
   const parallaxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let rafId: number;
     const handleScroll = () => {
-      if (!parallaxRef.current) {
-        return;
-      }
-      const scrollY = window.scrollY;
-      parallaxRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (!parallaxRef.current) {
+          return;
+        }
+        parallaxRef.current.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+      });
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

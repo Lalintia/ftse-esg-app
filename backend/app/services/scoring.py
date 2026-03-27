@@ -11,6 +11,9 @@ from app.utils.sector_themes import get_theme_exposure
 
 logger = logging.getLogger(__name__)
 
+# Valid AI-returned statuses for indicator/requirement results
+VALID_STATUSES = frozenset({"found", "partial", "missing"})
+
 # Thailand-specific: these themes always have High Exposure
 THAILAND_HIGH_EXPOSURE_THEMES = {"Anti-Corruption", "Corporate Governance"}
 
