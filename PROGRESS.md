@@ -400,4 +400,89 @@ Security audit using `security-auditor` skill — found 12 issues, fixed 9:
 - LSEG signed deals with Anthropic, Microsoft, OpenAI (GBP 1.9 billion)
 - Thai Union website analysis (HTML only, no PDF): ~75% of indicators are qualitative (policy/commitment) which website covers well, but 92 quantitative indicators (Water Security, H&S, Pollution, Climate) need numbers from PDFs
 
-*Created by Claude from conversations with P'Ohm — Updated 26 March 2569*
+---
+
+### Phase 13 — About Page Redesign (27 March 2569)
+Redesigned /about page with editorial storytelling layout using `frontend-design` skill.
+
+**Layout changes:**
+- [x] Reordered sections: Overview → User Flow → Accuracy → Cost → (Deep Dive divider) → Pipeline → Tech → Security → Dev Process
+- [x] Overview: 3 cards (What / How / Value) instead of single text block
+- [x] User Flow: vertical flow cards with connectors (kept detailed descriptions)
+- [x] Accuracy: full-width dark section as visual showstopper + Calibration process (3 steps: Indicator Mapping, False Positive Reduction, Cross-Industry Calibration)
+- [x] Cost: headline number ~3.4 ฿ ตัวใหญ่ + detail cards
+- [x] Zone divider "Deep Dive — Technical Details" separating general from technical
+- [x] Pipeline: vertical timeline with descriptions per step (replaced grid boxes)
+- [x] Tech Stack: added React 19, Python 3.11, Pydantic, Lucide, Let's Encrypt
+- [x] Security: severity badges (Critical/High/Med) + detailed explanations per measure
+- [x] Dev Process: tools table with descriptions + skills categorized into 4 groups (Design, Code Quality, Debug, Review) with used/installed indicators
+- [x] TH/EN bilingual toggle preserved
+- [x] Indicator breakdown: 381 (196 Core, 176 Sector-specific, 6 Performance, 3 Geography)
+
+**New skills installed (3):**
+- theme-factory (anthropics/skills)
+- brand-guidelines (anthropics/skills)
+- canvas-design (anthropics/skills)
+
+---
+
+### Phase 14 — Security & Code Review Round 2 (27 March 2569)
+Full code review using 3 review agents (`security-auditor`, `performance-error-reviewer`, `react-typescript-reviewer`) — found and fixed all issues across 3 rounds.
+
+**Security fixes:**
+- [x] SSRF DNS rebinding bypass — added `_safe_get()` that re-validates DNS at fetch time
+- [x] SSRF redirect bypass — disabled `follow_redirects=True`, manual redirect handling with URL validation per hop (max 5 redirects)
+- [x] Prompt injection — added `<website_content>` XML boundary tags + injection warning in AI prompts (both FTSE and IFRS analyzers)
+- [x] Error message leak — replaced `str(exc)[:500]` with safe generic messages in both `analyzer.py` and `reasoning` fields in FTSE/IFRS analyzers
+- [x] nginx rate limit fix — strict zone (`api_create` 5r/m) only applies to exact `POST /api/analyses`, general zone (30r/m) for all other API endpoints
+- [x] Reduced `client_max_body_size` from 10M to 1M
+- [x] OpenAI timeout — added `timeout=120.0` to all 4 OpenAI API call sites (ftse_analyzer, ifrs_analyzer, sitemap_generator, analyzer)
+- [x] Improved retry logic — handles 429, timeout, and 503 errors (not just "429" string match)
+
+**Accessibility fixes:**
+- [x] ARIA combobox attributes on IndustrySelect and SubsectorSelect (role, aria-expanded, aria-haspopup, aria-controls, listbox, option, aria-selected)
+- [x] `role="alert"` + `aria-live="polite"` on error messages (main page, history, analysis)
+- [x] `aria-label` on language toggle button (about page)
+- [x] `role="tablist"` / `role="tab"` / `aria-selected` / `aria-controls` on analysis dashboard tabs
+- [x] `role="tabpanel"` with `id` / `aria-labelledby` on tab content
+- [x] `aria-expanded` on ThemeCard expand buttons
+- [x] `role="img"` + `aria-label` on ScoreCard SVG charts
+- [x] `role="progressbar"` with `aria-valuenow/min/max` on AnalysisProgress
+- [x] `role="option"` + `aria-selected` on SubsectorSelect items
+- [x] `htmlFor="industry-select"` on Industry label
+
+**Performance fixes:**
+- [x] `useMemo` for GapTable grouped/themes (both FTSE and IFRS)
+- [x] `useMemo` for groupByTheme/groupByPillar in analysis page (moved before early returns to fix React hooks order)
+- [x] `ResponsiveContainer` wrapping RadarChart in PillarChart (responsive instead of hardcoded 350px)
+- [x] Fixed silent catch in history page — now shows error message with `role="alert"`
+
+**React hooks bug fixed:**
+- [x] `useMemo` was placed after conditional early returns (error/loading/inProgress) causing React Error #310 (hooks called in different order between renders). Moved hooks before all early returns with `data?.ftse_results ?? []` fallback.
+
+**Known risk (accepted):**
+- Playwright DNS TOCTOU — timing window for DNS rebinding between validation and Playwright navigation is very narrow, accepted for internal tool
+
+---
+
+### Phase 15 — Code Cleanup (27 March 2569)
+Full codebase cleanup using `simplify` skill with 3 review agents (Code Reuse, Code Quality, Code Efficiency).
+
+**Backend cleanup:**
+- [x] Removed deprecated `FIRECRAWL_API_KEY` from config.py
+- [x] Created `VALID_STATUSES` constant in scoring.py, replaced 2 duplicate definitions in analyzer.py
+- [x] Moved CORS origins to env config (`ALLOWED_ORIGINS` setting in config.py)
+- [x] Extracted magic numbers to module-level constants (`_CONTENT_FILTER_MAX_CHARS = 80_000` in ftse_analyzer.py, `_CONTENT_MAX_LENGTH = 120_000` in ifrs_analyzer.py)
+- [x] Removed unnecessary WHAT comments (kept WHY comments)
+
+**Frontend cleanup:**
+- [x] Created `useClickOutside` custom hook — replaced duplicate `useEffect` in IndustrySelect and SubsectorSelect
+- [x] Removed all dead IFRS code (commented imports, tabs, destructuring, comments)
+- [x] Added `requestAnimationFrame` throttle to scroll handler in main page
+- [x] Strict typed `pillarColor` in GapTable (`Record<'Environmental' | 'Social' | 'Governance', string>`)
+
+**Deployment note:**
+- nginx container requires `docker compose restart nginx` after config changes (volume mount doesn't auto-reload)
+- Cloudflare cache must be purged after frontend deploys (JS chunks cached with `immutable` header)
+
+*Created by Claude from conversations with P'Ohm — Updated 27 March 2569*
