@@ -91,6 +91,23 @@ async def create_analysis(
         subsector_code=subsector_code_to_use,
     )
 
+    # Keep only the latest 20 analyses — delete oldest beyond limit
+    _MAX_ANALYSES = 20
+    try:
+        old = (
+            supabase.table("analyses")
+            .select("id")
+            .order("created_at", desc=True)
+            .range(_MAX_ANALYSES, _MAX_ANALYSES + 100)
+            .execute()
+        )
+        if old.data:
+            old_ids = [row["id"] for row in old.data]
+            supabase.table("analyses").delete().in_("id", old_ids).execute()
+            logger.info("Cleaned up %d old analyses (keeping latest %d)", len(old_ids), _MAX_ANALYSES)
+    except Exception as cleanup_exc:
+        logger.warning("Failed to clean up old analyses: %s", cleanup_exc)
+
     logger.info("Analysis %s created for %s", analysis_id, company_url)
 
     return {
