@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Page — Mockup v4</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #fafaf8;
+    --bg-card: #ffffff;
+    --bg-dark: #1a1a1a;
+    --bg-muted: #f0efec;
+    --text: #1a1a1a;
+    --text-muted: #8a8a8a;
+    --text-on-dark: #fafaf8;
+    --text-muted-on-dark: #bbb;
+    --border: #e5e5e0;
+    --accent: #c2410c;
+    --accent-soft: rgba(194, 65, 12, 0.06);
+    --accent-border: rgba(194, 65, 12, 0.2);
+    --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    --max-w: 920px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Thai word-break fix */
+  p, li, span, div { word-break: keep-all; overflow-wrap: break-word; }
+
+  /* === NAV === */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250, 250, 248, 0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+  .logo span:first-child { color: var(--text); }
+  .logo span:last-child { color: var(--text-muted); margin-left: 4px; }
+  nav .links { display: flex; gap: 24px; }
+  nav .links a {
+    text-decoration: none; font-size: 12px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-muted); transition: color 0.2s;
+  }
+  nav .links a:hover, nav .links a.active { color: var(--text); }
+
+  /* === HERO === */
+  .hero {
+    max-width: var(--max-w); margin: 0 auto;
+    padding: 72px 32px 56px; text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 700; letter-spacing: -0.04em; line-height: 1.1;
+  }
+  .hero .subtitle {
+    margin-top: 16px; font-size: 15px;
+    color: var(--text-muted); max-width: 520px;
+    margin-left: auto; margin-right: auto;
+  }
+  .hero .badge {
+    display: inline-block; margin-top: 20px;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 18px;
+  }
+
+  /* === SECTION BASE === */
+  .section {
+    max-width: var(--max-w); margin: 0 auto;
+    padding: 0 32px 72px;
+  }
+  .section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--text); color: var(--bg);
+    font-size: 12px; font-weight: 600; margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 14px; color: var(--text-muted); margin-bottom: 28px;
+  }
+
+  /* === CARD === */
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; background: var(--bg-card);
+  }
+
+  /* === 1. OVERVIEW === */
+  .overview-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .overview-card {
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 24px; background: var(--bg-card);
+  }
+  .overview-card .card-label {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 12px;
+  }
+  .overview-card p {
+    font-size: 15px; color: var(--text-muted); line-height: 1.75;
+  }
+  .overview-card strong { color: var(--text); }
+
+  /* === 2. USER FLOW === */
+  .flow-container { display: flex; flex-direction: column; gap: 0; }
+  .flow-step-card {
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px 28px; background: var(--bg-card);
+  }
+  .flow-step-card.active {
+    border-color: var(--accent-border); background: var(--accent-soft);
+  }
+  .flow-connector {
+    display: flex; justify-content: center; padding: 4px 0;
+  }
+  .flow-connector .line { width: 1px; height: 20px; background: var(--border); }
+  .flow-step-card .step-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+  }
+  .flow-step-card .num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--text); color: var(--bg);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .flow-step-card.active .num { background: var(--accent); color: white; }
+  .flow-step-card h4 { font-size: 15px; font-weight: 600; }
+  .flow-step-card .step-body {
+    font-size: 14px; color: var(--text-muted); line-height: 1.75;
+    margin-left: 40px;
+  }
+  .flow-step-card .step-body strong { color: var(--text); }
+  .flow-step-card .tech {
+    display: inline-block; margin-top: 8px; margin-left: 40px;
+    font-size: 10px; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  /* === 3. ACCURACY === */
+  .accuracy-wrap {
+    background: var(--bg-dark); color: var(--text-on-dark);
+    padding: 72px 32px; margin-bottom: 72px;
+  }
+  .accuracy-inner { max-width: var(--max-w); margin: 0 auto; }
+  .accuracy-wrap .section-num { background: var(--accent); color: white; }
+  .accuracy-wrap .section-desc { color: var(--text-muted-on-dark); }
+  .accuracy-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 32px;
+  }
+  .score-card {
+    text-align: center; padding: 28px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; background: rgba(255,255,255,0.04);
+  }
+  .score-card .value {
+    font-size: 42px; font-weight: 700;
+    letter-spacing: -0.04em; line-height: 1;
+  }
+  .score-card .vs {
+    margin-top: 6px; font-size: 13px; color: var(--text-muted-on-dark);
+  }
+  .score-card .vs span { color: var(--accent); font-weight: 600; }
+  .score-card .label {
+    margin-top: 10px; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted-on-dark);
+  }
+  .accuracy-detail {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 28px;
+    background: rgba(255,255,255,0.03); margin-top: 24px;
+  }
+  .accuracy-detail h4 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .accuracy-detail > p {
+    font-size: 14px; color: var(--text-muted-on-dark); line-height: 1.85;
+    margin-bottom: 12px;
+  }
+  .accuracy-detail > p:last-child { margin-bottom: 0; }
+  .accuracy-detail strong { color: var(--text-on-dark); }
+  .accuracy-steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 20px;
+  }
+  .accuracy-step {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 18px;
+    background: rgba(255,255,255,0.02);
+  }
+  .accuracy-step .step-num {
+    font-size: 10px; font-weight: 700;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .accuracy-step h5 { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-on-dark); }
+  .accuracy-step p {
+    font-size: 12px; margin-bottom: 0; line-height: 1.7;
+    color: var(--text-muted-on-dark);
+  }
+
+  /* === 4. COST === */
+  .cost-hero { text-align: center; margin-bottom: 28px; }
+  .cost-hero .big-number {
+    font-size: clamp(48px, 8vw, 64px);
+    font-weight: 700; letter-spacing: -0.04em; line-height: 1;
+  }
+  .cost-hero .big-label {
+    font-size: 14px; color: var(--text-muted); margin-top: 6px;
+  }
+  .cost-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cost-card-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 14px;
+  }
+  .cost-row {
+    display: flex; justify-content: space-between;
+    font-size: 14px; padding: 6px 0; color: var(--text-muted);
+  }
+  .cost-row.total {
+    border-top: 1px solid var(--border);
+    margin-top: 8px; padding-top: 10px;
+    font-weight: 600; color: var(--text);
+  }
+
+  /* === ZONE DIVIDER === */
+  .zone-divider {
+    max-width: var(--max-w); margin: 0 auto;
+    padding: 0 32px 72px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .zone-divider::before, .zone-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .zone-divider span {
+    font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* === 5. PIPELINE — vertical timeline === */
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 24px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 13px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--border) 0%, var(--accent) 50%, var(--border) 100%);
+  }
+  .timeline-step {
+    position: relative;
+    padding: 0 0 28px 0;
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .timeline-step:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    position: absolute;
+    left: -40px; top: 2px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    z-index: 1;
+  }
+  .timeline-step:hover .timeline-dot {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .timeline-content {
+    flex: 1;
+  }
+  .timeline-content h5 {
+    font-size: 14px; font-weight: 600; margin-bottom: 3px;
+  }
+  .timeline-content p {
+    font-size: 13px; color: var(--text-muted); line-height: 1.65;
+  }
+
+  .callout {
+    border: 1px solid var(--accent-border);
+    border-radius: 12px; padding: 20px 22px;
+    background: var(--accent-soft);
+  }
+  .callout-title {
+    font-size: 12px; font-weight: 700;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .callout p {
+    font-size: 13px; color: var(--text-muted); line-height: 1.75;
+  }
+
+  /* === 6. TECH STACK === */
+  .tech-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .tech-box {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 20px; background: var(--bg-card);
+  }
+  .tech-box h4 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent); margin-bottom: 14px;
+  }
+  .tech-box ul { list-style: none; }
+  .tech-box li {
+    font-size: 13px; color: var(--text-muted); padding: 3px 0;
+  }
+  .tech-box li strong { color: var(--text); font-weight: 500; }
+
+  /* === 7. SECURITY === */
+  .security-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  }
+  .security-item {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; background: var(--bg-card);
+  }
+  .security-item h5 {
+    font-size: 13px; font-weight: 600; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .severity {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 1px 6px; border-radius: 4px;
+  }
+  .severity-crit { background: #fecaca; color: #991b1b; }
+  .severity-high { background: #fed7aa; color: #9a3412; }
+  .severity-med { background: #fef9c3; color: #854d0e; }
+  .security-item p {
+    font-size: 12px; color: var(--text-muted); line-height: 1.7;
+  }
+
+  /* === 8. DEV PROCESS === */
+  .vibe-quote {
+    border-left: 3px solid var(--accent);
+    padding: 24px 28px; background: var(--bg-card);
+    border-radius: 0 14px 14px 0; margin-bottom: 28px;
+  }
+  .vibe-quote .qt {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 8px;
+  }
+  .vibe-quote p {
+    font-size: 14px; color: var(--text-muted); line-height: 1.85;
+  }
+
+  /* Tools — 2 column description */
+  .tools-list {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; margin-bottom: 28px;
+    border: 1px solid var(--border); border-radius: 14px;
+    background: var(--bg-card); overflow: hidden;
+  }
+  .tool-item {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tool-item:nth-child(odd) { border-right: 1px solid var(--border); }
+  .tool-item:nth-last-child(-n+2) { border-bottom: none; }
+  .tool-item .tool-name {
+    font-size: 14px; font-weight: 600; margin-bottom: 3px;
+    font-family: var(--mono); letter-spacing: -0.02em;
+  }
+  .tool-item .tool-desc {
+    font-size: 12px; color: var(--text-muted); line-height: 1.6;
+  }
+
+  /* Skills section */
+  .skills-section {
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px; background: var(--bg-card);
+  }
+  .skills-section > h4 {
+    font-size: 14px; font-weight: 700; margin-bottom: 6px;
+  }
+  .skills-section > p.skills-intro {
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 24px; line-height: 1.7;
+  }
+  .skill-group { margin-bottom: 20px; }
+  .skill-group:last-of-type { margin-bottom: 0; }
+  .skill-group-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent); margin-bottom: 10px;
+  }
+  .skill-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .skill-table tr { border-bottom: 1px solid var(--border); }
+  .skill-table tr:last-child { border-bottom: none; }
+  .skill-table td {
+    padding: 8px 0; font-size: 13px; vertical-align: top;
+  }
+  .skill-table .sk-name {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    white-space: nowrap; padding-right: 16px; width: 190px;
+    color: var(--text);
+  }
+  .skill-table .sk-name.used::before {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+    margin-right: 6px; vertical-align: middle;
+  }
+  .skill-table .sk-desc {
+    color: var(--text-muted);
+  }
+
+  .skill-legend {
+    display: flex; gap: 16px; margin-top: 16px;
+    font-size: 10px; color: var(--text-muted);
+  }
+  .skill-legend .leg-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+
+  /* === FOOTER === */
+  footer {
+    max-width: var(--max-w); margin: 0 auto;
+    padding: 36px 32px 52px;
+    border-top: 1px solid var(--border);
+    text-align: center; font-size: 12px; color: var(--text-muted);
+  }
+  footer strong { color: var(--text); }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 640px) {
+    .overview-cards, .tech-grid { grid-template-columns: 1fr; }
+    .accuracy-grid { grid-template-columns: repeat(2, 1fr); }
+    .accuracy-steps { grid-template-columns: 1fr; }
+    .cost-grid, .security-grid { grid-template-columns: 1fr; }
+    .tools-list { grid-template-columns: 1fr; }
+    .tool-item:nth-child(odd) { border-right: none; }
+  }
+
+  /* === ANIMATIONS === */
+  .fade-up {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span>FTSE</span><span>ESG</span></div>
+  <div class="links">
+    <a href="#">Analyse</a>
+    <a href="#">History</a>
+    <a href="#" class="active">About</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero fade-up">
+  <h1>FTSE ESG Analyzer</h1>
+  <p class="subtitle">AI-powered ESG analysis tool ที่วิเคราะห์เว็บไซต์บริษัทตามมาตรฐาน FTSE Russell</p>
+  <span class="badge">Internal Sales Tool &bull; Version 2.0 &bull; March 2026</span>
+</div>
+
+<!-- 1. OVERVIEW -->
+<div class="section fade-up">
+  <div class="section-num">1</div>
+  <div class="section-title">Project Overview</div>
+  <div class="section-desc"></div>
+  <div class="overview-cards">
+    <div class="overview-card">
+      <div class="card-label">What</div>
+      <p>เครื่องมือสำหรับ<strong>ทีม Sale</strong> ใช้วิเคราะห์เว็บไซต์ของลูกค้า เพื่อดูว่าบริษัทมีข้อมูล ESG (สิ่งแวดล้อม, สังคม, ธรรมาภิบาล) ครบถ้วนแค่ไหน ตามมาตรฐาน FTSE Russell</p>
+    </div>
+    <div class="overview-card">
+      <div class="card-label">How</div>
+      <p>Sale ใส่ URL เว็บไซต์ลูกค้า &rarr; ระบบวิเคราะห์อัตโนมัติ &rarr; ได้คะแนน ESG พร้อมจุดที่ต้องปรับปรุง &rarr; Sale นำไปเสนอลูกค้า</p>
+    </div>
+    <div class="overview-card">
+      <div class="card-label">Value</div>
+      <p>ช่วย Sale pitch ลูกค้าว่า <strong>&ldquo;เว็บไซต์คุณขาดข้อมูล ESG ตรงนี้ เราช่วยทำได้&rdquo;</strong> เปลี่ยน ESG gap เป็นโอกาสขายบริการ</p>
+    </div>
+  </div>
+</div>
+
+<!-- 2. USER FLOW -->
+<div class="section fade-up">
+  <div class="section-num">2</div>
+  <div class="section-title">User Flow &mdash; ขั้นตอนการใช้งาน</div>
+  <div class="section-desc">จากมุม Sale team</div>
+  <div class="flow-container">
+    <div class="flow-step-card active">
+      <div class="step-header"><div class="num">1</div><h4>กรอก URL + เลือก Industry</h4></div>
+      <div class="step-body">
+        Sale ใส่ URL เว็บไซต์หลักของลูกค้าเพียง URL เดียว &mdash; ระบบจะค้นหาเว็บที่เกี่ยวข้องเอง เช่น subdomain นักลงทุนสัมพันธ์, ความยั่งยืน, Corporate โดยอัตโนมัติ ไม่ต้องใส่ทีละเว็บ
+        <br><br>
+        <strong>Industry:</strong> ถ้ารู้หมวดธุรกิจก็เลือกได้เลย ถ้าไม่รู้ก็เลือก <strong>Auto-detect</strong> แล้ว AI จะตรวจจากเนื้อหาเว็บให้
+      </div>
+      <span class="tech">esg.ohmai.me</span>
+    </div>
+    <div class="flow-connector"><div class="line"></div></div>
+    <div class="flow-step-card">
+      <div class="step-header"><div class="num">2</div><h4>ระบบ Crawl เว็บไซต์</h4></div>
+      <div class="step-body">AI เข้าไปอ่านเนื้อหาทั้งเว็บไซต์ ทุกหน้าที่เกี่ยวข้องกับ ESG รวมถึง subdomain และดาวน์โหลด PDF (Annual Report, Sustainability Report) อัตโนมัติ</div>
+      <span class="tech">Playwright + pdfplumber</span>
+    </div>
+    <div class="flow-connector"><div class="line"></div></div>
+    <div class="flow-step-card">
+      <div class="step-header"><div class="num">3</div><h4>AI วิเคราะห์ ESG Indicators</h4></div>
+      <div class="step-body">AI วิเคราะห์เนื้อหาเทียบกับ FTSE Russell ESG indicators ที่เกี่ยวข้องกับหมวดธุรกิจนั้นๆ ครอบคลุม themes ด้าน Environment, Social และ Governance</div>
+      <span class="tech">OpenAI GPT-4.1-mini</span>
+    </div>
+    <div class="flow-connector"><div class="line"></div></div>
+    <div class="flow-step-card">
+      <div class="step-header"><div class="num">4</div><h4>คำนวณคะแนน ESG</h4></div>
+      <div class="step-body">คิดคะแนน 0-5 ต่อ theme ตาม FTSE methodology แล้วรวมเป็นคะแนน E, S, G และ Overall</div>
+      <span class="tech">Scoring Engine</span>
+    </div>
+    <div class="flow-connector"><div class="line"></div></div>
+    <div class="flow-step-card active">
+      <div class="step-header"><div class="num">5</div><h4>แสดงผล Dashboard + Sitemap</h4></div>
+      <div class="step-body">Sale เห็นคะแนนรวม, คะแนนรายธีม, รายละเอียด indicator ที่เจอ/ไม่เจอ, และคำแนะนำว่าควรสร้างหน้าเว็บอะไรเพิ่ม</div>
+      <span class="tech">Dashboard</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3. ACCURACY & CALIBRATION -->
+<div class="accuracy-wrap fade-up">
+  <div class="accuracy-inner">
+    <div class="section-num">3</div>
+    <div class="section-title" style="color: var(--text-on-dark);">Accuracy &amp; Calibration &mdash; ความแม่นยำและการปรับจูน</div>
+    <div class="section-desc">เทียบผลลัพธ์กับคะแนน FTSE Russell จริง แล้วปรับจูนจนใกล้เคียง</div>
+
+    <div class="accuracy-grid">
+      <div class="score-card">
+        <div class="value">3.4</div>
+        <div class="vs">target <span>3.3</span></div>
+        <div class="label">ESG Overall</div>
+      </div>
+      <div class="score-card">
+        <div class="value">2.0</div>
+        <div class="vs">target <span>2.3</span></div>
+        <div class="label">Environmental</div>
+      </div>
+      <div class="score-card">
+        <div class="value">4.3</div>
+        <div class="vs">target <span>3.3</span></div>
+        <div class="label">Social</div>
+      </div>
+      <div class="score-card">
+        <div class="value">4.0</div>
+        <div class="vs">target <span>4.6</span></div>
+        <div class="label">Governance</div>
+      </div>
+    </div>
+
+    <div class="accuracy-detail">
+      <h4>กระบวนการ Calibration</h4>
+      <p>เรานำผลลัพธ์จาก App มาเทียบกับ<strong>คะแนน FTSE Russell จริง</strong>ของบริษัทจดทะเบียน จากนั้น<strong>ปรับจูนระบบทีละขั้น</strong>จนคะแนนใกล้เคียงกับของจริงมากที่สุด เป้าหมายคือเก็บข้อมูลจริงจากบริษัทในทุกกลุ่มอุตสาหกรรม เพื่อให้ระบบ calibrate ได้ครอบคลุมและแม่นยำมากยิ่งขึ้น</p>
+
+      <div class="accuracy-steps">
+        <div class="accuracy-step">
+          <div class="step-num">Step 1</div>
+          <h5>Indicator Mapping</h5>
+          <p>จับคู่ FTSE indicators ทั้ง 381 ตัว (196 Core, 176 Sector-specific, 6 Performance, 3 Geography &mdash; นับจากเอกสาร FTSE Russell โดยตรง) กับแต่ละหมวดอุตสาหกรรม เมื่อเว็บลูกค้าถูกระบุหมวดธุรกิจแล้ว ระบบจะวัดเฉพาะ indicators ที่เกี่ยวข้องกับหมวดนั้นจริงๆ ตรงตาม FTSE methodology</p>
+        </div>
+        <div class="accuracy-step">
+          <div class="step-num">Step 2</div>
+          <h5>False Positive Reduction</h5>
+          <p>วิเคราะห์ข้อมูลที่ AI &ldquo;คิดว่าเจอ&rdquo; แต่จริงๆ ไม่ถูกต้อง เช่น บริษัทเอ่ยถึงนโยบาย แต่ไม่มีตัวเลขจริงรองรับ &mdash; แล้วเพิ่มกฎให้ AI แยกแยะได้แม่นขึ้น</p>
+        </div>
+        <div class="accuracy-step">
+          <div class="step-num">Step 3</div>
+          <h5>Cross-Industry Calibration</h5>
+          <p>ยิ่งมีผลลัพธ์จริงจากบริษัทหลากหลายอุตสาหกรรมมากขึ้น ระบบยิ่ง calibrate ได้แม่นขึ้น &mdash; เพราะแต่ละอุตสาหกรรมมี pattern การเปิดเผยข้อมูล ESG ต่างกัน</p>
+        </div>
+      </div>
+
+      <p style="margin-top: 20px;">Benchmark ล่าสุด: Indicator mapping ตรง <strong>142/142</strong> (100%) &mdash; คะแนนรวมห่างจากของจริงเพียง <strong>0.1 คะแนน</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- 4. COST -->
+<div class="section fade-up">
+  <div class="section-num">4</div>
+  <div class="section-title">Cost &amp; Resources</div>
+  <div class="section-desc">ค่าใช้จ่ายรายเดือนและต่อการใช้งาน</div>
+  <div class="cost-hero">
+    <div class="big-number">~3.4 ฿</div>
+    <div class="big-label">ต่อการวิเคราะห์ 1 ครั้ง (5-7 นาที)</div>
+  </div>
+  <div class="cost-grid">
+    <div class="card">
+      <div class="cost-card-title">Fixed Cost / Month</div>
+      <div class="cost-row"><span>AWS EC2 (shared)</span><span>~$30</span></div>
+      <div class="cost-row"><span>Supabase PRO</span><span>~$25</span></div>
+      <div class="cost-row total"><span>Total</span><span>~$55/mo (~1,925 ฿)</span></div>
+    </div>
+    <div class="card">
+      <div class="cost-card-title">Per Analysis</div>
+      <div class="cost-row"><span>OpenAI tokens</span><span>~$0.096</span></div>
+      <div class="cost-row"><span>Processing time</span><span>5-7 นาที</span></div>
+      <div class="cost-row total"><span>Per run</span><span>~3.4 ฿</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE DIVIDER -->
+<div class="zone-divider fade-up">
+  <span>Deep Dive &mdash; Technical Details</span>
+</div>
+
+<!-- 5. PIPELINE — vertical timeline -->
+<div class="section fade-up">
+  <div class="section-num">5</div>
+  <div class="section-title">Analysis Pipeline &mdash; ระบบทำงานอย่างไร</div>
+  <div class="section-desc">9 ขั้นตอนภายใน backend</div>
+
+  <div class="timeline">
+    <div class="timeline-step">
+      <div class="timeline-dot">1</div>
+      <div class="timeline-content">
+        <h5>ค้นหา Sitemap</h5>
+        <p>อ่านไฟล์ sitemap.xml ของเว็บไซต์ เพื่อค้นหาหน้าทั้งหมดที่เกี่ยวข้องกับ ESG</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">2</div>
+      <div class="timeline-content">
+        <h5>อ่านเว็บ</h5>
+        <p>Crawl เนื้อหาจากหน้าเว็บที่คัดเลือกแล้ว รวมถึง subdomain ที่ค้นพบอัตโนมัติ</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">3</div>
+      <div class="timeline-content">
+        <h5>ค้นหาและอ่าน PDF</h5>
+        <p>ค้นหา PDF รายงานสำคัญ (Sustainability Report, Annual Report) แล้วอ่านเฉพาะหน้าที่เกี่ยวข้อง</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">4</div>
+      <div class="timeline-content">
+        <h5>ระบุหมวดธุรกิจ</h5>
+        <p>AI วิเคราะห์เนื้อหาเว็บเพื่อระบุหมวดอุตสาหกรรม (ICB subsector) โดยอัตโนมัติ</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">5</div>
+      <div class="timeline-content">
+        <h5>กรอง Indicators</h5>
+        <p>เลือกเฉพาะ FTSE indicators ที่เกี่ยวข้องกับหมวดธุรกิจนั้น จาก 381 ตัวทั้งหมด</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">6</div>
+      <div class="timeline-content">
+        <h5>วิเคราะห์จากเว็บ (Round 1)</h5>
+        <p>AI วิเคราะห์ indicators ทั้งหมดจากเนื้อหาเว็บไซต์ก่อน เป็นแหล่งข้อมูลหลัก</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">7</div>
+      <div class="timeline-content">
+        <h5>เติมข้อมูลจาก PDF (Round 2)</h5>
+        <p>Indicators ที่ยังไม่เจอจากเว็บ นำ PDF มาวิเคราะห์เพิ่มเพื่อหาข้อมูลเชิงปริมาณ</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">8</div>
+      <div class="timeline-content">
+        <h5>คำนวณคะแนน</h5>
+        <p>รวมผลลัพธ์ทั้ง 2 รอบ แล้วคำนวณคะแนน 0-5 ต่อ theme ตาม FTSE methodology</p>
+      </div>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">9</div>
+      <div class="timeline-content">
+        <h5>แนะนำ Sitemap</h5>
+        <p>สร้างคำแนะนำว่าควรเพิ่มหน้าเว็บอะไรบ้าง เพื่อปรับปรุงคะแนน ESG</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Smart PDF Reading</div>
+    <p>PDF รายงานประจำปีอาจมี 300+ หน้า แต่ระบบไม่อ่านทุกหน้า &mdash; สแกนสารบัญก่อน แล้วอ่านเฉพาะหน้าที่เกี่ยวข้องกับ ESG ทั้งภาษาไทยและอังกฤษ ประหยัดเวลาและ token</p>
+  </div>
+</div>
+
+<!-- 6. TECH STACK -->
+<div class="section fade-up">
+  <div class="section-num">6</div>
+  <div class="section-title">Tech Stack</div>
+  <div class="section-desc">เทคโนโลยีที่ใช้ในโปรเจกต์</div>
+  <div class="tech-grid">
+    <div class="tech-box">
+      <h4>Frontend</h4>
+      <ul>
+        <li><strong>Next.js 16</strong> &mdash; React framework</li>
+        <li><strong>React 19</strong> &mdash; UI library</li>
+        <li><strong>TypeScript</strong> &mdash; strict mode</li>
+        <li><strong>Tailwind CSS 4</strong> &mdash; styling</li>
+        <li><strong>shadcn/ui</strong> &mdash; components</li>
+        <li><strong>Recharts</strong> &mdash; charts</li>
+        <li><strong>Lucide React</strong> &mdash; icons</li>
+      </ul>
+    </div>
+    <div class="tech-box">
+      <h4>Backend</h4>
+      <ul>
+        <li><strong>Python 3.11</strong> &mdash; runtime</li>
+        <li><strong>FastAPI</strong> &mdash; API framework</li>
+        <li><strong>Playwright</strong> &mdash; web crawler</li>
+        <li><strong>pdfplumber</strong> &mdash; PDF extraction</li>
+        <li><strong>OpenAI GPT-4.1-mini</strong> &mdash; AI engine</li>
+        <li><strong>httpx</strong> &mdash; HTTP client</li>
+        <li><strong>Pydantic</strong> &mdash; data validation</li>
+      </ul>
+    </div>
+    <div class="tech-box">
+      <h4>Infrastructure</h4>
+      <ul>
+        <li><strong>AWS EC2</strong> &mdash; t3.medium server</li>
+        <li><strong>Docker Compose</strong> &mdash; 3 containers</li>
+        <li><strong>Nginx</strong> &mdash; reverse proxy</li>
+        <li><strong>Supabase</strong> &mdash; PostgreSQL database</li>
+        <li><strong>Cloudflare</strong> &mdash; DNS + SSL</li>
+        <li><strong>Let's Encrypt</strong> &mdash; HTTPS certificate</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 7. SECURITY -->
+<div class="section fade-up">
+  <div class="section-num">7</div>
+  <div class="section-title">Security Measures</div>
+  <div class="section-desc">มาตรการรักษาความปลอดภัยตามมาตรฐาน OWASP</div>
+  <div class="security-grid">
+    <div class="security-item"><h5><span class="severity severity-crit">Critical</span> SSRF Protection</h5><p>ป้องกันไม่ให้ผู้ใช้กรอก URL ที่ชี้ไปยัง IP ภายใน (127.x, 10.x, 172.16.x, 169.254.x) ซึ่งอาจเข้าถึง AWS metadata หรือระบบภายในได้</p></div>
+    <div class="security-item"><h5><span class="severity severity-high">High</span> Rate Limiting</h5><p>จำกัดจำนวน request &mdash; สร้าง analysis ได้ 5 ครั้ง/นาที, API ทั่วไป 30 ครั้ง/นาที ป้องกันการใช้งานเกินควรหรือ DDoS</p></div>
+    <div class="security-item"><h5><span class="severity severity-high">High</span> Non-root Docker</h5><p>Container ทุกตัวรันเป็น user ปกติ (appuser:1001) ไม่ใช่ root &mdash; ลดความเสียหายหากมีช่องโหว่</p></div>
+    <div class="security-item"><h5><span class="severity severity-high">High</span> Input Validation</h5><p>ตรวจสอบ URL ด้วย Pydantic, sanitize ข้อความก่อนส่ง AI (ลบ null bytes, control chars), จำกัด query สูงสุด 100 records</p></div>
+    <div class="security-item"><h5><span class="severity severity-med">Med</span> Security Headers</h5><p>X-Content-Type-Options (ป้องกัน MIME sniffing), X-Frame-Options DENY (ป้องกัน clickjacking), HSTS (บังคับ HTTPS 1 ปี), X-XSS-Protection</p></div>
+    <div class="security-item"><h5><span class="severity severity-med">Med</span> CORS Restricted</h5><p>อนุญาตเฉพาะ esg.ohmai.me เท่านั้นที่เรียก API ได้ ป้องกันเว็บอื่นขโมยใช้ API &mdash; รับเฉพาะ GET, POST</p></div>
+  </div>
+</div>
+
+<!-- 8. DEV PROCESS -->
+<div class="section fade-up">
+  <div class="section-num">8</div>
+  <div class="section-title">Development Process &mdash; สร้างแอปนี้ขึ้นมาอย่างไร</div>
+  <div class="section-desc">Vibe Coding &mdash; ใช้ AI เป็นตัวช่วยหลักในการเขียน code ทั้งหมด</div>
+
+  <div class="vibe-quote">
+    <div class="qt">Vibe Coding</div>
+    <p>วิธีการพัฒนาซอฟต์แวร์แบบใหม่ที่ใช้ AI coding agent เป็นผู้เขียน code &mdash; ผู้สร้างทำหน้าที่เป็น &ldquo;ผู้กำกับ&rdquo; คอยบอกว่าต้องการอะไร ตรวจสอบผลลัพธ์ และตัดสินใจ โดยไม่ต้องเขียน code เองทุกบรรทัด</p>
+  </div>
+
+  <!-- Tools — 2 column with description -->
+  <div class="tools-list">
+    <div class="tool-item">
+      <div class="tool-name">Claude Code</div>
+      <div class="tool-desc">AI coding agent ที่ทำงานใน VS Code terminal เขียน code, debug, deploy ให้ทั้งหมด</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-name">Claude Opus 4.6</div>
+      <div class="tool-desc">AI model ที่ขับเคลื่อน Claude Code มีความสามารถวิเคราะห์ code ระดับสูง</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-name">Playwright MCP</div>
+      <div class="tool-desc">เชื่อมต่อ browser เข้ากับ AI Agent ให้ทดสอบเว็บอัตโนมัติระหว่างพัฒนา</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-name">GitHub</div>
+      <div class="tool-desc">ระบบจัดการ version ของ source code และ collaboration</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-name">AWS EC2</div>
+      <div class="tool-desc">Cloud server สำหรับ deploy และรัน production ของทั้ง frontend และ backend</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-name">Docker</div>
+      <div class="tool-desc">บรรจุแอปทั้งหมดเป็น container เพื่อ deploy ได้ง่ายและเหมือนกันทุกเครื่อง</div>
+    </div>
+  </div>
+
+  <!-- Skills — table format with descriptions -->
+  <div class="skills-section">
+    <h4>Agent Skills &amp; Review Agents</h4>
+    <p class="skills-intro">Skills เสริมที่ช่วยให้ AI Agent เขียน code ได้ดีขึ้น แบ่งเป็น 4 กลุ่มตามหน้าที่ &mdash; Skills ที่ใช้จริงในโปรเจกต์นี้จะมี <strong style="color: var(--accent);">จุดสีส้ม</strong> กำกับ</p>
+
+    <!-- Design & UI -->
+    <div class="skill-group">
+      <div class="skill-group-label">Design &amp; UI &mdash; ออกแบบหน้าตา</div>
+      <table class="skill-table">
+        <tr><td class="sk-name used">shadcn/ui</td><td class="sk-desc">ใช้ UI components สำเร็จรูปอย่างถูกวิธีตาม design system</td></tr>
+        <tr><td class="sk-name used">frontend-design</td><td class="sk-desc">ออกแบบ UI/UX ตามหลัก accessibility และ responsive design</td></tr>
+        <tr><td class="sk-name">brand-guidelines</td><td class="sk-desc">ควบคุมสี, ฟอนต์, โทนให้ตรงตามแบรนด์</td></tr>
+        <tr><td class="sk-name">canvas-design</td><td class="sk-desc">สร้างงานกราฟิก เช่น โปสเตอร์ ออกเป็น PNG/PDF</td></tr>
+        <tr><td class="sk-name">theme-factory</td><td class="sk-desc">ธีมสำเร็จรูป 10 แบบ พร้อมคู่สีและฟอนต์ที่คัดมาแล้ว</td></tr>
+      </table>
+    </div>
+
+    <!-- Code Quality -->
+    <div class="skill-group">
+      <div class="skill-group-label">Code Quality &mdash; เขียน code ให้ดี</div>
+      <table class="skill-table">
+        <tr><td class="sk-name used">next-best-practices</td><td class="sk-desc">เขียน Next.js ตามมาตรฐาน Vercel &mdash; App Router, Server Components</td></tr>
+        <tr><td class="sk-name used">react-best-practices</td><td class="sk-desc">เขียน React components ที่ปลอดภัย มี performance ดี</td></tr>
+        <tr><td class="sk-name">supabase-postgres</td><td class="sk-desc">เขียน query, RLS, migration ตามแนวทางของ Supabase</td></tr>
+        <tr><td class="sk-name">python-error-handling</td><td class="sk-desc">จัดการ error, retry, logging ใน Python อย่างถูกต้อง</td></tr>
+        <tr><td class="sk-name">python-performance</td><td class="sk-desc">ลด memory, ใช้ async/await, optimize algorithm</td></tr>
+      </table>
+    </div>
+
+    <!-- Debug & Tools -->
+    <div class="skill-group">
+      <div class="skill-group-label">Debug &amp; Tools &mdash; หาบัคและเครื่องมือ</div>
+      <table class="skill-table">
+        <tr><td class="sk-name used">agent-browser</td><td class="sk-desc">ควบคุม browser อัตโนมัติ &mdash; เปิดเว็บ, กรอกฟอร์ม, ตรวจผลลัพธ์</td></tr>
+        <tr><td class="sk-name used">pdf</td><td class="sk-desc">อ่าน, สร้าง, แยก, รวมไฟล์ PDF &mdash; รวมถึง OCR สำหรับ PDF ที่เป็นรูป</td></tr>
+        <tr><td class="sk-name">systematic-debugging</td><td class="sk-desc">วิเคราะห์ bug อย่างเป็นขั้นตอน หาสาเหตุที่แท้จริง ไม่ใช่แค่แก้อาการ</td></tr>
+      </table>
+    </div>
+
+    <!-- Review Agents -->
+    <div class="skill-group">
+      <div class="skill-group-label">Review Agents &mdash; ตรวจ code อัตโนมัติ</div>
+      <table class="skill-table">
+        <tr><td class="sk-name used">security-auditor</td><td class="sk-desc">ตรวจช่องโหว่ SSRF, XSS, rate limiting, secrets, Docker security</td></tr>
+        <tr><td class="sk-name used">performance-reviewer</td><td class="sk-desc">ตรวจ memory leaks, error handling, timeout, algorithm complexity</td></tr>
+        <tr><td class="sk-name used">react-ts-reviewer</td><td class="sk-desc">ตรวจ accessibility, type safety, unused imports, re-render issues</td></tr>
+      </table>
+    </div>
+
+    <div class="skill-legend">
+      <span><span class="leg-dot" style="background: var(--accent);"></span> ใช้แล้วในโปรเจกต์นี้</span>
+      <span><span class="leg-dot" style="background: var(--border);"></span> ติดตั้งแล้ว พร้อมใช้งาน</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>FTSE ESG Analyzer</strong><br>
+  Built by P'Ohm with Claude Code (Opus 4.6) &bull; March 2026
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

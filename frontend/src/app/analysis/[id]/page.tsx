@@ -201,6 +201,10 @@ export default function AnalysisDashboard({
     };
   }, [fetchData]);
 
+  const ftseResults = data?.ftse_results ?? [];
+  const themeGroups = useMemo(() => groupByTheme(ftseResults), [ftseResults]);
+  const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
+
   if (error) {
     return (
       <div role="alert" className="mx-auto max-w-3xl px-6 py-20 text-center">
@@ -222,11 +226,8 @@ export default function AnalysisDashboard({
     );
   }
 
-  const { analysis, ftse_results, sitemap_recommendations, ifrs_results: _ifrs } = data;
+  const { analysis, sitemap_recommendations, ifrs_results: _ifrs } = data;
   const isInProgress = IN_PROGRESS_STATUSES.has(analysis.status);
-
-  const themeGroups = useMemo(() => groupByTheme(ftse_results), [ftse_results]);
-  const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
 
   if (isInProgress) {
     return (
@@ -251,7 +252,7 @@ export default function AnalysisDashboard({
   })();
 
   const tabs = [
-    { key: 'ftse' as const, label: 'FTSE Themes', count: ftse_results.length },
+    { key: 'ftse' as const, label: 'FTSE Themes', count: ftseResults.length },
     // IFRS temporarily hidden — no verified reference data yet
     // { key: 'ifrs' as const, label: 'IFRS', count: ifrs_results.length },
     { key: 'sitemap' as const, label: 'Sitemap', count: sitemap_recommendations.length },
@@ -371,7 +372,7 @@ export default function AnalysisDashboard({
                 </div>
               );
             })}
-            {ftse_results.length === 0 && (
+            {ftseResults.length === 0 && (
               <EmptyState message="No FTSE indicator results available." />
             )}
           </div>
