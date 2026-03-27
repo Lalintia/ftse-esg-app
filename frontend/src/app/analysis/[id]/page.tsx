@@ -225,6 +225,9 @@ export default function AnalysisDashboard({
   const { analysis, ftse_results, sitemap_recommendations, ifrs_results: _ifrs } = data;
   const isInProgress = IN_PROGRESS_STATUSES.has(analysis.status);
 
+  const themeGroups = useMemo(() => groupByTheme(ftse_results), [ftse_results]);
+  const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
+
   if (isInProgress) {
     return (
       <div className="mx-auto max-w-lg px-6 py-12">
@@ -246,9 +249,6 @@ export default function AnalysisDashboard({
   const companyDisplayName = analysis.company_name ?? (() => {
     try { return new URL(analysis.company_url).hostname; } catch { return analysis.company_url; }
   })();
-
-  const themeGroups = useMemo(() => groupByTheme(ftse_results), [ftse_results]);
-  const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
 
   const tabs = [
     { key: 'ftse' as const, label: 'FTSE Themes', count: ftse_results.length },
