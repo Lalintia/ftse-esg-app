@@ -61,6 +61,35 @@ def is_safe_url(url: str) -> bool:
     except (socket.gaierror, ValueError):
         return False
 
+
+async def _safe_get(
+    client: httpx.AsyncClient,
+    url: str,
+) -> httpx.Response:
+    """Fetch URL with SSRF protection at request time.
+
+    Re-validates DNS before every fetch to prevent DNS rebinding,
+    and handles redirects manually to block redirect-based SSRF.
+    """
+    if not is_safe_url(url):
+        raise ValueError(f"SSRF blocked at fetch time: {url}")
+
+    response = await client.get(url, follow_redirects=False)
+
+    max_redirects = 5
+    for _ in range(max_redirects):
+        if not response.is_redirect:
+            break
+        redirect_url = response.headers.get("location", "")
+        if redirect_url.startswith("/"):
+            parsed = urlparse(str(response.url))
+            redirect_url = f"{parsed.scheme}://{parsed.netloc}{redirect_url}"
+        if not is_safe_url(redirect_url):
+            raise ValueError(f"SSRF blocked: redirect to unsafe URL {redirect_url}")
+        response = await client.get(redirect_url, follow_redirects=False)
+
+    return response
+
 ESG_KEYWORDS: list[str] = [
     "sustainability",
     "sustainability-report",
@@ -433,8 +462,8 @@ async def _fetch_sitemap_urls(base_url: str) -> list[str]:
     logger.info("Trying sitemap at %s", sitemap_url)
 
     try:
-        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
-            response = await client.get(sitemap_url)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await _safe_get(client, sitemap_url)
             if response.status_code != 200:
                 logger.info("No sitemap found at %s (status %d)", sitemap_url, response.status_code)
                 return []
@@ -803,10 +832,9 @@ async def _download_and_extract_pdf(
     try:
         async with httpx.AsyncClient(
             timeout=_PDF_DOWNLOAD_TIMEOUT,
-            follow_redirects=True,
             headers=_browser_headers,
         ) as client:
-            response = await client.get(url)
+            response = await _safe_get(client, url)
             if response.status_code == 200:
                 pdf_bytes = response.content
             else:

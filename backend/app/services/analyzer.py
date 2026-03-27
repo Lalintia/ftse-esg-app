@@ -6,6 +6,8 @@ import re
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
+import httpx
+
 from supabase import Client
 
 from app.dependencies import get_openai, get_supabase
@@ -89,6 +91,7 @@ async def _detect_subsector(openai_client, website_content: str) -> str | None:
             ],
             response_format={"type": "json_object"},
             temperature=0.1,
+            timeout=120.0,
         )
         raw = response.choices[0].message.content or "{}"
         data = _json.loads(raw)
@@ -819,12 +822,17 @@ async def run_analysis(
 
     except Exception as exc:
         logger.error("Analysis %s failed: %s", analysis_id, exc, exc_info=True)
+        safe_msg = "Analysis failed due to an internal error. Please try again."
+        if "SSRF" in str(exc):
+            safe_msg = "The provided URL could not be accessed safely."
+        elif isinstance(exc, httpx.TimeoutException):
+            safe_msg = "Website took too long to respond. Please try again."
         try:
             _update_status(
                 supabase,
                 analysis_id,
                 "failed",
-                error_message=str(exc)[:500],
+                error_message=safe_msg,
             )
         except Exception as save_exc:
             logger.error(

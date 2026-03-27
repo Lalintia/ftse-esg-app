@@ -67,6 +67,11 @@ export const SubsectorSelect = ({
     <div ref={containerRef} className="relative w-full">
       <button
         type="button"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls="subsector-listbox"
+        aria-label="Select subsector"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -85,12 +90,15 @@ export const SubsectorSelect = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+        <div id="subsector-listbox" role="listbox" aria-label="Subsector options" className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
           <div className="flex items-center gap-2 border-b px-3 py-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
               ref={inputRef}
               type="text"
+              aria-label="Search subsectors"
+              aria-autocomplete="list"
+              aria-controls="subsector-listbox"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search subsectors..."

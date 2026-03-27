@@ -72,7 +72,13 @@ export const AnalysisProgress = ({ status, pagesCrawled, statusMessage }: Analys
 
       {/* Progress bar */}
       <div className="w-full max-w-sm space-y-2">
-        <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-1 w-full overflow-hidden rounded-full bg-muted"
+          role="progressbar"
+          aria-valuenow={animatedProgress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
             className="h-full rounded-full bg-foreground transition-all duration-700 ease-out"
             style={{ width: `${animatedProgress}%` }}

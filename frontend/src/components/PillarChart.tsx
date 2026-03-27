@@ -6,6 +6,7 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
+  ResponsiveContainer,
 } from 'recharts';
 
 interface PillarChartProps {
@@ -26,13 +27,9 @@ export const PillarChart = ({
   ];
 
   return (
-    <div style={{ width: '100%', height: 300 }}>
+    <ResponsiveContainer width="100%" height={300}>
       <RadarChart
-        cx={175}
-        cy={140}
         outerRadius={100}
-        width={350}
-        height={280}
         data={data}
       >
         <PolarGrid stroke="#d1d5db" />
@@ -55,6 +52,6 @@ export const PillarChart = ({
           strokeWidth={2}
         />
       </RadarChart>
-    </div>
+    </ResponsiveContainer>
   );
 };

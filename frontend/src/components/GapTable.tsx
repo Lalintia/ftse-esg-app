@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import {
   Table,
@@ -45,26 +45,28 @@ interface GroupedFtse {
 export const FtseGapTable = ({ results }: FtseGapTableProps) => {
   const [expandedThemes, setExpandedThemes] = useState<Set<string>>(new Set());
 
-  const grouped = results.reduce<Record<string, GroupedFtse>>((acc, item) => {
-    const theme = item.ftse_indicators.ftse_themes.theme_name;
-    if (!acc[theme]) {
-      acc[theme] = {
-        themeName: theme,
-        pillar: item.ftse_indicators.ftse_themes.pillar,
-        items: [],
-        found: 0,
-        partial: 0,
-        missing: 0,
-      };
-    }
-    acc[theme].items.push(item);
-    acc[theme][item.status]++;
-    return acc;
-  }, {});
+  const themes = useMemo(() => {
+    const grouped = results.reduce<Record<string, GroupedFtse>>((acc, item) => {
+      const theme = item.ftse_indicators.ftse_themes.theme_name;
+      if (!acc[theme]) {
+        acc[theme] = {
+          themeName: theme,
+          pillar: item.ftse_indicators.ftse_themes.pillar,
+          items: [],
+          found: 0,
+          partial: 0,
+          missing: 0,
+        };
+      }
+      acc[theme].items.push(item);
+      acc[theme][item.status]++;
+      return acc;
+    }, {});
 
-  const themes = Object.values(grouped).sort((a, b) =>
-    a.pillar.localeCompare(b.pillar) || a.themeName.localeCompare(b.themeName),
-  );
+    return Object.values(grouped).sort((a, b) =>
+      a.pillar.localeCompare(b.pillar) || a.themeName.localeCompare(b.themeName),
+    );
+  }, [results]);
 
   const toggleTheme = (themeName: string) => {
     setExpandedThemes((prev) => {

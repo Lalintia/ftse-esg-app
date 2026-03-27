@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, use } from 'react';
+import { useEffect, useState, useCallback, useRef, use, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -108,6 +108,7 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="flex w-full items-start justify-between p-4 text-left"
       >
         <div className="flex-1">
@@ -246,8 +247,8 @@ export default function AnalysisDashboard({
     try { return new URL(analysis.company_url).hostname; } catch { return analysis.company_url; }
   })();
 
-  const themeGroups = groupByTheme(ftse_results);
-  const pillarGroups = groupByPillar(themeGroups);
+  const themeGroups = useMemo(() => groupByTheme(ftse_results), [ftse_results]);
+  const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
 
   const tabs = [
     { key: 'ftse' as const, label: 'FTSE Themes', count: ftse_results.length },
@@ -318,11 +319,15 @@ export default function AnalysisDashboard({
       {/* IFRS Quick Stats — temporarily hidden, no verified reference data yet */}
 
       {/* Tabs — sticky so switching tabs doesn't scroll away */}
-      <div ref={tabBarRef} className="sticky top-14 z-40 -mx-6 mb-8 flex gap-1 border-b bg-background/95 backdrop-blur-sm px-6 animate-fade-up-d3">
+      <div ref={tabBarRef} role="tablist" className="sticky top-14 z-40 -mx-6 mb-8 flex gap-1 border-b bg-background/95 backdrop-blur-sm px-6 animate-fade-up-d3">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
+            role="tab"
+            id={`tab-${tab.key}`}
+            aria-selected={activeTab === tab.key}
+            aria-controls={`tabpanel-${tab.key}`}
             onClick={() => {
               const scrollY = window.scrollY;
               setActiveTab(tab.key);

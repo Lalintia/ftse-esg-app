@@ -252,6 +252,7 @@ export default function AboutPage() {
       {/* Lang toggle */}
       <button
         onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
+        aria-label={lang === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
         className="fixed right-6 top-20 z-50 rounded-full border border-border bg-background/90 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-foreground hover:text-background"
       >
         {lang === 'th' ? 'EN' : 'TH'}

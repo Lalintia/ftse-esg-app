@@ -148,6 +148,7 @@ async def _analyze_batch(
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.1,
+                timeout=120.0,
             )
 
             usage = response.usage

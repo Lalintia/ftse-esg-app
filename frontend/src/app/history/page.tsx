@@ -37,15 +37,17 @@ export default function HistoryPage() {
   const [page, setPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const loadAnalyses = useCallback(async (offset: number) => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await getAnalyses(PAGE_SIZE, offset);
       setAnalyses(data.analyses);
       setTotal(data.total);
     } catch {
-      /* Silently handled — empty table shown */
+      setError('Failed to load analysis history. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -115,6 +117,11 @@ export default function HistoryPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div role="alert" aria-live="polite" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

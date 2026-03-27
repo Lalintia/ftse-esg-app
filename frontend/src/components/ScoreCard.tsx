@@ -53,6 +53,8 @@ export const ScoreCard = ({
           height={config.svgSize}
           viewBox={`0 0 ${config.svgSize} ${config.svgSize}`}
           className="-rotate-90"
+          role="img"
+          aria-label={`${label} score: ${score.toFixed(1)} out of ${maxScore}`}
         >
           <circle
             cx={config.svgSize / 2}

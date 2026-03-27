@@ -125,6 +125,7 @@ async def generate_sitemap(
             ],
             response_format={"type": "json_object"},
             temperature=0.3,
+            timeout=120.0,
         )
 
         raw_text = response.choices[0].message.content or "{}"

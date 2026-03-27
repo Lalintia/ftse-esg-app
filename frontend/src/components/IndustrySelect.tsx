@@ -31,6 +31,12 @@ export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProp
     <div ref={containerRef} className="relative">
       <button
         type="button"
+        id="industry-select"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls="industry-listbox"
+        aria-label="Select industry"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
@@ -51,12 +57,14 @@ export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProp
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-lg border bg-card shadow-lg animate-fade-in">
+        <div id="industry-listbox" role="listbox" aria-label="Industry options" className="absolute z-50 mt-2 w-full rounded-lg border bg-card shadow-lg animate-fade-in">
           <div className="max-h-80 overflow-y-auto py-1">
             {INDUSTRY_CATEGORIES.map((category) => (
               <button
                 key={category.value}
                 type="button"
+                role="option"
+                aria-selected={category.value === value}
                 onClick={() => {
                   onChange(category.value);
                   setIsOpen(false);
