@@ -437,16 +437,16 @@ function DomainSection({ group, isCollapsible, urlThemeMap }: { group: DomainGro
         </div>
       )}
       {isOpen && (() => {
-        const esgPages = group.pages.filter((p) => {
-          if (p.isEsg !== false) { return true; }
-          const normalized = p.url.replace(/\/$/, '');
+        const isEsgPage = (page: TreePage): boolean => {
+          const normalized = page.url.replace(/\/$/, '');
           if (urlThemeMap?.has(normalized)) { return true; }
-          return p.children.some((c) => {
-            const cn = c.url.replace(/\/$/, '');
-            return c.isEsg !== false || urlThemeMap?.has(cn);
-          });
-        });
-        const otherPages = group.pages.filter((p) => !esgPages.includes(p));
+          if (page.children.some((c) => urlThemeMap?.has(c.url.replace(/\/$/, '')))) { return true; }
+          const urlLower = page.url.toLowerCase();
+          const esgHints = ['sustain', 'esg', 'csr', 'governance', 'environment', 'climate', 'safety', 'human-rights', 'labour', 'labor', 'anti-corruption', 'risk', 'supply-chain', 'stakeholder', 'diversity', 'employee', 'cybersecurity', 'materiality', 'whistleblow'];
+          return esgHints.some((h) => urlLower.includes(h));
+        };
+        const esgPages = group.pages.filter(isEsgPage);
+        const otherPages = group.pages.filter((p) => !isEsgPage(p));
 
         return (
           <div className="mt-4 space-y-4">
