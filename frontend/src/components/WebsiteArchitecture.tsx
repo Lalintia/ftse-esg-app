@@ -18,7 +18,7 @@ interface DomainGroup {
 }
 
 function buildUrlThemeMap(ftseResults: FtseResultItem[]): Map<string, ThemeBadge[]> {
-  const urlThemes = new Map<string, Map<string, ThemeBadge>>();
+  const urlThemes = new Map<string, Map<string, ThemeBadge & { _count: number; _total: number }>>();
 
   for (const r of ftseResults) {
     if (!r.source_url || !r.ftse_indicators?.ftse_themes) {
@@ -41,15 +41,21 @@ function buildUrlThemeMap(ftseResults: FtseResultItem[]): Map<string, ThemeBadge
     }
     const themes = urlThemes.get(normalized)!;
     if (!themes.has(theme)) {
-      themes.set(theme, { theme, score: 0, pillar });
+      themes.set(theme, { theme, score: 0, pillar, _count: 0, _total: 0 });
     }
     const existing = themes.get(theme)!;
-    existing.score = Math.max(existing.score, r.score ?? 0);
+    existing._count++;
+    existing._total += r.score ?? 0;
   }
 
   const result = new Map<string, ThemeBadge[]>();
   for (const [url, themes] of urlThemes) {
-    result.set(url, Array.from(themes.values()));
+    const badges = Array.from(themes.values()).map((b) => ({
+      theme: b.theme,
+      pillar: b.pillar,
+      score: b._count > 0 ? b._total / b._count : 0,
+    }));
+    result.set(url, badges);
   }
   return result;
 }
