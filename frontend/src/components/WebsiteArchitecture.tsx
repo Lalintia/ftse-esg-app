@@ -465,7 +465,9 @@ function DomainSection({ group, isCollapsible, urlThemeMap }: { group: DomainGro
                     {page.children.length > 0 && page.children.map((child) => {
                       const childNormalized = child.url.replace(/\/$/, '');
                       const childBadges = urlThemeMap?.get(childNormalized);
-                      const childDimmed = child.isEsg === false && !childBadges;
+                      const childUrlLower = child.url.toLowerCase();
+                      const childHasEsgKeyword = ['sustain', 'esg', 'csr', 'governance', 'environment', 'climate', 'safety', 'human-rights', 'labour', 'labor', 'anti-corruption', 'risk', 'supply-chain', 'stakeholder', 'diversity', 'employee', 'cybersecurity', 'materiality', 'whistleblow', 'ethics', 'code-of-conduct'].some((h) => childUrlLower.includes(h));
+                      const childDimmed = !childBadges && !childHasEsgKeyword;
                       return (
                         <li key={child.url}>
                           <TreeNode title={child.title} isDimmed={childDimmed} themeBadges={childBadges} />
