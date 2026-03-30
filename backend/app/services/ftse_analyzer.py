@@ -6,7 +6,7 @@ import logging
 import re
 from dataclasses import dataclass
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, RateLimitError, APIStatusError, APITimeoutError
 
 from app.config import get_settings
 from app.prompts.ftse_system import FTSE_SYSTEM_PROMPT
@@ -14,6 +14,29 @@ from app.prompts.ftse_system import FTSE_SYSTEM_PROMPT
 logger = logging.getLogger(__name__)
 
 _CONTENT_FILTER_MAX_CHARS = 80_000
+
+
+def _validate_source_url(url: str) -> str:
+    """Accept only http/https URLs. Blocks javascript:, data:, etc.
+
+    Args:
+        url: URL string from AI response.
+
+    Returns:
+        Validated URL or empty string if invalid.
+    """
+    if not url:
+        return ""
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return ""
+        if not parsed.netloc:
+            return ""
+        return url
+    except Exception:
+        return ""
 
 
 def _sanitize_text(text: str) -> str:
@@ -42,6 +65,8 @@ class FtseResult:
         evidence: Evidence text found on the website.
         confidence: Confidence level from 0.0 to 1.0.
         reasoning: AI reasoning for the assessment.
+        source_url: URL of the page where evidence was found.
+        source_page_title: Title of the source page.
     """
 
     indicator_code: str
@@ -50,6 +75,8 @@ class FtseResult:
     evidence: str
     confidence: float
     reasoning: str
+    source_url: str = ""
+    source_page_title: str = ""
 
 
 _THEME_KEYWORDS: dict[str, list[str]] = {
@@ -203,9 +230,8 @@ async def _analyze_theme(
                     break
                 except Exception as retry_exc:
                     is_retryable = (
-                        "429" in str(retry_exc)
-                        or "timeout" in str(retry_exc).lower()
-                        or "503" in str(retry_exc)
+                        isinstance(retry_exc, (RateLimitError, APITimeoutError))
+                        or (isinstance(retry_exc, APIStatusError) and retry_exc.status_code in (429, 502, 503))
                     )
                     if is_retryable and attempt < max_retries - 1:
                         wait_time = (attempt + 1) * 5
@@ -252,6 +278,8 @@ async def _analyze_theme(
                         evidence=str(r.get("evidence", "")),
                         confidence=float(r.get("confidence", 0.0)),
                         reasoning=str(r.get("reasoning", "")),
+                        source_url=_validate_source_url(str(r.get("source_url", ""))),
+                        source_page_title=str(r.get("source_page_title", ""))[:500],
                     ))
                 else:
                     logger.warning(
@@ -364,6 +392,9 @@ def _merge_results(
     for r in round2:
         existing = best.get(r.indicator_code)
         if existing is None or r.score > existing.score:
+            if existing and not r.source_url and existing.source_url:
+                from dataclasses import replace
+                r = replace(r, source_url=existing.source_url, source_page_title=existing.source_page_title)
             best[r.indicator_code] = r
 
     return list(best.values())

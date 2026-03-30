@@ -1,6 +1,7 @@
 """Main analysis orchestrator — coordinates crawl, analysis, scoring, and storage."""
 
 import asyncio
+import json
 import logging
 import re
 from datetime import datetime, timezone
@@ -314,8 +315,13 @@ def _update_status(
     if status == "completed" or status == "failed":
         update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
 
-    supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
-    logger.info("Analysis %s status updated to: %s", analysis_id, status)
+    try:
+        supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
+        logger.info("Analysis %s status updated to: %s", analysis_id, status)
+    except Exception as exc:
+        if status in ("completed", "failed"):
+            raise
+        logger.warning("Failed to update status for %s: %s", analysis_id, exc)
 
 
 def _update_message(
@@ -330,9 +336,12 @@ def _update_message(
         analysis_id: UUID of the analysis.
         message: Human-readable progress message.
     """
-    supabase.table("analyses").update(
-        {"status_message": message}
-    ).eq("id", analysis_id).execute()
+    try:
+        supabase.table("analyses").update(
+            {"status_message": message}
+        ).eq("id", analysis_id).execute()
+    except Exception as exc:
+        logger.warning("Failed to update progress message for %s: %s", analysis_id, exc)
 
 
 def _save_ftse_results(
@@ -377,6 +386,8 @@ def _save_ftse_results(
             "evidence": r.evidence or None,
             "confidence": r.confidence,
             "ai_reasoning": r.reasoning or None,
+            "source_url": r.source_url or None,
+            "source_page_title": r.source_page_title or None,
         }
 
     rows = list(seen.values())
@@ -481,7 +492,7 @@ def _save_sitemap(
         analysis_id: UUID of the analysis.
         recommendations: List of SitemapRecommendation.
     """
-    rows: list[dict[str, str | None]] = []
+    rows: list[dict] = []
     for rec in recommendations:
         rows.append({
             "analysis_id": analysis_id,
@@ -489,6 +500,11 @@ def _save_sitemap(
             "recommended_page_path": rec.page_path,
             "reason": rec.reason,
             "priority": rec.priority,
+            "estimated_impact": json.dumps({
+                "type": rec.rec_type,
+                "existing_page_url": rec.existing_page_url,
+                "data_to_add": rec.data_to_add,
+            }),
         })
 
     if rows:
@@ -610,11 +626,17 @@ async def run_analysis(
         def _crawl_progress(msg: str) -> None:
             _update_message(supabase, analysis_id, msg)
 
-        crawl_result = await crawl_website(
-            url=company_url,
-            max_pages=settings.MAX_PAGES_TO_CRAWL,
-            on_progress=_crawl_progress,
-        )
+        try:
+            crawl_result = await asyncio.wait_for(
+                crawl_website(
+                    url=company_url,
+                    max_pages=settings.MAX_PAGES_TO_CRAWL,
+                    on_progress=_crawl_progress,
+                ),
+                timeout=600.0,
+            )
+        except asyncio.TimeoutError:
+            raise RuntimeError("Website crawl timed out after 10 minutes")
 
         # Extract company name from homepage title
         company_name = _extract_company_name(
@@ -622,10 +644,25 @@ async def run_analysis(
             base_url=company_url,
         )
 
+        crawled_pages_data = [
+            {"url": p.url, "title": p.title}
+            for p in crawl_result.pages
+        ]
+        pdf_data = [
+            {"url": d.url, "filename": d.filename, "chars": d.chars_extracted, "pages": d.pages_in_pdf}
+            for d in crawl_result.pdf_downloads
+        ]
+
         supabase.table("analyses").update({
             "pages_crawled": crawl_result.pages_crawled,
             "company_name": company_name,
             "status_message": f"Crawled {crawl_result.pages_crawled} pages from {company_name or company_url}",
+            "crawled_urls": {
+                "all_discovered": crawl_result.all_discovered_urls[:500],
+                "selected": crawl_result.selected_urls[:100],
+                "pages": crawled_pages_data[:100],
+                "pdfs": pdf_data[:20],
+            },
         }).eq("id", analysis_id).execute()
 
         # Separate HTML pages from PDF pages
@@ -805,10 +842,17 @@ async def run_analysis(
         _update_message(supabase, analysis_id, "Generating sitemap recommendations...")
         ftse_gaps = _extract_ftse_gaps(ftse_results, indicators_by_theme)
 
+        existing_pages = [
+            {"url": p.url, "title": p.title}
+            for p in crawl_result.pages
+            if not p.title.startswith("PDF:")
+        ]
+
         recommendations = await generate_sitemap(
             openai_client=openai_client,
             ftse_gaps=ftse_gaps,
             ifrs_gaps=[],
+            existing_pages=existing_pages,
         )
         _save_sitemap(supabase, analysis_id, recommendations)
 

@@ -229,6 +229,7 @@ async def get_analysis(
             supabase.table("analysis_ftse_results")
             .select(
                 "id, status, score, evidence, confidence, ai_reasoning, "
+                "source_url, source_page_title, "
                 "ftse_indicators(indicator_code, indicator_name, theme_id, "
                 "ftse_themes(theme_name, pillar, pillar_code))"
             )
@@ -239,7 +240,7 @@ async def get_analysis(
         logger.warning("Join query failed for FTSE results, using simple query")
         ftse_results = (
             supabase.table("analysis_ftse_results")
-            .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning")
+            .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title")
             .eq("analysis_id", analysis_id_str)
             .execute()
         )

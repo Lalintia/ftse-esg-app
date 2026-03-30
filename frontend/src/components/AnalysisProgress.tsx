@@ -40,7 +40,7 @@ export const AnalysisProgress = ({ status, pagesCrawled, statusMessage }: Analys
 
   if (status === 'failed') {
     return (
-      <div className="flex flex-col items-center gap-6 py-20">
+      <div role="alert" className="flex flex-col items-center gap-6 py-20">
         <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-300 bg-red-50">
           <span className="text-xl font-bold text-red-600">!</span>
         </div>
@@ -78,6 +78,7 @@ export const AnalysisProgress = ({ status, pagesCrawled, statusMessage }: Analys
           aria-valuenow={animatedProgress}
           aria-valuemin={0}
           aria-valuemax={100}
+          aria-label={`Analysis progress: ${animatedProgress}%`}
         >
           <div
             className="h-full rounded-full bg-foreground transition-all duration-700 ease-out"
@@ -89,7 +90,7 @@ export const AnalysisProgress = ({ status, pagesCrawled, statusMessage }: Analys
           {pagesCrawled > 0 && <span>{pagesCrawled} pages</span>}
         </div>
         {statusMessage && (
-          <p className="mt-2 text-center text-xs text-muted-foreground animate-pulse">
+          <p aria-live="polite" aria-atomic="true" className="mt-2 text-center text-xs text-muted-foreground animate-pulse">
             {statusMessage}
           </p>
         )}

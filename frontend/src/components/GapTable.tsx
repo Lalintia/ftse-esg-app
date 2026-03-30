@@ -103,8 +103,13 @@ export const FtseGapTable = ({ results }: FtseGapTableProps) => {
             return (
               <TableRowGroup key={theme.themeName}>
                 <TableRow
+                  tabIndex={0}
+                  role="button"
+                  aria-expanded={isExpanded}
+                  aria-label={`${theme.pillar} / ${theme.themeName}`}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => toggleTheme(theme.themeName)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(theme.themeName); } }}
                 >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
@@ -234,8 +239,13 @@ export const IfrsGapTable = ({ results }: IfrsGapTableProps) => {
             return (
               <TableRowGroup key={key}>
                 <TableRow
+                  tabIndex={0}
+                  role="button"
+                  aria-expanded={isExpanded}
+                  aria-label={key}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => toggleChapter(key)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleChapter(key); } }}
                 >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">

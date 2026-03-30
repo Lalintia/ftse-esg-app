@@ -97,6 +97,7 @@ ESG_KEYWORDS: list[str] = [
     "csr",
     "governance",
     "environment",
+    "environmental",
     "climate",
     "safety",
     "human-rights",
@@ -167,6 +168,13 @@ _CORE_REPORT_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"56-1", re.IGNORECASE),
     re.compile(r"one[_-]?report", re.IGNORECASE),
     re.compile(r"integrated[_-]?report", re.IGNORECASE),
+    re.compile(r"corporate[_-]?governance", re.IGNORECASE),
+    re.compile(r"cg[_-]?report", re.IGNORECASE),
+    re.compile(r"anti[_-]?corruption", re.IGNORECASE),
+    re.compile(r"human[_-]?rights", re.IGNORECASE),
+    re.compile(r"environment(al)?[_-]?policy", re.IGNORECASE),
+    re.compile(r"supplier[_-]?code", re.IGNORECASE),
+    re.compile(r"code[_-]?of[_-]?conduct", re.IGNORECASE),
 ]
 
 # Skip Thai language PDFs — prefer English versions
@@ -275,6 +283,8 @@ class CrawlResult:
     pages_crawled: int
     pdf_downloads: list[PdfDownloadInfo] = dataclass_field(default_factory=list)
     html_pages_scraped: int = 0
+    all_discovered_urls: list[str] = dataclass_field(default_factory=list)
+    selected_urls: list[str] = dataclass_field(default_factory=list)
 
 
 def _get_domain(url: str) -> str:
@@ -774,11 +784,16 @@ async def _download_pdf_via_playwright(url: str) -> bytes | None:
     Some websites block non-browser HTTP clients (returning 405/404).
     This uses Playwright's request API which sends real browser headers.
     """
+    if not is_safe_url(url):
+        logger.warning("SSRF blocked in Playwright PDF download: %s", url)
+        return None
+
     try:
         from playwright.async_api import async_playwright
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
+            context = None
             try:
                 context = await browser.new_context()
                 response = await context.request.get(url, timeout=60000)
@@ -789,6 +804,8 @@ async def _download_pdf_via_playwright(url: str) -> bytes | None:
                         return pdf_bytes
                 logger.info("Playwright API download got status %d for %s", response.status, url)
             finally:
+                if context:
+                    await context.close()
                 await browser.close()
     except Exception as exc:
         logger.warning("Playwright PDF download failed for %s: %s", url, exc)
@@ -1152,6 +1169,55 @@ async def crawl_website(
 
                 all_urls = _deduplicate_urls(all_urls)
 
+            # Step 2b: Crawl ESG subdomains (investor, sustainability, etc.)
+            root_domain = _get_root_domain(base_domain)
+            parsed_base = urlparse(url)
+            _SUB_PREFIXES = ["investor", "ir", "sustainability", "esg"]
+            for prefix in _SUB_PREFIXES:
+                sub_host = f"{prefix}.{root_domain}"
+                if sub_host == base_domain:
+                    continue
+                sub_home = f"{parsed_base.scheme}://{sub_host}"
+                if not is_safe_url(sub_home):
+                    continue
+                try:
+                    _progress(f"Checking subdomain: {sub_host}...")
+                    resp = await page.goto(
+                        sub_home,
+                        wait_until="domcontentloaded",
+                        timeout=_PAGE_TIMEOUT_MS,
+                    )
+                    if resp and resp.status < 400:
+                        sub_links = await _extract_links_from_page(page, sub_home, base_domain)
+                        new_links = [lnk for lnk in sub_links if lnk not in set(all_urls)]
+                        if new_links:
+                            all_urls.append(sub_home)
+                            all_urls.extend(new_links)
+                            logger.info(
+                                "Subdomain %s: discovered %d new links",
+                                sub_host, len(new_links),
+                            )
+                            # Level-2 for subdomain: visit ESG-relevant subpages
+                            sub_level2 = [
+                                u for u in new_links
+                                if _is_esg_relevant(u) and not u.lower().endswith(".pdf")
+                            ][:3]
+                            for sub_l2 in sub_level2:
+                                try:
+                                    await page.goto(
+                                        sub_l2,
+                                        wait_until="domcontentloaded",
+                                        timeout=_PAGE_TIMEOUT_MS,
+                                    )
+                                    l2_links = await _extract_links_from_page(page, sub_l2, base_domain)
+                                    all_urls.extend(l2_links)
+                                except Exception as exc:
+                                    logger.debug("Subdomain level-2 failed %s: %s", sub_l2, exc)
+                except Exception as exc:
+                    logger.debug("Subdomain %s not reachable: %s", sub_host, exc)
+
+            all_urls = _deduplicate_urls(all_urls)
+
             total_pages_found = len(all_urls)
             logger.info("Discovered %d pages for %s", total_pages_found, url)
 
@@ -1283,4 +1349,6 @@ async def crawl_website(
         pages_crawled=len(pages),
         pdf_downloads=pdf_download_infos,
         html_pages_scraped=html_count,
+        all_discovered_urls=all_urls,
+        selected_urls=selected_urls,
     )

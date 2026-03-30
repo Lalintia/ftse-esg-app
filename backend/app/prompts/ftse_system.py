@@ -164,11 +164,20 @@ Respond with a JSON object:
       "score": 4,
       "evidence": "The company reports Scope 1 and 2 GHG emissions of 45,000 tCO2e with a 42% reduction target by 2030.",
       "confidence": 0.85,
-      "reasoning": "Direct quantitative GHG disclosure with specific targets — matches this climate indicator."
+      "reasoning": "Direct quantitative GHG disclosure with specific targets — matches this climate indicator.",
+      "source_url": "https://example.com/sustainability/climate-change",
+      "source_page_title": "Climate Change & GHG Emissions"
     }
   ]
 }
 ```
+
+## IMPORTANT: Source Attribution
+- For EVERY indicator with status "found" or "partial", you MUST include `source_url` and `source_page_title`.
+- Look for the "Source:" line at the top of each page section in the website content — that is the URL.
+- If evidence spans multiple pages, use the page with the STRONGEST evidence.
+- Use the EXACT URL from the "Source:" line — do not modify or fabricate URLs.
+- If status is "missing", set both to empty string "".
 
 Return ONLY status values: "found", "partial", or "missing". No other values.
 Return exactly one result per indicator. Do not skip any.

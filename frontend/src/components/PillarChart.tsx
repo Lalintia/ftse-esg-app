@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
   RadarChart,
   PolarGrid,
@@ -20,11 +21,11 @@ export const PillarChart = ({
   social,
   governance,
 }: PillarChartProps) => {
-  const data = [
+  const data = useMemo(() => [
     { pillar: 'Environmental', score: environmental, fullMark: 5 },
     { pillar: 'Social', score: social, fullMark: 5 },
     { pillar: 'Governance', score: governance, fullMark: 5 },
-  ];
+  ], [environmental, social, governance]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>

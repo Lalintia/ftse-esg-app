@@ -48,6 +48,8 @@ export interface FtseResultItem {
   evidence: string | null;
   confidence: number | null;
   ai_reasoning: string | null;
+  source_url: string | null;
+  source_page_title: string | null;
   ftse_indicators: FtseIndicatorInfo;
 }
 
@@ -77,6 +79,31 @@ export interface SitemapRecommendation {
   recommended_page_path?: string | null;
   reason: string;
   priority: 'high' | 'medium' | 'low';
+  estimated_impact?: string | null;
+}
+
+export interface RecommendationMeta {
+  type: 'new' | 'enhance';
+  existing_page_url: string;
+  data_to_add: string[];
+}
+
+export function parseRecommendationMeta(rec: SitemapRecommendation): RecommendationMeta {
+  if (!rec.estimated_impact) {
+    return { type: 'new', existing_page_url: '', data_to_add: [] };
+  }
+  try {
+    const parsed = JSON.parse(rec.estimated_impact);
+    return {
+      type: parsed.type === 'enhance' ? 'enhance' : 'new',
+      existing_page_url: parsed.existing_page_url || '',
+      data_to_add: Array.isArray(parsed.data_to_add)
+        ? parsed.data_to_add.filter((item: unknown): item is string => typeof item === 'string').map((item: string) => item.slice(0, 500))
+        : [],
+    };
+  } catch {
+    return { type: 'new', existing_page_url: '', data_to_add: [] };
+  }
 }
 
 export interface ThemeSummary {
@@ -93,6 +120,7 @@ export interface AnalysisDetail {
   analysis: AnalysisListItem & {
     subsector_id: string | null;
     theme_summaries?: ThemeSummary[];
+    crawled_urls?: CrawledUrls | null;
   };
   ftse_results: FtseResultItem[];
   ifrs_results: IfrsResultItem[];
@@ -112,3 +140,22 @@ export interface CreateAnalysisResponse {
 
 export type StatusType = 'found' | 'partial' | 'missing';
 export type PriorityType = 'high' | 'medium' | 'low';
+
+export interface CrawledPageInfo {
+  url: string;
+  title: string;
+}
+
+export interface CrawledPdfInfo {
+  url: string;
+  filename: string;
+  chars: number;
+  pages: number;
+}
+
+export interface CrawledUrls {
+  all_discovered: string[];
+  selected: string[];
+  pages: CrawledPageInfo[];
+  pdfs: CrawledPdfInfo[];
+}

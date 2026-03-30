@@ -108,6 +108,7 @@ export default function HistoryPage() {
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                aria-label="Search by company name or URL"
                 placeholder="Search by company..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -149,8 +150,12 @@ export default function HistoryPage() {
                     {filteredAnalyses.map((analysis) => (
                       <TableRow
                         key={analysis.id}
+                        tabIndex={0}
+                        role="link"
+                        aria-label={`View analysis for ${getDisplayName(analysis)}`}
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => router.push(`/analysis/${analysis.id}`)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/analysis/${analysis.id}`); } }}
                       >
                         <TableCell className="font-medium">
                           {getDisplayName(analysis)}

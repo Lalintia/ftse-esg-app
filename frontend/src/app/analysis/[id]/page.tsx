@@ -5,22 +5,29 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   ChevronDown,
-  ChevronRight,
   Globe,
   ExternalLink,
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  LayoutGrid,
-  Minus,
 } from 'lucide-react';
 import { ScoreCard } from '@/components/ScoreCard';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
+import { WebsiteArchitecture } from '@/components/WebsiteArchitecture';
 import { getAnalysis } from '@/lib/api';
-import type { AnalysisDetail, FtseResultItem, SitemapRecommendation, StatusType } from '@/lib/types';
+import type { AnalysisDetail, FtseResultItem, StatusType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 const POLL_INTERVAL_MS = 5000;
+
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
 const IN_PROGRESS_STATUSES = new Set(['pending', 'crawling', 'analyzing', 'scoring']);
 
 interface ThemeGroup {
@@ -100,313 +107,7 @@ const EmptyState = ({ message }: { message: string }) => (
   </div>
 );
 
-/* ─── Website Blueprint ─── */
-
-interface BlueprintItem {
-  section: string;
-  pageTitle: string;
-  pagePath: string;
-  status: StatusType;
-  ftseImpact: string;
-  priority: 'high' | 'medium' | 'low';
-  description: string;
-}
-
-const ESG_BLUEPRINT_TEMPLATE: Omit<BlueprintItem, 'status'>[] = [
-  // ESG Overview
-  { section: 'ESG Overview', pageTitle: 'ESG Highlights', pagePath: '/esg', ftseImpact: 'Overall +0.3', priority: 'high', description: 'Key ESG visual, company ESG index, highlight performance, key targets & achievements' },
-  { section: 'ESG Overview', pageTitle: 'ESG Calendar', pagePath: '/esg/calendar', ftseImpact: 'Overall +0.1', priority: 'low', description: 'Upcoming ESG events, reporting dates, stakeholder meetings' },
-  { section: 'ESG Overview', pageTitle: 'ESG Objectives & Targets', pagePath: '/esg/objectives', ftseImpact: 'Overall +0.2', priority: 'high', description: 'Key targets, achievement progress, measurable KPIs' },
-  // Sustainability
-  { section: 'Sustainability', pageTitle: 'Sustainability Framework', pagePath: '/sustainability', ftseImpact: 'Overall +0.2', priority: 'high', description: 'Introduction, framework, governance, president advisory' },
-  { section: 'Sustainability', pageTitle: 'SDGs Alignment', pagePath: '/sustainability/sdgs', ftseImpact: 'Overall +0.2', priority: 'medium', description: 'Contribution to UN Sustainable Development Goals & ESG alignment' },
-  { section: 'Sustainability', pageTitle: 'Materiality Assessment', pagePath: '/sustainability/materiality', ftseImpact: 'Overall +0.3', priority: 'high', description: 'Material ESG topics identification and prioritization matrix' },
-  { section: 'Sustainability', pageTitle: 'Stakeholder Engagement', pagePath: '/sustainability/stakeholders', ftseImpact: 'Social +0.2', priority: 'medium', description: 'Stakeholder identification, engagement approach, feedback channels' },
-  // Environment
-  { section: 'Environment', pageTitle: 'Climate Change', pagePath: '/sustainability/environment/climate-change', ftseImpact: 'Environmental +0.5', priority: 'high', description: 'GHG emissions, climate risk, TCFD alignment, reduction targets' },
-  { section: 'Environment', pageTitle: 'Biodiversity', pagePath: '/sustainability/environment/biodiversity', ftseImpact: 'Environmental +0.3', priority: 'medium', description: 'Biodiversity impact, conservation programs, land use management' },
-  { section: 'Environment', pageTitle: 'Water Security', pagePath: '/sustainability/environment/water', ftseImpact: 'Environmental +0.3', priority: 'medium', description: 'Water consumption, recycling rate, water risk assessment' },
-  { section: 'Environment', pageTitle: 'Supply Chain (Environment)', pagePath: '/sustainability/environment/supply-chain', ftseImpact: 'Environmental +0.2', priority: 'medium', description: 'Environmental criteria for suppliers, supply chain emissions' },
-  // Social
-  { section: 'Social', pageTitle: 'Corporate Responsibility', pagePath: '/sustainability/social/responsibility', ftseImpact: 'Social +0.3', priority: 'high', description: 'Community engagement, social programs, impact measurement' },
-  { section: 'Social', pageTitle: 'Health and Safety', pagePath: '/sustainability/social/health-safety', ftseImpact: 'Social +0.4', priority: 'high', description: 'OHS policy, incident rates, safety programs, certifications' },
-  { section: 'Social', pageTitle: 'Human Rights', pagePath: '/sustainability/social/human-rights', ftseImpact: 'Social +0.3', priority: 'high', description: 'Human rights policy, due diligence, community impact assessment' },
-  { section: 'Social', pageTitle: 'Labor Standards', pagePath: '/sustainability/social/labor', ftseImpact: 'Social +0.3', priority: 'medium', description: 'Labor practices, diversity & inclusion, fair wages, working conditions' },
-  { section: 'Social', pageTitle: 'Supply Chain (Social)', pagePath: '/sustainability/social/supply-chain', ftseImpact: 'Social +0.2', priority: 'medium', description: 'Social criteria for suppliers, labor audits, fair trade' },
-  // Governance
-  { section: 'Governance', pageTitle: 'Anti-corruption', pagePath: '/governance/anti-corruption', ftseImpact: 'Governance +0.4', priority: 'high', description: 'Anti-corruption policy, whistleblower channels, training programs' },
-  { section: 'Governance', pageTitle: 'Corporate Governance', pagePath: '/governance/corporate', ftseImpact: 'Governance +0.4', priority: 'high', description: 'Board structure, independence, committee charters, governance policies' },
-  { section: 'Governance', pageTitle: 'Risk Management', pagePath: '/governance/risk', ftseImpact: 'Governance +0.3', priority: 'high', description: 'Enterprise risk framework, ESG risk integration, mitigation strategies' },
-  { section: 'Governance', pageTitle: 'Tax Transparency', pagePath: '/governance/tax', ftseImpact: 'Governance +0.2', priority: 'medium', description: 'Tax strategy, country-by-country reporting, tax governance' },
-  // Reporting
-  { section: 'Reporting', pageTitle: 'Sustainability Report', pagePath: '/reports/sustainability', ftseImpact: 'Overall +0.3', priority: 'high', description: 'Annual sustainability/ESG report (PDF download + online flipbook)' },
-  { section: 'Reporting', pageTitle: 'ESG Data & Factsheet', pagePath: '/reports/esg-data', ftseImpact: 'Overall +0.2', priority: 'medium', description: 'ESG performance data, KPI summary, downloadable factsheet' },
-  // Contact
-  { section: 'Contact', pageTitle: 'ESG Contact / CTA', pagePath: '/contact/esg', ftseImpact: 'Overall +0.1', priority: 'low', description: 'ESG inquiry form, sustainability team contact, FAQ' },
-];
-
-const SECTION_ORDER = ['ESG Overview', 'Sustainability', 'Environment', 'Social', 'Governance', 'Reporting', 'Contact'];
-
-const SECTION_ICONS: Record<string, string> = {
-  'ESG Overview': '◈',
-  'Sustainability': '◉',
-  'Environment': '●',
-  'Social': '●',
-  'Governance': '●',
-  'Reporting': '◎',
-  'Contact': '○',
-};
-
-const SECTION_PILLAR_MAP: Record<string, string> = {
-  'ESG Overview': 'Overall',
-  'Sustainability': 'Overall',
-  'Environment': 'Environmental',
-  'Social': 'Social',
-  'Governance': 'Governance',
-  'Reporting': 'Overall',
-  'Contact': 'Overall',
-};
-
-function matchBlueprintToSitemap(
-  recommendations: SitemapRecommendation[],
-  crawledPages: number,
-): BlueprintItem[] {
-  const recTexts = recommendations.map((r) =>
-    `${r.page_title ?? ''} ${r.recommended_page_title ?? ''} ${r.reason ?? ''} ${r.page_path ?? ''} ${r.recommended_page_path ?? ''}`.toLowerCase()
-  );
-
-  return ESG_BLUEPRINT_TEMPLATE.map((template) => {
-    const keywords = template.pageTitle.toLowerCase().split(/\s+/);
-    const pathKeywords = template.pagePath.toLowerCase().split('/').filter(Boolean);
-    const allKeywords = [...keywords, ...pathKeywords];
-
-    const matchScore = recTexts.reduce((best, text, idx) => {
-      const hits = allKeywords.filter((kw) => text.includes(kw)).length;
-      const ratio = hits / allKeywords.length;
-      return ratio > best.ratio ? { ratio, idx } : best;
-    }, { ratio: 0, idx: -1 });
-
-    let status: StatusType = 'missing';
-    if (matchScore.ratio >= 0.4) {
-      const rec = recommendations[matchScore.idx];
-      if (rec.page_path || rec.page_title) {
-        status = rec.priority === 'low' ? 'found' : 'partial';
-      }
-    } else if (crawledPages > 10 && matchScore.ratio >= 0.2) {
-      status = 'partial';
-    }
-
-    return { ...template, status };
-  });
-}
-
-interface BlueprintSectionGroup {
-  section: string;
-  items: BlueprintItem[];
-  found: number;
-  partial: number;
-  missing: number;
-  total: number;
-}
-
-function groupBlueprintBySection(items: BlueprintItem[]): BlueprintSectionGroup[] {
-  const map = new Map<string, BlueprintItem[]>();
-  for (const item of items) {
-    if (!map.has(item.section)) { map.set(item.section, []); }
-    map.get(item.section)!.push(item);
-  }
-
-  return SECTION_ORDER
-    .filter((s) => map.has(s))
-    .map((section) => {
-      const sectionItems = map.get(section)!;
-      return {
-        section,
-        items: sectionItems,
-        found: sectionItems.filter((i) => i.status === 'found').length,
-        partial: sectionItems.filter((i) => i.status === 'partial').length,
-        missing: sectionItems.filter((i) => i.status === 'missing').length,
-        total: sectionItems.length,
-      };
-    });
-}
-
-const BlueprintCompleteness = ({ groups }: { groups: BlueprintSectionGroup[] }) => {
-  const total = groups.reduce((s, g) => s + g.total, 0);
-  const found = groups.reduce((s, g) => s + g.found, 0);
-  const partial = groups.reduce((s, g) => s + g.partial, 0);
-  const pct = total > 0 ? Math.round(((found + partial * 0.5) / total) * 100) : 0;
-
-  return (
-    <div className="mb-8 rounded-lg border bg-card p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <LayoutGrid className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <h3 className="text-sm font-semibold">Website Completeness</h3>
-            <p className="text-[11px] text-muted-foreground">
-              {found + partial}/{total} sections covered — based on ESG best-practice template
-            </p>
-          </div>
-        </div>
-        <span className={cn(
-          'text-2xl font-bold tracking-tight',
-          pct >= 70 ? 'text-[#1a5632]' : pct >= 40 ? 'text-[#92400e]' : 'text-[#991b1b]',
-        )}>
-          {pct}%
-        </span>
-      </div>
-      {/* Progress bar */}
-      <div className="h-2 w-full rounded-full bg-[#e8e8e3] overflow-hidden">
-        <div className="flex h-full">
-          <div
-            className="h-full bg-[#1a5632] transition-all duration-700 ease-out"
-            style={{ width: `${(found / total) * 100}%` }}
-          />
-          <div
-            className="h-full bg-[#d4a017] transition-all duration-700 ease-out"
-            style={{ width: `${(partial / total) * 100}%` }}
-          />
-        </div>
-      </div>
-      <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#1a5632]" /> {found} found
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#d4a017]" /> {partial} partial
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#e8e8e3] border border-[#d4d4cf]" /> {total - found - partial} missing
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const BlueprintSectionCard = ({ group }: { group: BlueprintSectionGroup }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const completePct = group.total > 0
-    ? Math.round(((group.found + group.partial * 0.5) / group.total) * 100)
-    : 0;
-
-  return (
-    <div className="rounded-lg border bg-card transition-all hover:border-foreground/20">
-      <button
-        type="button"
-        onClick={() => setIsExpanded(!isExpanded)}
-        aria-expanded={isExpanded}
-        className="flex w-full items-center justify-between p-4 text-left"
-      >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-muted-foreground text-xs select-none">{SECTION_ICONS[group.section] ?? '○'}</span>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-semibold truncate">{group.section}</h4>
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                {SECTION_PILLAR_MAP[group.section]}
-              </span>
-            </div>
-            <div className="mt-1.5 flex items-center gap-2">
-              {/* Mini progress bar */}
-              <div className="h-1 w-20 rounded-full bg-[#e8e8e3] overflow-hidden">
-                <div className="flex h-full">
-                  <div className="h-full bg-[#1a5632]" style={{ width: `${(group.found / group.total) * 100}%` }} />
-                  <div className="h-full bg-[#d4a017]" style={{ width: `${(group.partial / group.total) * 100}%` }} />
-                </div>
-              </div>
-              <span className="text-[11px] text-muted-foreground">
-                {group.found + group.partial}/{group.total}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 shrink-0 ml-3">
-          {group.missing > 0 && (
-            <span className="rounded-full bg-[#fef2f2] px-2 py-0.5 text-[10px] font-medium text-[#991b1b]">
-              {group.missing} missing
-            </span>
-          )}
-          <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform', isExpanded && 'rotate-180')} />
-        </div>
-      </button>
-
-      {isExpanded && (
-        <div className="border-t px-4 py-3">
-          <div className="space-y-1.5">
-            {group.items.map((item) => (
-              <div
-                key={item.pagePath}
-                className={cn(
-                  'flex items-start gap-3 rounded-md px-3 py-2.5 transition-colors',
-                  item.status === 'missing'
-                    ? 'bg-[#fef2f2]/50 border border-dashed border-[#991b1b]/20'
-                    : item.status === 'partial'
-                      ? 'bg-[#fffbeb]/50'
-                      : 'bg-muted/30',
-                )}
-              >
-                <StatusIcon status={item.status} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-semibold">{item.pageTitle}</span>
-                    <span className={cn(
-                      'rounded-full px-1.5 py-px text-[9px] font-medium',
-                      item.priority === 'high' && 'bg-[#fef2f2] text-[#991b1b]',
-                      item.priority === 'medium' && 'bg-[#fffbeb] text-[#92400e]',
-                      item.priority === 'low' && 'bg-[#f0f4ff] text-[#3b5998]',
-                    )}>
-                      {item.priority}
-                    </span>
-                    {item.status === 'missing' && (
-                      <span className="text-[9px] font-medium text-[#1a5632] bg-[#ecfdf5] px-1.5 py-px rounded-full">
-                        {item.ftseImpact}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{item.pagePath}</p>
-                  {item.status === 'missing' && (
-                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const WebsiteBlueprint = ({
-  recommendations,
-  pagesCrawled,
-}: {
-  recommendations: SitemapRecommendation[];
-  pagesCrawled: number;
-}) => {
-  const blueprintItems = useMemo(
-    () => matchBlueprintToSitemap(recommendations, pagesCrawled),
-    [recommendations, pagesCrawled],
-  );
-  const sectionGroups = useMemo(
-    () => groupBlueprintBySection(blueprintItems),
-    [blueprintItems],
-  );
-
-  return (
-    <div>
-      <BlueprintCompleteness groups={sectionGroups} />
-      <div className="space-y-3">
-        {sectionGroups.map((group) => (
-          <BlueprintSectionCard key={group.section} group={group} />
-        ))}
-      </div>
-    </div>
-  );
-};
+/* ─── Theme Card ─── */
 
 const ThemeCard = ({ group }: { group: ThemeGroup }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -459,6 +160,17 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
                       {r.evidence}
                     </p>
                   )}
+                  {r.source_url && isSafeUrl(r.source_url) && (
+                    <a
+                      href={r.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-600 hover:text-emerald-700 hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      {r.source_page_title || 'View source'}
+                    </a>
+                  )}
                 </div>
                 {r.score !== null && (
                   <span className="shrink-0 text-xs font-semibold">{r.score}/5</span>
@@ -480,26 +192,33 @@ export default function AnalysisDashboard({
   const { id } = use(params);
   const [data, setData] = useState<AnalysisDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'ftse' | 'blueprint' | 'sitemap'>('ftse');
+  const [activeTab, setActiveTab] = useState<'ftse' | 'architecture'>('ftse');
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
       const result = await getAnalysis(id);
       setData(result);
+      setError(null);
       return result.analysis.status;
-    } catch {
-      setError('Failed to load analysis. It may not exist.');
-      return 'failed';
+    } catch (err) {
+      if (err instanceof Error && 'statusCode' in err && (err as { statusCode: number }).statusCode === 404) {
+        setError('Analysis not found.');
+        return 'failed';
+      }
+      // Transient network error — keep polling
+      return data?.analysis.status ?? 'pending';
     }
-  }, [id]);
+  }, [id, data?.analysis.status]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
 
     const poll = async () => {
+      if (cancelled) { return; }
       const status = await fetchData();
-      if (IN_PROGRESS_STATUSES.has(status)) {
+      if (!cancelled && IN_PROGRESS_STATUSES.has(status)) {
         timer = setTimeout(poll, POLL_INTERVAL_MS);
       }
     };
@@ -507,11 +226,12 @@ export default function AnalysisDashboard({
     poll();
 
     return () => {
+      cancelled = true;
       if (timer) { clearTimeout(timer); }
     };
   }, [fetchData]);
 
-  const ftseResults = data?.ftse_results ?? [];
+  const ftseResults = useMemo(() => data?.ftse_results ?? [], [data?.ftse_results]);
   const themeGroups = useMemo(() => groupByTheme(ftseResults), [ftseResults]);
   const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
 
@@ -530,8 +250,8 @@ export default function AnalysisDashboard({
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+      <div role="status" aria-label="Loading analysis" className="flex items-center justify-center py-32">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" aria-hidden="true" />
       </div>
     );
   }
@@ -563,8 +283,7 @@ export default function AnalysisDashboard({
 
   const tabs = [
     { key: 'ftse' as const, label: 'FTSE Themes', count: ftseResults.length },
-    { key: 'blueprint' as const, label: 'Website Blueprint', count: ESG_BLUEPRINT_TEMPLATE.length },
-    { key: 'sitemap' as const, label: 'Sitemap', count: sitemap_recommendations.length },
+    { key: 'architecture' as const, label: 'Website Architecture', count: sitemap_recommendations.length },
   ];
 
   return (
@@ -685,43 +404,13 @@ export default function AnalysisDashboard({
           </div>
         )}
 
-        {activeTab === 'blueprint' && (
-          <WebsiteBlueprint
+        {activeTab === 'architecture' && (
+          <WebsiteArchitecture
+            crawledUrls={analysis.crawled_urls}
             recommendations={sitemap_recommendations}
-            pagesCrawled={analysis.pages_crawled}
+            companyName={companyDisplayName}
+            ftseResults={ftseResults}
           />
-        )}
-
-        {activeTab === 'sitemap' && (
-          sitemap_recommendations.length > 0 ? (
-            <div className="space-y-2">
-              {sitemap_recommendations.map((item) => {
-                const title = item.recommended_page_title || item.page_title || 'Recommended Page';
-                const path = item.recommended_page_path || item.page_path;
-                return (
-                  <div key={item.id} className="rounded-lg border bg-card p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={cn(
-                        'rounded-full px-2 py-0.5 text-[11px] font-medium',
-                        item.priority === 'high' && 'bg-red-50 text-red-700',
-                        item.priority === 'medium' && 'bg-amber-50 text-amber-700',
-                        item.priority === 'low' && 'bg-blue-50 text-blue-700',
-                      )}>
-                        {item.priority}
-                      </span>
-                      <h4 className="text-sm font-semibold">{title}</h4>
-                    </div>
-                    {path && (
-                      <p className="mb-1.5 font-mono text-xs text-muted-foreground">{path}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground leading-relaxed">{item.reason}</p>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState message="No sitemap recommendations available." />
-          )
         )}
       </div>
     </div>

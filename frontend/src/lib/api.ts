@@ -33,11 +33,17 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new ApiError(
-      response.status,
-      `API Error ${response.status}: ${errorBody}`,
-    );
+    let message = `Request failed with status ${response.status}`;
+    try {
+      const errorBody = await response.text();
+      const parsed = JSON.parse(errorBody);
+      if (parsed.detail && typeof parsed.detail === 'string') {
+        message = parsed.detail;
+      }
+    } catch {
+      // keep default message
+    }
+    throw new ApiError(response.status, message);
   }
 
   return response.json() as Promise<T>;
