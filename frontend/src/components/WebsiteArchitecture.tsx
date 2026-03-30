@@ -17,9 +17,20 @@ interface DomainGroup {
   pages: { url: string; title: string; children: { url: string; title: string }[]; pdfAttachment?: { filename: string; url: string; chars: number; pages: number } }[];
 }
 
-function buildUrlThemeMap(ftseResults: FtseResultItem[]): Map<string, ThemeBadge[]> {
-  const urlThemes = new Map<string, Map<string, ThemeBadge & { _count: number; _total: number }>>();
+function buildUrlThemeMap(
+  ftseResults: FtseResultItem[],
+  themeSummaries?: { theme_name: string; pillar: string; score: number }[],
+): Map<string, ThemeBadge[]> {
+  // Build theme score lookup from theme_summaries (the official 0-5 score)
+  const themeScoreLookup = new Map<string, { score: number; pillar: string }>();
+  if (themeSummaries) {
+    for (const ts of themeSummaries) {
+      themeScoreLookup.set(ts.theme_name, { score: ts.score, pillar: ts.pillar });
+    }
+  }
 
+  // Find which themes are referenced by each URL
+  const urlThemes = new Map<string, Set<string>>();
   for (const r of ftseResults) {
     if (!r.source_url || !r.ftse_indicators?.ftse_themes) {
       continue;
@@ -34,27 +45,25 @@ function buildUrlThemeMap(ftseResults: FtseResultItem[]): Map<string, ThemeBadge
     }
 
     const theme = r.ftse_indicators.ftse_themes.theme_name;
-    const pillar = r.ftse_indicators.ftse_themes.pillar;
-
     if (!urlThemes.has(normalized)) {
-      urlThemes.set(normalized, new Map());
+      urlThemes.set(normalized, new Set());
     }
-    const themes = urlThemes.get(normalized)!;
-    if (!themes.has(theme)) {
-      themes.set(theme, { theme, score: 0, pillar, _count: 0, _total: 0 });
-    }
-    const existing = themes.get(theme)!;
-    existing._count++;
-    existing._total += r.score ?? 0;
+    urlThemes.get(normalized)!.add(theme);
   }
 
+  // Build badges using theme score (not avg indicator score)
   const result = new Map<string, ThemeBadge[]>();
   for (const [url, themes] of urlThemes) {
-    const badges = Array.from(themes.values()).map((b) => ({
-      theme: b.theme,
-      pillar: b.pillar,
-      score: b._count > 0 ? b._total / b._count : 0,
-    }));
+    const badges: ThemeBadge[] = [];
+    for (const theme of themes) {
+      const lookup = themeScoreLookup.get(theme);
+      if (lookup) {
+        badges.push({ theme, score: lookup.score, pillar: lookup.pillar });
+      } else {
+        // Fallback: use first indicator's pillar, score 0
+        badges.push({ theme, score: 0, pillar: 'Environmental' });
+      }
+    }
     result.set(url, badges);
   }
   return result;
@@ -552,11 +561,13 @@ export function WebsiteArchitecture({
   recommendations,
   companyName,
   ftseResults,
+  themeSummaries,
 }: {
   crawledUrls: CrawledUrls | null | undefined;
   recommendations: SitemapRecommendation[];
   companyName: string;
   ftseResults?: FtseResultItem[];
+  themeSummaries?: { theme_name: string; pillar: string; score: number }[];
 }) {
   const domainGroups = useMemo(
     () => (crawledUrls ? groupUrlsByDomain(crawledUrls) : []),
@@ -564,8 +575,8 @@ export function WebsiteArchitecture({
   );
 
   const urlThemeMap = useMemo(
-    () => (ftseResults ? buildUrlThemeMap(ftseResults) : new Map<string, ThemeBadge[]>()),
-    [ftseResults],
+    () => (ftseResults ? buildUrlThemeMap(ftseResults, themeSummaries) : new Map<string, ThemeBadge[]>()),
+    [ftseResults, themeSummaries],
   );
 
   const recStats = useMemo(() => {

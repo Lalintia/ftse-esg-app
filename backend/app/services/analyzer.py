@@ -468,6 +468,19 @@ def _save_scores(
         ftse_scores: Calculated FTSE scores.
         ifrs_scores: Calculated IFRS scores.
     """
+    theme_summaries = [
+        {
+            "theme_name": ts.theme_name,
+            "pillar": ts.pillar,
+            "total": ts.indicators_total,
+            "found": ts.indicators_found,
+            "partial": ts.indicators_partial,
+            "missing": ts.indicators_missing,
+            "score": float(ts.theme_score),
+        }
+        for ts in ftse_scores.theme_scores
+    ]
+
     supabase.table("analyses").update({
         "overall_score": ftse_scores.overall_score,
         "environmental_score": ftse_scores.environmental_score,
@@ -475,6 +488,7 @@ def _save_scores(
         "governance_score": ftse_scores.governance_score,
         "ifrs_s1_score": ifrs_scores.s1_score,
         "ifrs_s2_score": ifrs_scores.s2_score,
+        "theme_summaries": theme_summaries,
     }).eq("id", analysis_id).execute()
 
     logger.info("Saved scores for analysis %s", analysis_id)

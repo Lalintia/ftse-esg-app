@@ -38,15 +38,23 @@ interface ThemeGroup {
   partial: number;
   missing: number;
   avgScore: number;
+  themeScore: number | null;
 }
 
-const groupByTheme = (results: FtseResultItem[]): ThemeGroup[] => {
+const groupByTheme = (results: FtseResultItem[], themeSummaries?: { theme_name: string; score: number }[]): ThemeGroup[] => {
   const map = new Map<string, FtseResultItem[]>();
   for (const r of results) {
     if (!r.ftse_indicators?.ftse_themes) { continue; }
     const theme = r.ftse_indicators.ftse_themes.theme_name;
     if (!map.has(theme)) { map.set(theme, []); }
     map.get(theme)!.push(r);
+  }
+
+  const summaryMap = new Map<string, number>();
+  if (themeSummaries) {
+    for (const ts of themeSummaries) {
+      summaryMap.set(ts.theme_name, ts.score);
+    }
   }
 
   const groups: ThemeGroup[] = [];
@@ -57,7 +65,8 @@ const groupByTheme = (results: FtseResultItem[]): ThemeGroup[] => {
     const missing = items.filter((i) => i.status === 'missing').length;
     const scores = items.map((i) => i.score ?? 0);
     const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-    groups.push({ theme, pillar, results: items, found, partial, missing, avgScore });
+    const themeScore = summaryMap.get(theme) ?? null;
+    groups.push({ theme, pillar, results: items, found, partial, missing, avgScore, themeScore });
   }
 
   return groups;
@@ -133,7 +142,7 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold tracking-tight">
-            {group.avgScore.toFixed(1)}
+            {(group.themeScore ?? group.avgScore).toFixed(1)}
           </span>
           <ChevronDown className={cn(
             'h-4 w-4 text-muted-foreground transition-transform',
@@ -232,7 +241,8 @@ export default function AnalysisDashboard({
   }, [fetchData]);
 
   const ftseResults = useMemo(() => data?.ftse_results ?? [], [data?.ftse_results]);
-  const themeGroups = useMemo(() => groupByTheme(ftseResults), [ftseResults]);
+  const themeSummaries = data?.analysis.theme_summaries;
+  const themeGroups = useMemo(() => groupByTheme(ftseResults, themeSummaries ?? undefined), [ftseResults, themeSummaries]);
   const pillarGroups = useMemo(() => groupByPillar(themeGroups), [themeGroups]);
 
   if (error) {
@@ -410,6 +420,7 @@ export default function AnalysisDashboard({
             recommendations={sitemap_recommendations}
             companyName={companyDisplayName}
             ftseResults={ftseResults}
+            themeSummaries={themeSummaries ?? undefined}
           />
         )}
       </div>
