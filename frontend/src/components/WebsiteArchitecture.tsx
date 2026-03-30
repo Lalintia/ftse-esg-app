@@ -436,34 +436,83 @@ function DomainSection({ group, isCollapsible, urlThemeMap }: { group: DomainGro
           <span className="font-mono text-stone-500">{group.domain}</span>
         </div>
       )}
+      {isOpen && (() => {
+        const esgPages = group.pages.filter((p) => {
+          if (p.isEsg !== false) { return true; }
+          const normalized = p.url.replace(/\/$/, '');
+          if (urlThemeMap?.has(normalized)) { return true; }
+          return p.children.some((c) => {
+            const cn = c.url.replace(/\/$/, '');
+            return c.isEsg !== false || urlThemeMap?.has(cn);
+          });
+        });
+        const otherPages = group.pages.filter((p) => !esgPages.includes(p));
+
+        return (
+          <div className="mt-4 space-y-4">
+            <div className="flex flex-wrap gap-4">
+              {esgPages.map((page) => {
+                const normalizedUrl = page.url.replace(/\/$/, '');
+                const sectionBadges = urlThemeMap?.get(normalizedUrl);
+                return (
+                  <TreeNode
+                    key={page.url}
+                    title={page.title}
+                    isSection
+                    pdfAttachment={page.pdfAttachment}
+                    themeBadges={sectionBadges}
+                  >
+                    {page.children.length > 0 && page.children.map((child) => {
+                      const childNormalized = child.url.replace(/\/$/, '');
+                      const childBadges = urlThemeMap?.get(childNormalized);
+                      const childDimmed = child.isEsg === false && !childBadges;
+                      return (
+                        <li key={child.url}>
+                          <TreeNode title={child.title} isDimmed={childDimmed} themeBadges={childBadges} />
+                        </li>
+                      );
+                    })}
+                  </TreeNode>
+                );
+              })}
+            </div>
+            {otherPages.length > 0 && (
+              <OtherPagesGroup pages={otherPages} />
+            )}
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+function OtherPagesGroup({ pages }: { pages: TreePage[] }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const totalChildren = pages.reduce((sum, p) => sum + p.children.length, 0);
+  const count = pages.length + totalChildren;
+
+  return (
+    <div className="rounded-md border border-stone-100 bg-stone-50/50 px-4 py-2.5">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className="flex items-center gap-2 text-xs text-stone-400 cursor-pointer hover:text-stone-500"
+      >
+        <ChevronDown className={cn('h-3 w-3 transition-transform', isOpen && 'rotate-180')} aria-hidden="true" />
+        <span>Other pages ({count})</span>
+      </button>
       {isOpen && (
-        <div className="mt-4 flex flex-wrap gap-4">
-          {group.pages.map((page) => {
-            const normalizedUrl = page.url.replace(/\/$/, '');
-            const sectionBadges = urlThemeMap?.get(normalizedUrl);
-            const sectionDimmed = page.isEsg === false && !sectionBadges;
-            return (
-              <TreeNode
-                key={page.url}
-                title={page.title}
-                isSection
-                isDimmed={sectionDimmed}
-                pdfAttachment={page.pdfAttachment}
-                themeBadges={sectionBadges}
-              >
-                {page.children.length > 0 && page.children.map((child) => {
-                  const childNormalized = child.url.replace(/\/$/, '');
-                  const childBadges = urlThemeMap?.get(childNormalized);
-                  const childDimmed = child.isEsg === false && !childBadges;
-                  return (
-                    <li key={child.url}>
-                      <TreeNode title={child.title} isDimmed={childDimmed} themeBadges={childBadges} />
-                    </li>
-                  );
-                })}
-              </TreeNode>
-            );
-          })}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {pages.map((page) => (
+            <TreeNode key={page.url} title={page.title} isSection isDimmed>
+              {page.children.length > 0 && page.children.map((child) => (
+                <li key={child.url}>
+                  <TreeNode title={child.title} isDimmed />
+                </li>
+              ))}
+            </TreeNode>
+          ))}
         </div>
       )}
     </div>
