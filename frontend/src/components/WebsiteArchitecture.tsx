@@ -12,9 +12,23 @@ interface ThemeBadge {
   pillar: string;
 }
 
+interface TreeChild {
+  url: string;
+  title: string;
+  isEsg?: boolean;
+}
+
+interface TreePage {
+  url: string;
+  title: string;
+  isEsg?: boolean;
+  children: TreeChild[];
+  pdfAttachment?: { filename: string; url: string; chars: number; pages: number };
+}
+
 interface DomainGroup {
   domain: string;
-  pages: { url: string; title: string; children: { url: string; title: string }[]; pdfAttachment?: { filename: string; url: string; chars: number; pages: number } }[];
+  pages: TreePage[];
 }
 
 function buildUrlThemeMap(
@@ -142,12 +156,26 @@ function groupUrlsByDomain(
     titleCounts.set(page.title, (titleCounts.get(page.title) || 0) + 1);
   }
 
-  const domainMap = new Map<string, Map<string, { url: string; title: string; children: { url: string; title: string }[]; _childTitles?: Set<string> }>>();
+  const domainMap = new Map<string, Map<string, { url: string; title: string; isEsg?: boolean; children: { url: string; title: string; isEsg?: boolean }[]; _childTitles?: Set<string> }>>();
+
+  // Build set of ESG page URLs for quick lookup
+  const esgPageUrls = new Set(crawledUrls.pages.filter((p) => !p.title.startsWith('PDF:')).map((p) => p.url.replace(/\/$/, '')));
+
+  // Combine ESG pages + all discovered URLs
+  const allPages: { url: string; title: string; isEsg: boolean }[] = [];
 
   for (const page of crawledUrls.pages) {
-    if (page.title.startsWith('PDF:')) {
-      continue;
-    }
+    if (page.title.startsWith('PDF:')) { continue; }
+    allPages.push({ url: page.url, title: page.title, isEsg: true });
+  }
+
+  const addedUrls = new Set(crawledUrls.pages.map((p) => p.url.replace(/\/$/, '')));
+  for (const url of crawledUrls.all_discovered) {
+    if (addedUrls.has(url.replace(/\/$/, '')) || url.toLowerCase().endsWith('.pdf')) { continue; }
+    allPages.push({ url, title: '', isEsg: false });
+  }
+
+  for (const page of allPages) {
     try {
       const parsed = new URL(page.url);
       const domain = parsed.hostname;
@@ -159,7 +187,9 @@ function groupUrlsByDomain(
         continue;
       }
 
-      const pageLabel = getPageLabel(page, titleCounts);
+      const pageLabel = page.title
+        ? getPageLabel(page, titleCounts)
+        : pathToLabel(parsed.pathname);
 
       if (!domainMap.has(domain)) {
         domainMap.set(domain, new Map());
@@ -176,6 +206,7 @@ function groupUrlsByDomain(
           sections.set(sectionKey, {
             url: page.url,
             title: sectionTitle,
+            isEsg: page.isEsg,
             children: [],
           });
         }
@@ -187,8 +218,11 @@ function groupUrlsByDomain(
           sections.set(sectionKey, {
             url: `${parsed.origin}/${section}`,
             title: sectionTitle,
+            isEsg: page.isEsg,
             children: [],
           });
+        } else if (page.isEsg) {
+          sections.get(sectionKey)!.isEsg = true;
         }
         const existing = sections.get(sectionKey)!;
         if (!existing._childTitles) {
@@ -199,6 +233,7 @@ function groupUrlsByDomain(
           existing.children.push({
             url: page.url,
             title: pageLabel,
+            isEsg: page.isEsg,
           });
         }
       }
@@ -290,10 +325,11 @@ const PILLAR_BADGE_COLORS: Record<string, string> = {
   Governance: 'bg-purple-100 text-purple-700 border-purple-200',
 };
 
-function TreeNode({ title, isSection, isNew, priority, children, pdfAttachment, tooltip, themeBadges }: {
+function TreeNode({ title, isSection, isNew, isDimmed, priority, children, pdfAttachment, tooltip, themeBadges }: {
   title: string;
   isSection?: boolean;
   isNew?: boolean;
+  isDimmed?: boolean;
   priority?: PriorityType;
   children?: React.ReactNode;
   pdfAttachment?: { filename: string; url: string; chars: number; pages: number };
@@ -303,8 +339,9 @@ function TreeNode({ title, isSection, isNew, priority, children, pdfAttachment, 
   const nodeClass = cn(
     'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-all',
     isSection && 'font-semibold px-4 py-2',
-    !isNew && 'bg-stone-100 border border-stone-200 text-stone-800',
-    !isNew && isSection && 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    !isNew && !isDimmed && 'bg-stone-100 border border-stone-200 text-stone-800',
+    !isNew && !isDimmed && isSection && 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    isDimmed && 'bg-stone-50 border border-stone-100 text-stone-400',
     isNew && priority === 'high' && 'bg-emerald-50/60 border-[1.5px] border-dashed border-emerald-400 text-emerald-700',
     isNew && priority !== 'high' && 'bg-amber-50/60 border-[1.5px] border-dashed border-amber-400 text-amber-700',
   );
@@ -404,20 +441,23 @@ function DomainSection({ group, isCollapsible, urlThemeMap }: { group: DomainGro
           {group.pages.map((page) => {
             const normalizedUrl = page.url.replace(/\/$/, '');
             const sectionBadges = urlThemeMap?.get(normalizedUrl);
+            const sectionDimmed = page.isEsg === false && !sectionBadges;
             return (
               <TreeNode
                 key={page.url}
                 title={page.title}
                 isSection
+                isDimmed={sectionDimmed}
                 pdfAttachment={page.pdfAttachment}
                 themeBadges={sectionBadges}
               >
                 {page.children.length > 0 && page.children.map((child) => {
                   const childNormalized = child.url.replace(/\/$/, '');
                   const childBadges = urlThemeMap?.get(childNormalized);
+                  const childDimmed = child.isEsg === false && !childBadges;
                   return (
                     <li key={child.url}>
-                      <TreeNode title={child.title} themeBadges={childBadges} />
+                      <TreeNode title={child.title} isDimmed={childDimmed} themeBadges={childBadges} />
                     </li>
                   );
                 })}
