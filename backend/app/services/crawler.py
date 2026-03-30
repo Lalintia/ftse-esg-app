@@ -1060,7 +1060,7 @@ async def _discover_report_pdfs(
                     continue
                 absolute_url = urljoin(base_url, link)
                 link_domain = _get_domain(absolute_url)
-                if _is_same_root_domain(link_domain, base_domain) or _is_esg_pdf(absolute_url):
+                if (_is_same_root_domain(link_domain, base_domain) or _is_esg_pdf(absolute_url)) and is_safe_url(absolute_url):
                     discovered_pdfs.add(absolute_url)
 
             logger.info(
@@ -1189,7 +1189,8 @@ async def crawl_website(
                     )
                     if resp and resp.status < 400:
                         sub_links = await _extract_links_from_page(page, sub_home, base_domain)
-                        new_links = [lnk for lnk in sub_links if lnk not in set(all_urls)]
+                        existing_set = set(u.rstrip("/") for u in all_urls)
+                        new_links = [lnk for lnk in sub_links if lnk.rstrip("/") not in existing_set]
                         if new_links:
                             all_urls.append(sub_home)
                             all_urls.extend(new_links)

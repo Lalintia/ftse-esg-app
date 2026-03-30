@@ -204,11 +204,14 @@ export default function AnalysisDashboard({
   const [activeTab, setActiveTab] = useState<'ftse' | 'architecture'>('ftse');
   const tabBarRef = useRef<HTMLDivElement>(null);
 
+  const lastStatusRef = useRef<string>('pending');
+
   const fetchData = useCallback(async () => {
     try {
       const result = await getAnalysis(id);
       setData(result);
       setError(null);
+      lastStatusRef.current = result.analysis.status;
       return result.analysis.status;
     } catch (err) {
       if (err instanceof Error && 'statusCode' in err && (err as { statusCode: number }).statusCode === 404) {
@@ -216,9 +219,9 @@ export default function AnalysisDashboard({
         return 'failed';
       }
       // Transient network error — keep polling
-      return data?.analysis.status ?? 'pending';
+      return lastStatusRef.current;
     }
-  }, [id, data?.analysis.status]);
+  }, [id]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;

@@ -311,7 +311,7 @@ function TreeNode({ title, isSection, isNew, priority, children, pdfAttachment, 
 
   return (
     <div>
-      <div className="group relative">
+      <div className="group relative" tabIndex={tooltip ? 0 : undefined} aria-describedby={tooltip ? `tooltip-${title.replace(/\s+/g, '-')}` : undefined}>
         <span className={nodeClass}>
           {isNew && (
             <span className={cn(
@@ -325,6 +325,7 @@ function TreeNode({ title, isSection, isNew, priority, children, pdfAttachment, 
               {themeBadges.map((badge) => (
                 <span
                   key={badge.theme}
+                  aria-label={`${badge.theme}: score ${badge.score.toFixed(1)} out of 5`}
                   className={cn(
                     'rounded-full border px-1.5 py-0 text-[9px] font-medium leading-4',
                     PILLAR_BADGE_COLORS[badge.pillar] || 'bg-stone-100 text-stone-600 border-stone-200',
@@ -337,7 +338,7 @@ function TreeNode({ title, isSection, isNew, priority, children, pdfAttachment, 
           )}
         </span>
         {tooltip && (
-          <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg bg-stone-900 p-3 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+          <div id={`tooltip-${title.replace(/\s+/g, '-')}`} role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg bg-stone-900 p-3 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             <p className="font-semibold">{tooltip.title}</p>
             <p className="mt-1 font-mono text-[10px] text-stone-400">{tooltip.path}</p>
             <p className="mt-2 leading-relaxed text-stone-300">{tooltip.reason}</p>
@@ -523,7 +524,7 @@ function EnhancementBadges({ recommendations }: { recommendations: SitemapRecomm
                 </span>
                 <span className="text-sm font-semibold">{title}</span>
               </div>
-              {meta.existing_page_url && /^https?:\/\//i.test(meta.existing_page_url) && (
+              {meta.existing_page_url && isSafeHref(meta.existing_page_url) && (
                 <a
                   href={meta.existing_page_url}
                   target="_blank"

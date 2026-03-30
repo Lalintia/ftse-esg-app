@@ -229,8 +229,8 @@ async def generate_sitemap(
         return recommendations
 
     except json.JSONDecodeError as exc:
-        logger.error("JSON parse error in sitemap generation: %s", exc)
+        logger.error("JSON parse error in sitemap generation: %s", exc, exc_info=True)
         return []
     except Exception as exc:
-        logger.error("Sitemap generation failed: %s", exc)
+        logger.error("Sitemap generation failed: %s", exc, exc_info=True)
         return []
