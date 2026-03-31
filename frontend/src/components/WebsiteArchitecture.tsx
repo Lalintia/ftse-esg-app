@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown, ExternalLink, FileText, Globe } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, normalizeUrl } from '@/lib/utils';
 import type { CrawledUrls, SitemapRecommendation, PriorityType, FtseResultItem } from '@/lib/types';
 import { parseRecommendationMeta } from '@/lib/types';
 
@@ -140,6 +140,18 @@ const JUNK_SECTION_PATTERNS = [
   /^menu/i,
 ];
 
+const ESG_URL_HINTS = [
+  'sustain', 'esg', 'csr', 'governance', 'environment', 'climate',
+  'safety', 'human-rights', 'labour', 'labor', 'anti-corruption', 'risk',
+  'supply-chain', 'stakeholder', 'diversity', 'employee', 'cybersecurity',
+  'materiality', 'whistleblow', 'ethics', 'code-of-conduct',
+] as const;
+
+function hasEsgKeyword(url: string): boolean {
+  const lower = url.toLowerCase();
+  return ESG_URL_HINTS.some((h) => lower.includes(h));
+}
+
 function isJunkUrl(pathname: string): boolean {
   return JUNK_PATH_PATTERNS.some((re) => re.test(pathname));
 }
@@ -158,9 +170,6 @@ function groupUrlsByDomain(
 
   const domainMap = new Map<string, Map<string, { url: string; title: string; isEsg?: boolean; children: { url: string; title: string; isEsg?: boolean }[]; _childTitles?: Set<string> }>>();
 
-  // Build set of ESG page URLs for quick lookup
-  const esgPageUrls = new Set(crawledUrls.pages.filter((p) => !p.title.startsWith('PDF:')).map((p) => p.url.replace(/\/$/, '')));
-
   // Combine ESG pages + all discovered URLs
   const allPages: { url: string; title: string; isEsg: boolean }[] = [];
 
@@ -169,9 +178,9 @@ function groupUrlsByDomain(
     allPages.push({ url: page.url, title: page.title, isEsg: true });
   }
 
-  const addedUrls = new Set(crawledUrls.pages.map((p) => p.url.replace(/\/$/, '')));
+  const addedUrls = new Set(crawledUrls.pages.map((p) => normalizeUrl(p.url)));
   for (const url of crawledUrls.all_discovered) {
-    if (addedUrls.has(url.replace(/\/$/, '')) || url.toLowerCase().endsWith('.pdf')) { continue; }
+    if (addedUrls.has(normalizeUrl(url)) || url.toLowerCase().endsWith('.pdf')) { continue; }
     allPages.push({ url, title: '', isEsg: false });
   }
 
@@ -325,23 +334,29 @@ const PILLAR_BADGE_COLORS: Record<string, string> = {
   Governance: 'bg-purple-100 text-purple-700 border-purple-200',
 };
 
-function TreeNode({ title, isSection, isNew, isDimmed, priority, children, pdfAttachment, tooltip, themeBadges }: {
+function TreeNode({ title, isSection, isNew, isDimmed, isEsgHint, priority, children, pdfAttachment, tooltip, themeBadges }: {
   title: string;
   isSection?: boolean;
   isNew?: boolean;
   isDimmed?: boolean;
+  isEsgHint?: boolean;
   priority?: PriorityType;
   children?: React.ReactNode;
   pdfAttachment?: { filename: string; url: string; chars: number; pages: number };
   tooltip?: { title: string; path: string; reason: string };
   themeBadges?: ThemeBadge[];
 }) {
+  const hasBadges = themeBadges && themeBadges.length > 0;
+  const showEsgHint = isEsgHint && !hasBadges && !isDimmed && !isNew;
+
   const nodeClass = cn(
     'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-all',
     isSection && 'font-semibold px-4 py-2',
-    !isNew && !isDimmed && 'bg-stone-100 border border-stone-200 text-stone-800',
-    !isNew && !isDimmed && isSection && 'bg-emerald-50 border-emerald-200 text-emerald-800',
-    isDimmed && 'bg-stone-50 border border-stone-100 text-stone-400',
+    !isNew && !isDimmed && !showEsgHint && 'bg-stone-100 border border-stone-200 text-stone-800',
+    !isNew && !isDimmed && !showEsgHint && isSection && 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    showEsgHint && 'bg-emerald-50/40 border border-emerald-200/60 text-stone-700',
+    showEsgHint && isSection && 'bg-emerald-50/60 border-emerald-200 text-emerald-800',
+    isDimmed && 'bg-stone-50/50 border border-stone-100 text-stone-300',
     isNew && priority === 'high' && 'bg-emerald-50/60 border-[1.5px] border-dashed border-emerald-400 text-emerald-700',
     isNew && priority !== 'high' && 'bg-amber-50/60 border-[1.5px] border-dashed border-amber-400 text-amber-700',
   );
@@ -351,10 +366,13 @@ function TreeNode({ title, isSection, isNew, isDimmed, priority, children, pdfAt
       <div className="group relative" tabIndex={tooltip ? 0 : undefined} aria-describedby={tooltip ? `tooltip-${title.replace(/\s+/g, '-')}` : undefined}>
         <span className={nodeClass}>
           {isNew && (
-            <span className={cn(
+            <span aria-hidden="true" className={cn(
               'h-1.5 w-1.5 rounded-full flex-shrink-0',
               priority === 'high' ? 'bg-emerald-500' : 'bg-amber-500',
             )} />
+          )}
+          {showEsgHint && (
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 flex-shrink-0" aria-hidden="true" />
           )}
           {title}
           {themeBadges && themeBadges.length > 0 && (
@@ -437,40 +455,38 @@ function DomainSection({ group, isCollapsible, urlThemeMap }: { group: DomainGro
         </div>
       )}
       {isOpen && (() => {
-        const isEsgPage = (page: TreePage): boolean => {
-          const normalized = page.url.replace(/\/$/, '');
-          if (urlThemeMap?.has(normalized)) { return true; }
-          if (page.children.some((c) => urlThemeMap?.has(c.url.replace(/\/$/, '')))) { return true; }
-          const urlLower = page.url.toLowerCase();
-          const esgHints = ['sustain', 'esg', 'csr', 'governance', 'environment', 'climate', 'safety', 'human-rights', 'labour', 'labor', 'anti-corruption', 'risk', 'supply-chain', 'stakeholder', 'diversity', 'employee', 'cybersecurity', 'materiality', 'whistleblow'];
-          return esgHints.some((h) => urlLower.includes(h));
-        };
-        const esgPages = group.pages.filter(isEsgPage);
-        const otherPages = group.pages.filter((p) => !isEsgPage(p));
+        const esgPages: TreePage[] = [];
+        const otherPages: TreePage[] = [];
+        for (const page of group.pages) {
+          const isEsg = page.isEsg
+            || urlThemeMap?.has(normalizeUrl(page.url))
+            || page.children.some((c) => c.isEsg || urlThemeMap?.has(normalizeUrl(c.url)))
+            || hasEsgKeyword(page.url);
+          (isEsg ? esgPages : otherPages).push(page);
+        }
 
         return (
           <div className="mt-4 space-y-4">
             <div className="flex flex-wrap gap-4">
               {esgPages.map((page) => {
-                const normalizedUrl = page.url.replace(/\/$/, '');
-                const sectionBadges = urlThemeMap?.get(normalizedUrl);
+                const sectionBadges = urlThemeMap?.get(normalizeUrl(page.url));
+                const sectionHasAnyBadge = !!sectionBadges || page.children.some((c) => urlThemeMap?.has(normalizeUrl(c.url)));
                 return (
                   <TreeNode
                     key={page.url}
                     title={page.title}
                     isSection
+                    isEsgHint={!sectionHasAnyBadge}
                     pdfAttachment={page.pdfAttachment}
                     themeBadges={sectionBadges}
                   >
                     {page.children.length > 0 && page.children.map((child) => {
-                      const childNormalized = child.url.replace(/\/$/, '');
-                      const childBadges = urlThemeMap?.get(childNormalized);
-                      const childUrlLower = child.url.toLowerCase();
-                      const childHasEsgKeyword = ['sustain', 'esg', 'csr', 'governance', 'environment', 'climate', 'safety', 'human-rights', 'labour', 'labor', 'anti-corruption', 'risk', 'supply-chain', 'stakeholder', 'diversity', 'employee', 'cybersecurity', 'materiality', 'whistleblow', 'ethics', 'code-of-conduct'].some((h) => childUrlLower.includes(h));
-                      const childDimmed = !childBadges && !childHasEsgKeyword;
+                      const childBadges = urlThemeMap?.get(normalizeUrl(child.url));
+                      const childIsEsg = child.isEsg || !!childBadges || hasEsgKeyword(child.url);
+                      const childDimmed = !childIsEsg;
                       return (
                         <li key={child.url}>
-                          <TreeNode title={child.title} isDimmed={childDimmed} themeBadges={childBadges} />
+                          <TreeNode title={child.title} isDimmed={childDimmed} isEsgHint={childIsEsg && !childBadges} themeBadges={childBadges} />
                         </li>
                       );
                     })}
@@ -775,6 +791,8 @@ export function WebsiteArchitecture({
       <div className="flex flex-wrap items-center gap-5 rounded-lg bg-stone-50 px-5 py-3 text-xs text-stone-500">
         <span className="font-semibold uppercase tracking-wider text-stone-400">Legend</span>
         <span className="flex items-center gap-2"><span className="h-4 w-6 rounded border border-stone-200 bg-stone-100" /> Existing page</span>
+        <span className="flex items-center gap-2"><span className="inline-flex items-center gap-1 h-4 rounded border border-emerald-200/60 bg-emerald-50/40 px-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /></span> ESG-related</span>
+        <span className="flex items-center gap-2"><span className="h-4 w-6 rounded border border-stone-100 bg-stone-50/50" /> Non-ESG</span>
         <span className="flex items-center gap-2"><span className="h-4 w-6 rounded border-[1.5px] border-dashed border-emerald-400 bg-emerald-50/60" /> Recommended — high</span>
         <span className="flex items-center gap-2"><span className="h-4 w-6 rounded border-[1.5px] border-dashed border-amber-400 bg-amber-50/60" /> Recommended — medium</span>
         <span className="flex items-center gap-2"><span className="h-4 w-6 rounded border border-amber-200 bg-amber-50/50" /> PDF document</span>
