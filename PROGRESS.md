@@ -533,4 +533,60 @@ Tab 3: Sitemap (recommendations เดิม)
 
 **Deployed:** Docker rebuilt + restarted on AWS EC2 — verified live at esg.ohmai.me ✅
 
-*Created by Claude from conversations with P'Ohm — Updated 27 March 2569*
+---
+
+### Phase 18 — Website Architecture Redesign + Consistency Fix (30 March 2569)
+
+**Major redesign** ของ Website Architecture tab ทั้งหมด:
+
+**Architecture tab:**
+- [x] Before/After layout with FTSE theme badges on each page
+- [x] Theme badges ใช้ **theme_score (0-5)** ตรงกับ FTSE Themes tab เป๊ะ (single source of truth จาก DB)
+- [x] เพิ่ม `theme_summaries` JSONB column ใน Supabase → backend save, frontend อ่าน
+- [x] All 152 discovered URLs แสดงใน tree (ไม่ใช่แค่ 35 ESG pages)
+- [x] Non-ESG pages จาง + group เป็น **"Other pages (N)"** collapsible (default หุบ)
+- [x] ESG detection ใช้ URL keyword + theme badge matching
+- [x] Filter junk: ChangeLang, Cookiepolicy, MenuPTG + deduplicate children
+- [x] Labels: CSRStrategy→CSR Strategy, Th→Investor Relations, Indexautobacs→Autobacs
+- [x] Orphan PDFs จาก external domain (ptg.listedcompany.com) attach ไปที่ main domain
+
+**Crawler:**
+- [x] Deep crawl ESG subdomains (investor, ir, sustainability, esg) + level-2
+- [x] เพิ่ม PDF patterns: CG report, anti-corruption, human rights, env policy, supplier code
+- [x] PTG investor subdomain: 22 pages (เดิมได้แค่ 1)
+
+**Security (3 rounds multi-agent review):**
+- [x] SSRF: Playwright PDF download + discovered PDFs + isSafeHref consistency
+- [x] Browser context leak fix
+- [x] Error message sanitize
+- [x] Global crawl timeout 10 min
+- [x] Retry logic: isinstance() แทน string match
+- [x] Sitemap generator: retry 3 ครั้ง
+
+**Performance:**
+- [x] Polling: cancelled flag + useRef (fix dependency loop)
+- [x] O(n²) dedup → Set
+- [x] useMemo: ftseResults, PillarChart data
+
+**Accessibility:**
+- [x] Keyboard nav: History table, GapTable expand
+- [x] Tooltip: focusable, role="tooltip", aria-describedby
+- [x] AnalysisProgress: role="alert", aria-live
+- [x] PillarChart: sr-only table for screen readers
+- [x] Theme badges: aria-label
+
+**Benchmark (PTG Energy, 30 มี.ค.):**
+- Overall: **2.9** (target 3.3)
+- Environmental: 2.0 | Social: 3.0 | Governance: 3.6
+- Indicators: 142/142 correct
+- Theme scores ตรงกันทั้ง 2 tabs ✅
+
+**⚠️ TODO — ตรวจสอบเพิ่ม:**
+- [ ] **ตรวจ non-ESG dimming อีกที** — หน้าเทาจางๆ ถูกต้องไหม? มีหน้า ESG ที่ถูก dim ผิดหรือเปล่า? ลองดูกับบริษัทอื่นด้วย
+- [ ] **Accessibility settings** — ปุ่มมุมขวาบน: ตาบอดสี (ใช้ pattern/icon แทนสี), เพิ่ม/ลดฟอนต์ (A-/A/A+), High contrast mode
+- [ ] API authentication
+- [ ] Score band calibration
+- [ ] PDF export
+- [ ] CSP header ใน nginx
+
+*Created by Claude from conversations with P'Ohm — Updated 30 March 2569*
