@@ -156,8 +156,8 @@ _SKIP_SCHEMES = {"javascript:", "mailto:", "tel:", "data:"}
 
 _PDF_MAX_BYTES = 50 * 1024 * 1024  # 50 MB
 _PDF_MAX_CHARS_PER_FILE = 200_000
-_PDF_MAX_CHARS_TOTAL = 500_000
-_PDF_MAX_FILES = 3
+_PDF_MAX_CHARS_TOTAL = 400_000
+_PDF_MAX_FILES = 2
 _PDF_DOWNLOAD_TIMEOUT = 120.0
 
 # Only download core ESG reports — SD Report and One Report / Annual Report
