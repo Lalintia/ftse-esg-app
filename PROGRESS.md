@@ -582,11 +582,171 @@ Tab 3: Sitemap (recommendations เดิม)
 - Theme scores ตรงกันทั้ง 2 tabs ✅
 
 **⚠️ TODO — ตรวจสอบเพิ่ม:**
-- [ ] **ตรวจ non-ESG dimming อีกที** — หน้าเทาจางๆ ถูกต้องไหม? มีหน้า ESG ที่ถูก dim ผิดหรือเปล่า? ลองดูกับบริษัทอื่นด้วย
+- [x] **ตรวจ non-ESG dimming** — แก้แล้ว: เพิ่ม ESG hint indicator (จุดเขียว + พื้นหลังเขียวจาง), ปรับ non-ESG ให้จางขึ้น, เพิ่ม legend (ESG-related / Non-ESG), extract ESG_URL_HINTS constant, สร้าง normalizeUrl utility, fix double-filter, ลบ dead code
 - [ ] **Accessibility settings** — ปุ่มมุมขวาบน: ตาบอดสี (ใช้ pattern/icon แทนสี), เพิ่ม/ลดฟอนต์ (A-/A/A+), High contrast mode
 - [ ] API authentication
 - [ ] Score band calibration
 - [ ] PDF export
 - [ ] CSP header ใน nginx
 
-*Created by Claude from conversations with P'Ohm — Updated 30 March 2569*
+---
+
+### Phase 19 — Non-ESG Dimming Fix + Code Cleanup (31 March 2569)
+
+**Bug:** หน้า ESG ที่ไม่มี theme badge ดูเหมือน non-ESG — ไม่มี visual indicator แยก
+
+**Root cause:** dimming logic ไม่ได้ใช้ `child.isEsg` จาก crawler data + ESG keyword arrays ซ้ำ 2 ที่ไม่ตรงกัน (parent ขาด `ethics`, `code-of-conduct`)
+
+**Fixes:**
+- [x] เพิ่ม `isEsgHint` prop ใน TreeNode — หน้า ESG ที่ไม่มี badge มีจุดเขียว + พื้นหลังเขียวจาง
+- [x] ใช้ `child.isEsg` จาก crawler ใน dimming logic
+- [x] Non-ESG จางขึ้น (`text-stone-300` + `bg-stone-50/50`)
+- [x] เพิ่ม legend: ESG-related + Non-ESG entries
+- [x] Extract `ESG_URL_HINTS` constant — แก้ keyword array ซ้ำ + inconsistent
+- [x] สร้าง `hasEsgKeyword()` function — ใช้ร่วมกัน parent/child
+- [x] สร้าง `normalizeUrl()` utility — แทน `url.replace(/\/$/, '')` ซ้ำ 9 จุด
+- [x] ลบ `esgPageUrls` dead code
+- [x] แก้ double-filter เป็น single-loop partition
+- [x] เพิ่ม `aria-hidden` บน `isNew` dot
+- [x] แก้ `sectionHasAnyBadge` ให้เป็น boolean (`!!`)
+
+**Code review:** 3 agents (Code Reuse + Code Quality + Efficiency) — พบ 6 issues แก้ทั้งหมด
+
+**Files changed:**
+- `frontend/src/components/WebsiteArchitecture.tsx`
+- `frontend/src/lib/utils.ts`
+
+**Deployed:** esg.ohmai.me ✅ (ต้อง purge Cloudflare cache + deploy ไปถูก directory `ftse-esg-app`)
+
+**Server cleanup:**
+- ลบ `/home/ubuntu/ftse-esg/` directory + containers ซ้ำ (ประหยัด RAM)
+- Docker prune: ได้คืน 4.9GB disk (จาก 5.7GB → 11GB free)
+- ติดตั้ง agent-browser CLI via Homebrew
+
+---
+
+### Phase 20 — PTG ESG Demo Website: ptgesg.ohmai.me (31 March 2569)
+
+**สร้าง demo website** สำหรับทีม Sale — clone เว็บ PTG Energy แล้วเพิ่มเนื้อหา ESG ที่ขาดเพื่อให้ได้คะแนนเต็ม
+
+**Approach:** wget mirror PTG + Python build script สร้างหน้าใหม่
+
+**What was built:**
+- [x] Mirror เว็บ PTG (24 หน้า ESG เดิม, 10MB)
+- [x] สร้าง 18 หน้า ESG ใหม่ครอบคลุม indicators ที่ขาด:
+  - Water Security (5 หน้า) — อ้างอิง PTTGC, Thai Union
+  - Human Rights & Community (5 หน้า) — อ้างอิง Thai Union, PTTGC
+  - Pollution & Resources (2 หน้า) — อ้างอิง PTTGC
+  - Labour Standards (3 หน้า) — อ้างอิง SCB, Thai Union
+  - Health & Safety, Risk Management, Anti-Corruption (3 หน้า)
+- [x] SEO injection ทุกหน้า: Schema.org JSON-LD, Open Graph, Author/Publisher meta
+- [x] Technical SEO: robots.txt, sitemap.xml (42 pages), llms.txt
+- [x] Deploy: nginx + SSL (Certbot) + Cloudflare DNS
+
+**aicheck.ohmai.me Score:** 74/100 (Good) — 10/13 passed
+- Passed: SSR, robots.txt, Heading, Images, Semantic HTML, Sitemap, OG, llms.txt, FAQ, Author, Page Speed
+- Partial: Schema.org (82-89%)
+- Failed: AI Visibility (domain ใหม่ GPT ไม่รู้จัก — แก้ไม่ได้ weight 5%)
+
+**FTSE ESG Score:** ยังไม่ได้ทดสอบ
+
+**FTSE ESG Score (รัน 31 มี.ค. 2569 — ก่อนลบ mock):**
+- Overall: **3.6** | E: 2.7 | S: 4.0 | G: 4.4
+- 142 indicators: 93 found, 20 partial, 29 missing
+- Anti-Corruption ได้ 5.0 เต็ม
+- จุดอ่อน: Corporate Governance (11 missing), Pollution & Resources (9 missing)
+
+---
+
+### Phase 21 — ลบ Mock Data + แก้ Readability (31 March 2569)
+
+**เปลี่ยน demo ให้มีเฉพาะข้อมูลจริงจาก ptgenergy.com:**
+
+**สิ่งที่ทำเสร็จแล้ว:**
+- [x] ลบ 18 mock HTML files (เหลือ 24 หน้าจริง)
+- [x] อัปเดต sitemap.xml — เหลือ 23 URLs จริง
+- [x] อัปเดต llms.txt — ลบ mock references + fake data points
+- [x] เพิ่ม `<meta charset="UTF-8">` ในทุก HTML (25 ไฟล์) — แก้ภาษาไทยเพี้ยน
+- [x] เปลี่ยน font เป็น system fonts (จาก DB Helvethaica X ที่บางเกินไป)
+- [x] ปรับ font-size ให้เหมาะกับ system font (body 16px, line-height 1.6)
+- [x] แก้ text-align: justify → left (190 จุดใน 15 ไฟล์)
+- [x] แก้ CSS font-family ค้าง 5 จุด (sidebar nav, title boxes) → inherit
+- [x] ลบ nested HTML document ใน index.html (CRITICAL bug)
+- [x] Deploy + Purge Cloudflare cache
+
+**QA ผลทดสอบ:**
+- Sustainable pages (CorporateGovernance, SafetyAndWorkEnvironment): **PASS** — ภาษาไทยถูกต้อง, ฟอนต์ 16px อ่านง่าย
+- Homepage (/): **FAIL** — 3 ปัญหาค้าง
+
+**⚠️ TODO — ค้างอยู่:**
+- [ ] **Homepage index.html เสีย** — cookie banner ภาษาไทยยังเพี้ยน, logo โหลดไม่ได้, ตัวเลข 10009/10010 หลุดมาแสดง (น่าจะเกิดจากการลบ nested HTML กระทบโครงสร้าง)
+- [ ] **รัน FTSE ESG score ใหม่** — หลังลบ mock จะได้คะแนนต่ำกว่า 3.6 (เหลือแต่ข้อมูลจริง)
+- [ ] **แก้ Schema.org** ให้ครบ 100%
+- [ ] **Cloudflare AI bot blocking** — ปิดเฉพาะ ptgesg subdomain
+
+**Server:**
+- IP: 54.169.168.58
+- Key: n8n-singapore-key.pem
+- Deploy path: /var/www/ptgesg/
+- Deploy command: `rsync -avz -e "ssh -i ~/Desktop/Keypair/n8n-singapore-key.pem" ~/Desktop/OhmProject/ptgesg/ ubuntu@54.169.168.58:/var/www/ptgesg/ --exclude='__pycache__' --exclude='build.py'`
+
+---
+
+### Phase 22 — PDF Discovery Fix + SD Report (1 April 2569)
+
+**Problem:** PTG Energy analysis scored 2.7/5.0 (target 3.3) — Governance only 3.3 vs target 4.6. Root cause: SD Report not being downloaded.
+
+**Root Cause Investigation (systematic-debugging skill):**
+
+1. **URL ผิด:** `ptgenergy.com` ถูกขายแล้ว (HugeDomains $3,695) → ต้องใช้ `ptgenergy.co.th`
+2. **SD Report ไม่ถูก discover** — 3 สาเหตุ:
+   - PDF อยู่บน `ptg.listedcompany.com` (คนละ domain)
+   - Filename format `ptg-SD2025-en.pdf` ไม่ match pattern `sd[_-]?report`
+   - Discovery paths ไม่มี `/en/downloads/sustainability-report` (PTG investor site ใช้ path นี้)
+3. **Server OOM:** ครั้งแรก download 3 PDFs (One Report 360 หน้า + SD Report 2 ฉบับ) ทำให้ t3.medium (4GB RAM) หน่วยความจำเต็ม → server hang ต้อง reboot
+
+**Fixes (3 commits):**
+- [x] `_ESG_PDF_PATTERNS` + `_CORE_REPORT_PATTERNS`: เพิ่ม `\bSD\d{4}` pattern
+- [x] Subdomain discovery paths: เพิ่ม `/en/downloads/sustainability-report`, `/en/downloads/annual-report` ฯลฯ
+- [x] `_PDF_PRIORITY_MAP`: เพิ่ม `"/sd/": 95` เพื่อให้ SD files ได้ priority ถูกต้อง
+- [x] PDF sorting: เพิ่ม filename desc เป็น tiebreaker (เลือกฉบับใหม่สุดก่อน)
+- [x] `_PDF_MAX_FILES`: ลดจาก 3 → 2 กัน OOM
+- [x] `_PDF_MAX_CHARS_TOTAL`: ลดจาก 500K → 400K กัน OOM
+
+**Test Results — PTG Energy (1 เม.ย. 2569):**
+
+| Run | Overall | E | S | G | Pages | PDFs | Key Change |
+|---|---|---|---|---|---|---|---|
+| Before fix | 2.7 | 2.0 | 3.0 | 3.3 | 36 | 1 (One Report) | SD Report missing |
+| **After fix** | **3.1** | **2.3** | **3.0** | **4.0** | **37** | **2 (SD2025 + SD2024)** | **SD Report found!** |
+| **REAL** | **3.3** | **2.3** | **3.3** | **4.6** | — | — | FTSE Russell official |
+
+**Improvement:** Overall 2.7 → 3.1 (+0.4), Governance 3.3 → 4.0 (+0.7), Environmental ตรงเป๊ะ 2.3 = 2.3
+
+**Theme-level changes:**
+| Theme | Before | After | Change |
+|---|---|---|---|
+| Anti-Corruption | 3.0 | **4.0** | +1.0 |
+| Corporate Governance | 3.0 | **4.0** | +1.0 |
+| Water Security | 2.0 | **3.0** | +1.0 |
+| Others | unchanged | unchanged | — |
+
+**Remaining gap (0.2):**
+- Social 3.0 vs 3.3 — Human Rights & Community ยัง missing (9/17)
+- Governance 4.0 vs 4.6 — Corporate Governance ยังขาด 8 indicators (audit fees, political donations, clawback policy etc. ที่ต้องมาจาก One Report)
+- Note: ตอนนี้ได้ SD Report 2 ฉบับแทน One Report — ถ้าปรับ priority ให้ได้ One Report + SD Report 1 ฉบับ อาจดีขึ้นอีก
+
+**Deployed:** esg.ohmai.me ✅
+
+---
+
+### Remaining Work
+- [ ] API authentication
+- [ ] Score band calibration (fine-tune threshold bands)
+- [ ] PDF export
+- [ ] Accessibility settings (color blind, font size, high contrast)
+- [ ] CSP header in nginx
+- [ ] Consider One Report + SD Report priority mix (currently SD gets both slots)
+- [ ] Re-enable IFRS when verified reference data available
+
+*Created by Claude from conversations with P'Ohm — Updated 1 April 2569*
