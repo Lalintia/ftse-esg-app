@@ -164,6 +164,7 @@ _PDF_DOWNLOAD_TIMEOUT = 120.0
 _CORE_REPORT_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"sustainability[_-]?report", re.IGNORECASE),
     re.compile(r"sd[_-]?report", re.IGNORECASE),
+    re.compile(r"\bSD\d{4}", re.IGNORECASE),
     re.compile(r"annual[_-]?report", re.IGNORECASE),
     re.compile(r"56-1", re.IGNORECASE),
     re.compile(r"one[_-]?report", re.IGNORECASE),
@@ -187,6 +188,7 @@ _THAI_PDF_PATTERNS: list[re.Pattern[str]] = [
 _ESG_PDF_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"sustainability[_-]?report", re.IGNORECASE),
     re.compile(r"sd[_-]?report", re.IGNORECASE),
+    re.compile(r"\bSD\d{4}", re.IGNORECASE),
     re.compile(r"integrated[_-]?report", re.IGNORECASE),
     re.compile(r"annual[_-]?report", re.IGNORECASE),
     re.compile(r"56-1", re.IGNORECASE),
@@ -1027,7 +1029,14 @@ async def _discover_report_pdfs(
         all_targets.append(urljoin(base_url.rstrip("/") + "/", path.lstrip("/")))
     for sub_url in subdomain_base_urls:
         all_targets.append(sub_url)
-        for path in ["/", "/downloads", "/reports", "/publications", "/annual-report"]:
+        for path in [
+            "/", "/downloads", "/reports", "/publications", "/annual-report",
+            "/en/downloads/sustainability-report",
+            "/en/downloads/annual-report",
+            "/en/downloads",
+            "/th/downloads/sustainability-report",
+            "/th/downloads/annual-report",
+        ]:
             all_targets.append(urljoin(sub_url.rstrip("/") + "/", path.lstrip("/")))
 
     logger.info(
