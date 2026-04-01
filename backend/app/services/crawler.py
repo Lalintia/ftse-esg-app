@@ -212,6 +212,7 @@ _PDF_PRIORITY_MAP: dict[str, int] = {
     "sustainability": 100,
     "sd-report": 95,
     "sd_report": 95,
+    "/sd/": 95,
     "integrated-report": 85,
     "integrated_report": 85,
     "annual-report": 80,
@@ -1277,8 +1278,8 @@ async def crawl_website(
                     deduped_pdf_urls.append(pdf_url)
             pdf_urls = deduped_pdf_urls
 
-            # Sort by priority and limit
-            pdf_urls.sort(key=_pdf_priority_score, reverse=True)
+            # Sort by priority (desc), then filename (desc) for date tiebreaker
+            pdf_urls.sort(key=lambda u: (_pdf_priority_score(u), _pdf_filename(u)), reverse=True)
             pdf_urls = pdf_urls[:_PDF_MAX_FILES]
 
             logger.info(
