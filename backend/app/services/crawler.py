@@ -6,7 +6,7 @@ import ipaddress
 import logging
 import re
 import socket
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass, field as dataclass_field
 from pathlib import PurePosixPath
@@ -18,15 +18,21 @@ from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
 
-# SSRF protection: block private/internal IP ranges
+# SSRF protection: block private/internal IP ranges (IPv4 + IPv6)
 _BLOCKED_NETWORKS = [
-    ipaddress.ip_network("127.0.0.0/8"),
-    ipaddress.ip_network("10.0.0.0/8"),
-    ipaddress.ip_network("172.16.0.0/12"),
-    ipaddress.ip_network("192.168.0.0/16"),
-    ipaddress.ip_network("169.254.0.0/16"),
-    ipaddress.ip_network("::1/128"),
-    ipaddress.ip_network("fc00::/7"),
+    # IPv4
+    ipaddress.ip_network("127.0.0.0/8"),      # loopback
+    ipaddress.ip_network("10.0.0.0/8"),        # private
+    ipaddress.ip_network("172.16.0.0/12"),     # private
+    ipaddress.ip_network("192.168.0.0/16"),    # private
+    ipaddress.ip_network("169.254.0.0/16"),    # link-local / AWS IMDS
+    ipaddress.ip_network("100.64.0.0/10"),     # CGNAT shared space
+    ipaddress.ip_network("0.0.0.0/8"),         # unroutable
+    # IPv6
+    ipaddress.ip_network("::1/128"),           # loopback
+    ipaddress.ip_network("fc00::/7"),          # unique local
+    ipaddress.ip_network("fe80::/10"),         # link-local
+    ipaddress.ip_network("::ffff:0:0/96"),     # IPv4-mapped (encodes private IPv4)
 ]
 
 
@@ -34,7 +40,8 @@ def is_safe_url(url: str) -> bool:
     """Check if URL resolves to a public IP (not private/internal).
 
     Blocks access to localhost, private networks, and AWS metadata
-    service (169.254.169.254) to prevent SSRF attacks.
+    service (169.254.169.254) to prevent SSRF attacks. Checks all
+    addresses returned by DNS (both IPv4 and IPv6).
 
     Args:
         url: URL to validate.
@@ -49,46 +56,20 @@ def is_safe_url(url: str) -> bool:
     if not hostname:
         return False
     try:
-        resolved_ip = socket.gethostbyname(hostname)
-        ip = ipaddress.ip_address(resolved_ip)
-        if any(ip in net for net in _BLOCKED_NETWORKS):
-            logger.warning(
-                "SSRF blocked: %s resolves to private IP %s",
-                hostname, resolved_ip,
-            )
-            return False
+        # Resolve all address families (IPv4 + IPv6) to cover dual-stack hosts
+        addr_infos = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC)
+        for addr_info in addr_infos:
+            ip = ipaddress.ip_address(addr_info[4][0])
+            if any(ip in net for net in _BLOCKED_NETWORKS):
+                logger.warning(
+                    "SSRF blocked: %s resolves to private IP %s",
+                    hostname, ip,
+                )
+                return False
         return True
     except (socket.gaierror, ValueError):
         return False
 
-
-async def _safe_get(
-    client: httpx.AsyncClient,
-    url: str,
-) -> httpx.Response:
-    """Fetch URL with SSRF protection at request time.
-
-    Re-validates DNS before every fetch to prevent DNS rebinding,
-    and handles redirects manually to block redirect-based SSRF.
-    """
-    if not is_safe_url(url):
-        raise ValueError(f"SSRF blocked at fetch time: {url}")
-
-    response = await client.get(url, follow_redirects=False)
-
-    max_redirects = 5
-    for _ in range(max_redirects):
-        if not response.is_redirect:
-            break
-        redirect_url = response.headers.get("location", "")
-        if redirect_url.startswith("/"):
-            parsed = urlparse(str(response.url))
-            redirect_url = f"{parsed.scheme}://{parsed.netloc}{redirect_url}"
-        if not is_safe_url(redirect_url):
-            raise ValueError(f"SSRF blocked: redirect to unsafe URL {redirect_url}")
-        response = await client.get(redirect_url, follow_redirects=False)
-
-    return response
 
 ESG_KEYWORDS: list[str] = [
     "sustainability",
@@ -154,11 +135,25 @@ _PAGE_TIMEOUT_MS = 15_000
 _MIN_CONTENT_LENGTH = 100
 _SKIP_SCHEMES = {"javascript:", "mailto:", "tel:", "data:"}
 
-_PDF_MAX_BYTES = 50 * 1024 * 1024  # 50 MB
+_SECOND_LEVEL_TLDS = {"co", "com", "or", "org", "ac", "go", "gov", "in", "net", "ne", "ed", "edu"}
+_DISCOVERY_TIMEOUT_MS = 10_000
+_NETWORKIDLE_TIMEOUT_MS = 4_000
+_SUB_PREFIXES = ["investor", "ir", "sustainability", "esg"]
+
+_PDF_MAX_BYTES = 20 * 1024 * 1024  # 20 MB — cap to avoid OOM on t3.medium
 _PDF_MAX_CHARS_PER_FILE = 200_000
 _PDF_MAX_CHARS_TOTAL = 400_000
 _PDF_MAX_FILES = 2
 _PDF_DOWNLOAD_TIMEOUT = 120.0
+_MAX_SITEMAP_BYTES = 10 * 1024 * 1024  # 10 MB
+
+# Chromium launch args: block cloud metadata service IPs from direct access (defense-in-depth)
+_PLAYWRIGHT_ARGS: list[str] = [
+    "--host-resolver-rules="
+    "MAP 169.254.169.254 0.0.0.0,"
+    "MAP 100.100.100.200 0.0.0.0,"
+    "MAP 168.63.129.16 0.0.0.0",
+]
 
 # Only download core ESG reports — SD Report and One Report / Annual Report
 _CORE_REPORT_PATTERNS: list[re.Pattern[str]] = [
@@ -176,6 +171,9 @@ _CORE_REPORT_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"environment(al)?[_-]?policy", re.IGNORECASE),
     re.compile(r"supplier[_-]?code", re.IGNORECASE),
     re.compile(r"code[_-]?of[_-]?conduct", re.IGNORECASE),
+    re.compile(r"water[_-]?risk", re.IGNORECASE),
+    re.compile(r"\btnfd\b", re.IGNORECASE),
+    re.compile(r"\btcfd\b", re.IGNORECASE),
 ]
 
 # Skip Thai language PDFs — prefer English versions
@@ -315,7 +313,6 @@ def _get_root_domain(domain: str) -> str:
         Root domain string.
     """
     parts = domain.lower().split(".")
-    _SECOND_LEVEL_TLDS = {"co", "com", "or", "org", "ac", "go", "gov", "in", "net", "ne", "ed", "edu"}
     if len(parts) >= 3 and parts[-2] in _SECOND_LEVEL_TLDS:
         return ".".join(parts[-3:])
     if len(parts) >= 2:
@@ -474,36 +471,59 @@ async def _fetch_sitemap_urls(base_url: str) -> list[str]:
     sitemap_url = urljoin(base_url.rstrip("/") + "/", "sitemap.xml")
     logger.info("Trying sitemap at %s", sitemap_url)
 
+    if not is_safe_url(sitemap_url):
+        return []
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await _safe_get(client, sitemap_url)
-            if response.status_code != 200:
-                logger.info("No sitemap found at %s (status %d)", sitemap_url, response.status_code)
+            # SSRF-safe: follow redirects manually so each destination is validated
+            current_url = sitemap_url
+            redirect_count = 0
+            chunks: list[bytes] = []
+            while redirect_count <= 3:
+                async with client.stream("GET", current_url, follow_redirects=False) as response:
+                    if response.status_code in (301, 302, 303, 307, 308):
+                        location = response.headers.get("location", "")
+                        if not location or not is_safe_url(location):
+                            logger.info("Sitemap redirect blocked: %s → %s", current_url, location)
+                            return []
+                        current_url = location
+                        redirect_count += 1
+                        continue
+                    if response.status_code != 200:
+                        logger.info("No sitemap found at %s (status %d)", sitemap_url, response.status_code)
+                        return []
+
+                    total = 0
+                    async for chunk in response.aiter_bytes(chunk_size=65536):
+                        total += len(chunk)
+                        if total > _MAX_SITEMAP_BYTES:
+                            logger.warning("Sitemap too large (>%dMB), skipping", _MAX_SITEMAP_BYTES // (1024 * 1024))
+                            return []
+                        chunks.append(chunk)
+                    break
+            else:
+                logger.info("Sitemap too many redirects from %s", sitemap_url)
                 return []
 
-            # Limit sitemap size to prevent XML DoS (billion laughs)
-            _MAX_SITEMAP_BYTES = 10 * 1024 * 1024
-            if len(response.content) > _MAX_SITEMAP_BYTES:
-                logger.warning("Sitemap too large (%d bytes), skipping", len(response.content))
-                return []
+        sitemap_text = b"".join(chunks).decode("utf-8", errors="replace")
+        root = ET.fromstring(sitemap_text)
+        namespace = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        urls = [
+            loc.text.strip()
+            for loc in root.findall(".//ns:loc", namespace)
+            if loc.text and loc.text.strip()
+        ]
 
-            root = ET.fromstring(response.text)
-            namespace = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        if not urls:
             urls = [
                 loc.text.strip()
-                for loc in root.findall(".//ns:loc", namespace)
+                for loc in root.findall(".//loc")
                 if loc.text and loc.text.strip()
             ]
 
-            if not urls:
-                urls = [
-                    loc.text.strip()
-                    for loc in root.findall(".//loc")
-                    if loc.text and loc.text.strip()
-                ]
-
-            logger.info("Found %d URLs in sitemap", len(urls))
-            return urls
+        logger.info("Found %d URLs in sitemap", len(urls))
+        return urls
 
     except Exception as exc:
         logger.info("Sitemap fetch failed: %s", exc)
@@ -604,8 +624,12 @@ def _is_thai_pdf(url: str) -> bool:
         url: The URL to check.
 
     Returns:
-        True if the filename suggests a Thai version.
+        True if the URL path or filename suggests a Thai version.
     """
+    # Check full URL path — catches /th/ directories (e.g. Indorama doc.pdf pattern)
+    url_lower = url.lower()
+    if any(p in url_lower for p in ["/th/", "/thai/", "_th/", "-th/"]):
+        return True
     fname = _pdf_filename(url).lower().replace(".pdf", "")
     return any(pattern.search(fname) for pattern in _THAI_PDF_PATTERNS)
 
@@ -781,37 +805,143 @@ def _find_relevant_pdf_pages(
     return sorted(relevant_pages)
 
 
-async def _download_pdf_via_playwright(url: str) -> bytes | None:
+def _extract_text_from_pdf_bytes(
+    pdf_bytes: bytes,
+    filename: str,
+    max_chars: int,
+    download_method: str,
+    url: str,
+) -> "tuple[PageContent | None, PdfDownloadInfo | None]":
+    """Synchronous PDF text extraction — CPU-bound, call via asyncio.to_thread.
+
+    Args:
+        pdf_bytes: Raw PDF bytes.
+        filename: PDF filename for logging.
+        max_chars: Maximum characters to extract.
+        download_method: 'httpx' or 'playwright' for logging.
+        url: Original PDF URL for PageContent.
+
+    Returns:
+        Tuple of (PageContent, PdfDownloadInfo) or (None, None).
+    """
+    extracted_parts: list[str] = []
+    total_chars = 0
+    total_pdf_pages = 0
+
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        total_pdf_pages = len(pdf.pages)
+        relevant_pages = _find_relevant_pdf_pages(pdf, filename)
+
+        if relevant_pages:
+            logger.info(
+                "PDF %s: %d pages total, smart-reading %d relevant pages",
+                filename, total_pdf_pages, len(relevant_pages),
+            )
+            pages_to_read = relevant_pages
+        else:
+            logger.info(
+                "PDF %s: %d pages total, no TOC found — reading sequentially",
+                filename, total_pdf_pages,
+            )
+            pages_to_read = list(range(total_pdf_pages))
+
+        for i in pages_to_read:
+            if i >= total_pdf_pages:
+                continue
+            page_text = pdf.pages[i].extract_text()
+            if page_text and page_text.strip():
+                part = f"--- Page {i + 1} ---\n{page_text.strip()}"
+                extracted_parts.append(part)
+                total_chars += len(part)
+                if total_chars >= max_chars:
+                    logger.info(
+                        "PDF %s: char limit reached after %d pages",
+                        filename, len(extracted_parts),
+                    )
+                    break
+
+    if not extracted_parts:
+        logger.warning("No text extracted from PDF: %s", filename)
+        return None, None
+
+    full_text = "\n\n".join(extracted_parts)
+    if len(full_text) > max_chars:
+        full_text = full_text[:max_chars]
+        logger.info("PDF text truncated to %d chars: %s", max_chars, filename)
+
+    markdown_text = f"# PDF: {filename}\n\n{full_text}"
+    pages_read = len(extracted_parts)
+    logger.info(
+        "PDF extracted: %s (%d chars from %d/%d pages) via %s",
+        filename, len(full_text), pages_read, total_pdf_pages, download_method,
+    )
+
+    page_content = PageContent(url=url, title=f"PDF: {filename}", markdown_text=markdown_text)
+    pdf_info = PdfDownloadInfo(
+        url=url,
+        filename=filename,
+        method=download_method,
+        chars_extracted=len(full_text),
+        pages_in_pdf=total_pdf_pages,
+    )
+    return page_content, pdf_info
+
+
+async def _download_pdf_via_playwright(url: str, browser=None) -> bytes | None:
     """Fallback PDF download using Playwright's API request context.
 
     Some websites block non-browser HTTP clients (returning 405/404).
     This uses Playwright's request API which sends real browser headers.
+
+    Args:
+        url: The PDF URL to download.
+        browser: Optional reusable Playwright browser (avoids launching a new one per PDF).
     """
     if not is_safe_url(url):
         logger.warning("SSRF blocked in Playwright PDF download: %s", url)
         return None
 
-    try:
-        from playwright.async_api import async_playwright
+    _pw = None
+    _own_browser = browser is None
 
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = None
-            try:
-                context = await browser.new_context()
-                response = await context.request.get(url, timeout=60000)
+    try:
+        if _own_browser:
+            _pw = await async_playwright().start()
+            browser = await _pw.chromium.launch(headless=True, args=_PLAYWRIGHT_ARGS)
+
+        context = None
+        try:
+            context = await browser.new_context()
+            # SSRF-safe: disable auto-redirect and validate each hop manually
+            current_pdf_url = url
+            for _ in range(4):
+                response = await context.request.get(
+                    current_pdf_url, timeout=60000, max_redirects=0,
+                )
+                if response.status in (301, 302, 303, 307, 308):
+                    location = response.headers.get("location", "")
+                    if not location or not is_safe_url(location):
+                        logger.info("Playwright PDF redirect blocked: %s → %s", current_pdf_url, location)
+                        break
+                    current_pdf_url = location
+                    continue
                 if response.ok:
                     pdf_bytes = await response.body()
                     if pdf_bytes and len(pdf_bytes) > 100:
                         logger.info("Playwright API download succeeded for %s (%d bytes)", url, len(pdf_bytes))
                         return pdf_bytes
                 logger.info("Playwright API download got status %d for %s", response.status, url)
-            finally:
-                if context:
-                    await context.close()
-                await browser.close()
+                break
+        finally:
+            if context:
+                await context.close()
     except Exception as exc:
         logger.warning("Playwright PDF download failed for %s: %s", url, exc)
+    finally:
+        if _own_browser and browser:
+            await browser.close()
+        if _pw:
+            await _pw.stop()
 
     return None
 
@@ -819,6 +949,7 @@ async def _download_pdf_via_playwright(url: str) -> bytes | None:
 async def _download_and_extract_pdf(
     url: str,
     max_chars: int = _PDF_MAX_CHARS_PER_FILE,
+    browser=None,
 ) -> tuple[PageContent | None, PdfDownloadInfo | None]:
     """Download a PDF and extract text content (all pages).
 
@@ -829,6 +960,7 @@ async def _download_and_extract_pdf(
     Args:
         url: The PDF URL to download.
         max_chars: Maximum characters to extract from this PDF.
+        browser: Optional reusable Playwright browser for fallback downloads.
 
     Returns:
         Tuple of (PageContent, PdfDownloadInfo) or (None, None).
@@ -850,19 +982,47 @@ async def _download_and_extract_pdf(
     }
 
     try:
+        if not is_safe_url(url):
+            raise ValueError(f"SSRF blocked: {url}")
         async with httpx.AsyncClient(
             timeout=_PDF_DOWNLOAD_TIMEOUT,
             headers=_browser_headers,
         ) as client:
-            response = await _safe_get(client, url)
-            if response.status_code == 200:
-                pdf_bytes = response.content
-            else:
-                logger.info(
-                    "httpx download got status %d for %s — trying Playwright",
-                    response.status_code,
-                    filename,
-                )
+            # SSRF-safe: follow redirects manually so each destination is validated
+            current_pdf_url = url
+            pdf_redirect_count = 0
+            while pdf_redirect_count <= 3:
+                async with client.stream("GET", current_pdf_url, follow_redirects=False) as response:
+                    if response.status_code in (301, 302, 303, 307, 308):
+                        location = response.headers.get("location", "")
+                        if not location or not is_safe_url(location):
+                            logger.info("PDF redirect blocked: %s → %s", current_pdf_url, location)
+                            break
+                        current_pdf_url = location
+                        pdf_redirect_count += 1
+                        continue
+                    if response.status_code == 200:
+                        chunks: list[bytes] = []
+                        total = 0
+                        async for chunk in response.aiter_bytes(chunk_size=65536):
+                            total += len(chunk)
+                            if total > _PDF_MAX_BYTES:
+                                logger.warning(
+                                    "PDF too large (>%dMB), aborting stream: %s",
+                                    _PDF_MAX_BYTES // (1024 * 1024),
+                                    filename,
+                                )
+                                break
+                            chunks.append(chunk)
+                        else:
+                            pdf_bytes = b"".join(chunks)
+                    else:
+                        logger.info(
+                            "httpx download got status %d for %s — trying Playwright",
+                            response.status_code,
+                            filename,
+                        )
+                    break
 
     except httpx.TimeoutException:
         logger.info("httpx timed out for %s — trying Playwright", filename)
@@ -870,7 +1030,7 @@ async def _download_and_extract_pdf(
         logger.info("httpx error for %s: %s — trying Playwright", filename, exc)
 
     if pdf_bytes is None:
-        pdf_bytes = await _download_pdf_via_playwright(url)
+        pdf_bytes = await _download_pdf_via_playwright(url, browser=browser)
         if pdf_bytes is not None:
             download_method = "playwright"
 
@@ -887,90 +1047,11 @@ async def _download_and_extract_pdf(
         )
         return None, None
 
-    try:
-        extracted_parts: list[str] = []
-        total_chars = 0
-        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-            total_pdf_pages = len(pdf.pages)
-
-            # Smart PDF reading: scan TOC first, then read relevant pages
-            relevant_pages = _find_relevant_pdf_pages(pdf, filename)
-
-            if relevant_pages:
-                logger.info(
-                    "PDF %s: %d pages total, smart-reading %d relevant pages",
-                    filename,
-                    total_pdf_pages,
-                    len(relevant_pages),
-                )
-                pages_to_read = relevant_pages
-            else:
-                logger.info(
-                    "PDF %s: %d pages total, no TOC found — reading sequentially",
-                    filename,
-                    total_pdf_pages,
-                )
-                pages_to_read = list(range(total_pdf_pages))
-
-            for i in pages_to_read:
-                if i >= total_pdf_pages:
-                    continue
-                page_text = pdf.pages[i].extract_text()
-                if page_text and page_text.strip():
-                    part = f"--- Page {i + 1} ---\n{page_text.strip()}"
-                    extracted_parts.append(part)
-                    total_chars += len(part)
-                    if total_chars >= max_chars:
-                        logger.info(
-                            "PDF %s: char limit reached after %d pages",
-                            filename,
-                            len(extracted_parts),
-                        )
-                        break
-
-        if not extracted_parts:
-            logger.warning("No text extracted from PDF: %s", filename)
-            return None, None
-
-        full_text = "\n\n".join(extracted_parts)
-
-        if len(full_text) > max_chars:
-            full_text = full_text[:max_chars]
-            logger.info(
-                "PDF text truncated to %d chars: %s",
-                max_chars,
-                filename,
-            )
-
-        markdown_text = f"# PDF: {filename}\n\n{full_text}"
-
-        pages_read = len(extracted_parts)
-        logger.info(
-            "PDF extracted: %s (%d chars from %d/%d pages) via %s",
-            filename,
-            len(full_text),
-            pages_read,
-            total_pdf_pages,
-            download_method,
-        )
-
-        page_content = PageContent(
-            url=url,
-            title=f"PDF: {filename}",
-            markdown_text=markdown_text,
-        )
-        pdf_info = PdfDownloadInfo(
-            url=url,
-            filename=filename,
-            method=download_method,
-            chars_extracted=len(full_text),
-            pages_in_pdf=total_pdf_pages,
-        )
-        return page_content, pdf_info
-
-    except Exception as exc:
-        logger.warning("PDF extraction error for %s: %s", filename, exc)
-        return None, None
+    # CPU-bound extraction runs in a thread to avoid blocking the event loop
+    return await asyncio.to_thread(
+        _extract_text_from_pdf_bytes,
+        pdf_bytes, filename, max_chars, download_method, url,
+    )
 
 
 _REPORT_PAGE_PATHS: list[str] = [
@@ -990,6 +1071,12 @@ _REPORT_PAGE_PATHS: list[str] = [
     "/sustainability/reports",
     "/sustainability/downloads",
     "/esg/reports",
+    # Language-prefixed paths common in multilingual corporate sites
+    "/en/downloads",
+    "/en/downloads/report-center",
+    "/en/reports",
+    "/en/sustainability/reports",
+    "/th/downloads",
 ]
 
 
@@ -1045,8 +1132,6 @@ async def _discover_report_pdfs(
         len(all_targets), len(subdomain_base_urls),
     )
 
-    _DISCOVERY_TIMEOUT_MS = 7_000
-
     for target_url in all_targets:
         if len(discovered_pdfs) >= 15:
             logger.info("PDF discovery: found %d PDFs, stopping early", len(discovered_pdfs))
@@ -1059,6 +1144,13 @@ async def _discover_report_pdfs(
             )
             if response is None or response.status >= 400:
                 continue
+
+            # Wait for JS-rendered content (e.g. dynamic download/report pages).
+            # Many corporate sites load PDF links via JavaScript after DOMContentLoaded.
+            try:
+                await page.wait_for_load_state("networkidle", timeout=_NETWORKIDLE_TIMEOUT_MS)
+            except Exception:
+                pass  # Timeout is acceptable — proceed with whatever is rendered
 
             pdf_links = await page.eval_on_selector_all(
                 "a[href]",
@@ -1137,7 +1229,8 @@ async def crawl_website(
         logger.info("Using %d URLs from sitemap", len(all_urls))
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, args=_PLAYWRIGHT_ARGS)
+        context = None
         try:
             context = await browser.new_context(
                 user_agent=(
@@ -1147,6 +1240,57 @@ async def crawl_website(
                 ),
             )
             page = await context.new_page()
+
+            # DNS cache keyed by hostname — avoids repeated lookups within one crawl
+            _guard_dns_cache: dict[str, bool] = {}
+
+            async def _ssrf_guard(route) -> None:
+                req_url = route.request.url
+                parsed_req = urlparse(req_url)
+                if parsed_req.scheme not in ("http", "https"):
+                    await route.continue_()
+                    return
+                hostname = parsed_req.hostname or ""
+                if not hostname:
+                    await route.abort()
+                    return
+
+                # Fast path: if hostname is an IP literal, check directly (no DNS)
+                try:
+                    ip = ipaddress.ip_address(hostname)
+                    if any(ip in net for net in _BLOCKED_NETWORKS):
+                        await route.abort()
+                        return
+                    await route.continue_()
+                    return
+                except ValueError:
+                    pass  # hostname is a domain name — fall through to DNS check
+
+                # DNS check for navigation/data requests; cache to avoid per-request lookups
+                if route.request.resource_type in ("document", "fetch", "xhr"):
+                    if hostname not in _guard_dns_cache:
+                        try:
+                            loop = asyncio.get_running_loop()
+                            addr_infos = await loop.getaddrinfo(
+                                hostname, None, family=socket.AF_UNSPEC,
+                            )
+                            blocked = any(
+                                any(
+                                    ipaddress.ip_address(ai[4][0]) in net
+                                    for net in _BLOCKED_NETWORKS
+                                )
+                                for ai in addr_infos
+                            )
+                        except (socket.gaierror, ValueError):
+                            blocked = True
+                        _guard_dns_cache[hostname] = blocked
+                    if _guard_dns_cache[hostname]:
+                        await route.abort()
+                        return
+
+                await route.continue_()
+
+            await page.route("**/*", _ssrf_guard)
 
             # Step 2: If no sitemap, crawl links from homepage + subpages
             if not all_urls:
@@ -1170,6 +1314,8 @@ async def crawl_website(
                 ][:5]
 
                 for sub_url in level2_candidates:
+                    if not is_safe_url(sub_url):
+                        continue
                     try:
                         await page.goto(sub_url, wait_until="domcontentloaded", timeout=_PAGE_TIMEOUT_MS)
                         sub_links = await _extract_links_from_page(page, sub_url, base_domain)
@@ -1182,7 +1328,6 @@ async def crawl_website(
             # Step 2b: Crawl ESG subdomains (investor, sustainability, etc.)
             root_domain = _get_root_domain(base_domain)
             parsed_base = urlparse(url)
-            _SUB_PREFIXES = ["investor", "ir", "sustainability", "esg"]
             for prefix in _SUB_PREFIXES:
                 sub_host = f"{prefix}.{root_domain}"
                 if sub_host == base_domain:
@@ -1214,6 +1359,8 @@ async def crawl_website(
                                 if _is_esg_relevant(u) and not u.lower().endswith(".pdf")
                             ][:3]
                             for sub_l2 in sub_level2:
+                                if not is_safe_url(sub_l2):
+                                    continue
                                 try:
                                     await page.goto(
                                         sub_l2,
@@ -1296,9 +1443,9 @@ async def crawl_website(
                 if result:
                     pages.append(result)
 
-            await context.close()
-
         finally:
+            if context:
+                await context.close()
             await browser.close()
 
     # Step 6: Download and extract PDFs
@@ -1315,27 +1462,34 @@ async def crawl_website(
         pdf_total_chars = 0
         pdf_count = 0
 
-        for pdf_url in pdf_urls:
-            if pdf_total_chars >= _PDF_MAX_CHARS_TOTAL:
-                logger.info("PDF total char limit reached — stopping PDF extraction")
-                break
+        # One shared Playwright browser for all PDF fallback downloads
+        _pdf_pw = await async_playwright().start()
+        _pdf_browser = await _pdf_pw.chromium.launch(headless=True, args=_PLAYWRIGHT_ARGS)
+        try:
+            for pdf_url in pdf_urls:
+                if pdf_total_chars >= _PDF_MAX_CHARS_TOTAL:
+                    logger.info("PDF total char limit reached — stopping PDF extraction")
+                    break
 
-            _progress(f"Reading PDF: {_pdf_filename(pdf_url)} ({pdf_count + 1}/{len(pdf_urls)})")
-            pdf_result, pdf_info = await _download_and_extract_pdf(pdf_url)
-            if pdf_result and pdf_info:
-                # Enforce total character budget
-                remaining_budget = _PDF_MAX_CHARS_TOTAL - pdf_total_chars
-                if len(pdf_result.markdown_text) > remaining_budget:
-                    pdf_result = PageContent(
-                        url=pdf_result.url,
-                        title=pdf_result.title,
-                        markdown_text=pdf_result.markdown_text[:remaining_budget],
-                    )
+                _progress(f"Reading PDF: {_pdf_filename(pdf_url)} ({pdf_count + 1}/{len(pdf_urls)})")
+                pdf_result, pdf_info = await _download_and_extract_pdf(pdf_url, browser=_pdf_browser)
+                if pdf_result and pdf_info:
+                    # Enforce total character budget
+                    remaining_budget = _PDF_MAX_CHARS_TOTAL - pdf_total_chars
+                    if len(pdf_result.markdown_text) > remaining_budget:
+                        pdf_result = PageContent(
+                            url=pdf_result.url,
+                            title=pdf_result.title,
+                            markdown_text=pdf_result.markdown_text[:remaining_budget],
+                        )
 
-                pages.append(pdf_result)
-                pdf_download_infos.append(pdf_info)
-                pdf_total_chars += len(pdf_result.markdown_text)
-                pdf_count += 1
+                    pages.append(pdf_result)
+                    pdf_download_infos.append(pdf_info)
+                    pdf_total_chars += len(pdf_result.markdown_text)
+                    pdf_count += 1
+        finally:
+            await _pdf_browser.close()
+            await _pdf_pw.stop()
 
         logger.info(
             "PDF extraction complete: %d PDF(s) extracted (%d chars total)",

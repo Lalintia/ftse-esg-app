@@ -6,10 +6,10 @@ import type {
   AnalysisDetail,
   AnalysisListResponse,
   CreateAnalysisResponse,
-  SubsectorItem,
 } from '@/lib/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? '';
 
 class ApiError extends Error {
   constructor(
@@ -23,68 +23,42 @@ class ApiError extends Error {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(API_KEY && { 'X-API-Key': API_KEY }),
+        ...options?.headers,
+      },
+    });
 
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`;
-    try {
-      const errorBody = await response.text();
-      const parsed = JSON.parse(errorBody);
-      if (parsed.detail && typeof parsed.detail === 'string') {
-        message = parsed.detail;
+    if (!response.ok) {
+      let message = `Request failed with status ${response.status}`;
+      try {
+        const errorBody = await response.text();
+        const parsed = JSON.parse(errorBody);
+        if (parsed.detail && typeof parsed.detail === 'string') {
+          message = parsed.detail;
+        }
+      } catch {
+        // keep default message
       }
-    } catch {
-      // keep default message
+      throw new ApiError(response.status, message);
     }
-    throw new ApiError(response.status, message);
+
+    return response.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json() as Promise<T>;
 }
 
-/**
- * Simplified industry categories mapped to ICB subsector codes.
- * Each industry maps to one representative subsector code.
- */
-export interface IndustryCategory {
-  label: string;
-  value: string;
-  description: string;
-}
-
-export const INDUSTRY_CATEGORIES: IndustryCategory[] = [
-  { label: 'Auto-detect from website', value: 'auto', description: 'AI will determine the industry automatically' },
-  { label: 'Oil, Gas & Energy', value: '60101000', description: 'Oil & gas producers, pipelines, energy services' },
-  { label: 'Electricity & Utilities', value: '65101010', description: 'Electric utilities, gas distribution, water' },
-  { label: 'Renewable Energy', value: '60102020', description: 'Solar, wind, alternative energy' },
-  { label: 'Mining & Metals', value: '55101010', description: 'Mining, steel, aluminium, precious metals' },
-  { label: 'Chemicals', value: '55201010', description: 'Commodity & specialty chemicals' },
-  { label: 'Construction & Materials', value: '50201010', description: 'Building materials, construction companies' },
-  { label: 'Food & Beverages', value: '45102020', description: 'Food producers, brewers, soft drinks' },
-  { label: 'Personal & Household Goods', value: '45201020', description: 'Personal care, household products, tobacco' },
-  { label: 'Healthcare & Pharmaceuticals', value: '20103010', description: 'Pharma, biotech, medical devices, hospitals' },
-  { label: 'Banks & Financial Services', value: '30101010', description: 'Banks, insurance, financial services' },
-  { label: 'Real Estate', value: '35102010', description: 'Property developers, REITs' },
-  { label: 'Technology', value: '10101015', description: 'Software, hardware, IT services, semiconductors' },
-  { label: 'Telecommunications', value: '15101010', description: 'Telecom operators, mobile, broadband' },
-  { label: 'Media & Entertainment', value: '15104025', description: 'Broadcasting, publishing, entertainment' },
-  { label: 'Retail & Consumer Services', value: '40201020', description: 'General retailers, specialty stores, e-commerce' },
-  { label: 'Travel & Leisure', value: '40501020', description: 'Hotels, airlines, restaurants, tourism' },
-  { label: 'Transportation & Logistics', value: '50101010', description: 'Shipping, trucking, railroads, airlines' },
-  { label: 'Automobiles & Parts', value: '40101010', description: 'Auto manufacturers, car parts, tyres' },
-  { label: 'Industrial & Manufacturing', value: '50201030', description: 'Machinery, electronics, aerospace, defence' },
-];
-
-export const fetchSubsectors = (): Promise<SubsectorItem[]> => {
-  return request<SubsectorItem[]>('/subsectors');
-};
+export type { IndustryCategory } from '@/lib/constants';
+export { INDUSTRY_CATEGORIES } from '@/lib/constants';
 
 export const createAnalysis = (
   companyUrl: string,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -76,15 +76,14 @@ export default function HistoryPage() {
     }
   };
 
-  const filteredAnalyses = searchQuery.trim()
-    ? analyses.filter((a) => {
-      const query = searchQuery.toLowerCase();
-      return (
-        (a.company_name?.toLowerCase().includes(query) ?? false) ||
-        a.company_url.toLowerCase().includes(query)
-      );
-    })
-    : analyses;
+  const filteredAnalyses = useMemo(() => {
+    if (!searchQuery.trim()) { return analyses; }
+    const query = searchQuery.toLowerCase();
+    return analyses.filter((a) =>
+      (a.company_name?.toLowerCase().includes(query) ?? false) ||
+      a.company_url.toLowerCase().includes(query),
+    );
+  }, [analyses, searchQuery]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -151,11 +150,10 @@ export default function HistoryPage() {
                       <TableRow
                         key={analysis.id}
                         tabIndex={0}
-                        role="link"
                         aria-label={`View analysis for ${getDisplayName(analysis)}`}
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => router.push(`/analysis/${analysis.id}`)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/analysis/${analysis.id}`); } }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/analysis/${analysis.id}`); } }}
                       >
                         <TableCell className="font-medium">
                           {getDisplayName(analysis)}

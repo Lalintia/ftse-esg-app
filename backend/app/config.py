@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_ROLE_KEY: str
     OPENAI_API_KEY: str
+    API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4.1-mini"
     ALLOWED_ORIGINS: str = "https://esg.ohmai.me,http://localhost:3000"
     MAX_PAGES_TO_CRAWL: int = 50

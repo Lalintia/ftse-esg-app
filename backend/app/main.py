@@ -4,11 +4,11 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.dependencies import get_supabase
+from app.dependencies import get_supabase, verify_api_key
 from app.routers import analyses, health, subsectors
 from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements, sync_indicator_names_to_db
 
@@ -43,6 +43,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as exc:
         logger.warning("Failed to sync indicator names: %s", exc)
 
+    if not _settings.API_KEY:
+        logger.warning("API_KEY is not set — all protected endpoints are unauthenticated")
+
     yield
     logger.info("Shutting down FTSE ESG Analyzer")
 
@@ -60,12 +63,13 @@ app.add_middleware(
     allow_origins=_settings.ALLOWED_ORIGINS.split(","),
     allow_credentials=False,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "X-API-Key"],
 )
 
+_auth = [Depends(verify_api_key)]
 app.include_router(health.router, prefix="/api")
-app.include_router(subsectors.router, prefix="/api")
-app.include_router(analyses.router, prefix="/api")
+app.include_router(subsectors.router, prefix="/api", dependencies=_auth)
+app.include_router(analyses.router, prefix="/api", dependencies=_auth)
 
 
 @app.get("/")

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown, ExternalLink, FileText, Globe } from 'lucide-react';
-import { cn, normalizeUrl } from '@/lib/utils';
+import { cn, normalizeUrl, isSafeUrl } from '@/lib/utils';
 import type { CrawledUrls, SitemapRecommendation, PriorityType, FtseResultItem } from '@/lib/types';
 import { parseRecommendationMeta } from '@/lib/types';
 
@@ -311,15 +311,6 @@ function groupUrlsByDomain(
   return groups;
 }
 
-function isSafeHref(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
-
 function formatFileSize(chars: number): string {
   const estimatedKb = Math.round(chars / 1024);
   if (estimatedKb > 1024) {
@@ -407,7 +398,7 @@ function TreeNode({ title, isSection, isNew, isDimmed, isEsgHint, priority, chil
           </div>
         )}
       </div>
-      {pdfAttachment && isSafeHref(pdfAttachment.url) && (
+      {pdfAttachment && isSafeUrl(pdfAttachment.url) && (
         <div className="ml-7 mt-1">
           <a
             href={pdfAttachment.url}
@@ -631,7 +622,7 @@ function EnhancementBadges({ recommendations }: { recommendations: SitemapRecomm
                 </span>
                 <span className="text-sm font-semibold">{title}</span>
               </div>
-              {meta.existing_page_url && isSafeHref(meta.existing_page_url) && (
+              {meta.existing_page_url && isSafeUrl(meta.existing_page_url) && (
                 <a
                   href={meta.existing_page_url}
                   target="_blank"
@@ -647,8 +638,8 @@ function EnhancementBadges({ recommendations }: { recommendations: SitemapRecomm
                 <div>
                   <p className="text-[11px] font-semibold text-stone-600 mb-1">Data to add:</p>
                   <ul className="space-y-0.5">
-                    {meta.data_to_add.map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-1.5 text-[11px] text-stone-500">
+                    {meta.data_to_add.map((item) => (
+                      <li key={item} className="flex items-start gap-1.5 text-[11px] text-stone-500">
                         <span className="mt-1 h-1 w-1 rounded-full bg-amber-400 flex-shrink-0" />
                         {item}
                       </li>

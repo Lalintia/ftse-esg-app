@@ -5,6 +5,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
+from typing import Literal, cast
 
 from openai import AsyncOpenAI, RateLimitError, APIStatusError, APITimeoutError
 
@@ -49,7 +50,7 @@ class SitemapRecommendation:
     reason: str
     priority: str
     addresses_gaps: list[str]
-    rec_type: str = "new"
+    rec_type: Literal["new", "enhance"] = "new"
     existing_page_url: str = ""
     data_to_add: list[str] = field(default_factory=list)
 
@@ -202,9 +203,8 @@ async def generate_sitemap(
             if not isinstance(data_to_add, list):
                 data_to_add = []
 
-            rec_type = str(rec.get("type", "new"))
-            if rec_type not in {"new", "enhance"}:
-                rec_type = "new"
+            raw_rec_type = str(rec.get("type", "new"))
+            rec_type = cast(Literal["new", "enhance"], raw_rec_type if raw_rec_type in {"new", "enhance"} else "new")
 
             recommendations.append(SitemapRecommendation(
                 page_title=str(rec.get("page_title", "")),

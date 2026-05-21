@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>TIDLOR — FTSE ESG Gap Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+@page{size:A4 portrait;margin:14mm 13mm 16mm 13mm}
+@media print{
+  html,body{width:210mm;margin:0}
+  .page-break{page-break-before:always}
+  body{font-size:8.5pt}
+  .cover-decor{display:none}
+  .compare-grid{grid-template-columns:1fr 1fr}
+}
+/* screen: cap at A4 width so preview matches print */
+body{font-family:'Noto Sans Thai',sans-serif;font-size:9.5pt;color:#1a1a2e;background:#f0f2f5;line-height:1.55}
+.page-wrap{max-width:182mm;margin:0 auto;background:#fff;padding:14mm 13mm 16mm;min-height:297mm}
+
+/* ── COVER ── */
+.cover{background:linear-gradient(145deg,#0f1b2d 0%,#1a3a5c 100%);color:#fff;padding:32px 28px 28px;margin-bottom:24px;border-radius:8px;position:relative;overflow:hidden}
+.cover-decor{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:50px solid rgba(255,255,255,0.05)}
+.cover-tag{display:inline-block;background:#f4a020;color:#fff;font-size:7.5pt;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.cover h1{font-size:20pt;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+.cover .co{font-size:10pt;opacity:.75;margin-bottom:18px}
+.cover-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+.cover-box{background:rgba(255,255,255,.1);border-radius:6px;padding:10px 12px}
+.cover-box .lb{font-size:7pt;opacity:.65;text-transform:uppercase;letter-spacing:.5px}
+.cover-box .vl{font-size:12pt;font-weight:700;margin-top:2px}
+
+/* ── SECTIONS ── */
+.section{margin-bottom:32px}
+.sec-title{font-size:14pt;font-weight:700;color:#0f1b2d;border-left:4px solid #f4a020;padding-left:12px;margin-bottom:16px}
+.note-box{background:#fffde7;border:1px solid #f4a020;border-radius:6px;padding:12px 16px;font-size:9pt;margin-bottom:16px;color:#5d4037}
+
+/* ── COMPARISON BOXES ── */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.cbox{border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.cbox-head{padding:12px 16px;color:#fff;font-weight:700;font-size:10pt}
+.cbox-body{padding:14px 16px;font-size:9.5pt;line-height:1.8;background:#fafafa;border:1px solid #e9ecef;border-top:none}
+.cbox-body .row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:4px 0}
+.cbox-body .row:last-child{border:none}
+.cbox-body .lbl{color:#555}
+.cbox-body .val{font-weight:700;color:#1a2f4e}
+.diff-box{background:#fff8e1;border:1px solid #ffd54f;border-radius:8px;padding:16px;margin-bottom:20px}
+.diff-title{font-weight:700;color:#e65100;margin-bottom:8px;font-size:10pt}
+.diff-row{display:flex;gap:10px;margin-bottom:8px;font-size:9.5pt}
+.diff-row .diff-icon{font-size:14pt;min-width:24px}
+.diff-row .diff-text{flex:1}
+
+/* ── THEME BARS ── */
+.theme-bar-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.theme-bar-table td{padding:5px 8px;vertical-align:middle}
+.bar-wrap{background:#f0f0f0;border-radius:20px;overflow:hidden;height:16px;min-width:120px}
+.bar-fill{height:100%;border-radius:20px;display:flex;align-items:center;padding-left:8px;font-size:7.5pt;font-weight:700;color:#fff}
+.theme-label{font-size:9pt;font-weight:600;width:180px}
+.theme-label-th{font-size:8pt;color:#777}
+.gap-count{font-size:11pt;font-weight:700;min-width:32px;text-align:right}
+.all-good{color:#1a6b3c;font-size:9pt}
+
+/* ── GAP TABLE ── */
+.gap-table{width:100%;border-collapse:collapse;font-size:9pt}
+.gap-table th{background:#1a2f4e;color:#fff;padding:8px 10px;text-align:left;font-size:8.5pt;font-weight:600}
+.gap-table td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:top}
+.gap-table tr:nth-child(even) td{background:#f8f9fa}
+.gap-table tr:hover td{background:#fff8e1}
+.gcode{font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#880e4f;background:#fff5f5;border:1px solid #f1a9a0;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.theme-chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:7.5pt;color:#fff;font-weight:600;white-space:nowrap}
+.priority-high{background:#c0392b;color:#fff;padding:2px 6px;border-radius:4px;font-size:7.5pt;font-weight:700}
+.priority-mid{background:#e67e22;color:#fff;padding:2px 6px;border-radius:4px;font-size:7.5pt;font-weight:700}
+.priority-low{background:#7f8c8d;color:#fff;padding:2px 6px;border-radius:4px;font-size:7.5pt;font-weight:700}
+
+/* ── INDICATOR DETAIL TABLE ── */
+.ind-table{width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:24px}
+.ind-table{table-layout:fixed}
+.ind-table th{padding:6px 8px;text-align:left;font-size:7.5pt;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,.2)}
+.ind-table td{padding:6px 8px;border-bottom:1px solid #e9ecef;vertical-align:top;border-right:1px solid #e9ecef;overflow:hidden;word-break:break-word}
+.ind-table tr:nth-child(even) td{background:#f8f9fa}
+.status-ok{color:#1a6b3c;font-weight:700;font-size:8pt}
+.status-gap{color:#c0392b;font-weight:700;font-size:8pt}
+.status-na{color:#888;font-size:8pt}
+.sub-chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:7pt;padding:1px 5px;border-radius:4px;margin:1px}
+.sub-gap-chip{background:#fff5f5;color:#c0392b;border:1px solid #f1a9a0}
+.sub-ok-chip{background:#f0faf4;color:#1a6b3c;border:1px solid #a8d5b9}
+.ind-name{font-weight:600;font-size:8.5pt}
+.ind-desc{color:#666;font-size:7.5pt;margin-top:2px}
+.theme-header-row td{font-weight:700;font-size:9pt;padding:10px;border-bottom:2px solid #ddd}
+
+/* ── FOOTER ── */
+.footer{margin-top:28px;padding-top:10px;border-top:1px solid #e9ecef;font-size:7.5pt;color:#aaa;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<div class="cover">
+  <div class="cover-decor"></div>
+  <div class="cover-tag">FTSE Russell ESG Assessment</div>
+  <h1>Gap Analysis Report</h1>
+  <div class="co">บริษัท ติดล้อ โฮลดิ้งส์ จำกัด (มหาชน) — TIDLOR</div>
+  <div class="cover-grid">
+    <div class="cover-box"><div class="lb">แหล่งข้อมูล REF</div><div class="vl">Ake PDF</div></div>
+    <div class="cover-box"><div class="lb">แหล่งข้อมูลระบบ</div><div class="vl">KB System</div></div>
+    <div class="cover-box"><div class="lb">Themes ที่ประเมิน (Ake PDF)</div><div class="vl">6 Themes <span style="font-size:9pt;opacity:0.7">(ไม่รวม CR)</span></div></div>
+    <div class="cover-box"><div class="lb">Gap ที่พบ (Ake PDF)</div><div class="vl" style="color:#f4a020">60 รายการ</div></div>
+  </div>
+</div>
+
+<div class="section">
+<div class="sec-title">📋 Ake PDF ตรวจเจออะไรบ้าง?</div>
+<div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #f4a020;border-radius:6px;padding:16px 18px;margin-bottom:20px;font-size:9pt;line-height:1.8">
+  <div style="font-weight:700;font-size:10pt;color:#0f1b2d;margin-bottom:8px">📖 คำอธิบายสำหรับผู้อ่าน — Gap คืออะไร?</div>
+  <p style="margin-bottom:8px">
+    <b>FTSE Russell</b> เป็นองค์กรสากลที่กำหนดมาตรฐานว่าบริษัทในแต่ละอุตสาหกรรมควร<b>เปิดเผยข้อมูล ESG</b> อะไรบ้าง
+    เช่น บริษัทสินเชื่อต้องรายงานนโยบายแรงงาน, ความเสี่ยงสภาพอากาศ, บรรษัทภิบาล ฯลฯ
+  </p>
+  <p style="margin-bottom:8px">
+    <b>Gap (ช่องว่าง)</b> = ข้อมูลที่ FTSE กำหนดว่าบริษัท<u>ควรรายงาน</u> แต่เมื่อเปิดรายงาน ESG ของ Tidlor แล้ว<b>หาคำตอบไม่เจอ</b>
+    — อาจไม่มีนโยบาย, ไม่เปิดเผยตัวเลข, หรือรายงานไม่ชัดเจนพอ
+  </p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <div style="background:#f0faf4;border:1px solid #a8d5b9;border-radius:5px;padding:10px 12px">
+      <div style="font-weight:700;color:#1a6b3c;margin-bottom:4px">✅ ไม่ใช่ Gap = ผ่าน</div>
+      <div style="color:#333">Tidlor มีนโยบาย / ตัวเลข / การเปิดเผยที่ชัดเจนในรายงานประจำปี<br>
+      → FTSE ให้คะแนนในข้อนั้น</div>
+    </div>
+    <div style="background:#fff5f5;border:1px solid #f1a9a0;border-radius:5px;padding:10px 12px">
+      <div style="font-weight:700;color:#c0392b;margin-bottom:4px">⚠️ Gap = ยังขาด</div>
+      <div style="color:#333">Tidlor ยังไม่ได้รายงานข้อมูลนั้น<br>
+      → FTSE ให้ 0 คะแนนในข้อนั้น และนับเป็น gap</div>
+    </div>
+  </div>
+  <p style="margin-top:10px;color:#555">
+    รายงานนี้แสดงให้เห็นว่า จาก 120 ข้อที่ FTSE กำหนดสำหรับ Tidlor — มี <b>60 sub-questions ที่ยังเป็น gap</b>
+    ซึ่งถ้า Tidlor เพิ่มข้อมูลเหล่านี้ในรายงานปีหน้า คะแนน FTSE ESG จะดีขึ้นได้
+  </p>
+</div>
+<div class="note-box">
+  <b>เข้าใจสั้นๆ:</b> Ake วิเคราะห์ว่า Tidlor <i>ควรรายงาน</i> ESG ทั้งหมด 120 ข้อ (219 sub-questions)
+  ตาม FTSE Russell standard — แต่จากรายงานที่ Tidlor ส่งมา ยังขาดอีก <b>60 sub-questions</b> ที่ยังไม่เปิดเผย
+</div>
+
+<div class="compare-grid">
+  <div class="cbox">
+    <div class="cbox-head" style="background:#2c3e50;">📋 REF — Ake PDF (ที่ควรจะเป็น)</div>
+    <div class="cbox-body">
+      <div class="row"><span class="lbl">อุตสาหกรรม (ICB)</span><span class="val">Specialized Consumer Services</span></div>
+      <div class="row"><span class="lbl">Themes ที่ประเมิน</span><span class="val">7 Themes (ไม่รวม CR)*</span></div>
+      <div class="row"><span class="lbl">Indicators ที่ควรรายงาน</span><span class="val">120 ข้อ</span></div>
+      <div class="row"><span class="lbl">Sub-indicators ที่ควรรายงาน</span><span class="val">219 รายการ</span></div>
+      <div class="row"><span class="lbl">Gap ที่ยังขาด</span><span class="val" style="color:#c0392b">60 รายการ</span></div>
+    </div>
+  </div>
+  <div class="cbox">
+    <div class="cbox-head" style="background:#1a6b3c;">🤖 KB System (ระบบของเรา)</div>
+    <div class="cbox-body">
+      <div class="row"><span class="lbl">อุตสาหกรรม (ICB)</span><span class="val">Consumer Lending (30201020)</span></div>
+      <div class="row"><span class="lbl">Themes ที่ประเมิน</span><span class="val">7 Themes (รวม CR)</span></div>
+      <div class="row"><span class="lbl">Indicators ที่ควรรายงาน</span><span class="val">120 ข้อ ✅ ตรงกัน</span></div>
+      <div class="row"><span class="lbl">Sub-indicators ที่ควรรายงาน</span><span class="val">237 รายการ (+18)</span></div>
+      <div class="row"><span class="lbl">ครอบคลุม gap ของ Ake PDF</span><span class="val" style="color:#1a6b3c">60/60 ✅ 100%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="diff-box">
+  <div class="diff-title">⚡ ต่างกันตรงไหน? (2 จุด)</div>
+  <div class="diff-row">
+    <div class="diff-icon">1️⃣</div>
+    <div class="diff-text">
+      <b>Sub-indicators มากกว่า +18 รายการ</b><br>
+      Ake นับ 219, ระบบเรานับ 237 — เพราะ Phase 31 แตก GAC/GRM/SLS ให้ละเอียดกว่า
+      เช่น SLS03 (การไม่เลือกปฏิบัติ) แตกเป็น 8 sub-items (เชื้อชาติ, ศาสนา, เพศ ฯลฯ)
+      แทนที่จะนับเป็น 1 ข้อรวม — <b>ไม่ใช่ข้อผิดพลาด</b>
+    </div>
+  </div>
+  <div class="diff-row">
+    <div class="diff-icon">2️⃣</div>
+    <div class="diff-text">
+      <b>Customer Responsibility (CR)</b><br>
+      Ake PDF ไม่ได้ประเมิน CR เลย (ระบุในหน้า 4 ว่า "ไม่มีหมวด CR")
+      แต่ระบบเรามี CR 6 indicators — ยังไม่มี gap data จาก Ake สำหรับหมวดนี้
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section">
+<div class="sec-title">📊 Gap แยกตามหมวด — Tidlor ยังขาดอะไรบ้าง?</div>
+<table class="theme-bar-table">
+
+  <tr>
+    <td class="theme-label">🌍 Climate Change<br><span class="theme-label-th">การเปลี่ยนแปลงสภาพอากาศ</span></td>
+    <td class="gap-count" style="color:#1a6b3c">15</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#1a6b3c;width:79%">15</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">24 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">👷 Labour Standards<br><span class="theme-label-th">มาตรฐานแรงงาน</span></td>
+    <td class="gap-count" style="color:#1d4e89">19</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#1d4e89;width:100%">19</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">23 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">🏛 Corporate Governance<br><span class="theme-label-th">บรรษัทภิบาล</span></td>
+    <td class="gap-count" style="color:#4a235a">11</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#4a235a;width:61%">11</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">30 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">🤝 Human Rights &amp; Community<br><span class="theme-label-th">สิทธิมนุษยชน &amp; ชุมชน</span></td>
+    <td class="gap-count" style="color:#7b3f00">7</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#7b3f00;width:38%">7</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">14 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">⚖ Risk Management<br><span class="theme-label-th">การบริหารความเสี่ยง</span></td>
+    <td class="gap-count" style="color:#6d4c41">5</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#6d4c41;width:27%">5</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">10 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">🛡 Anti-Corruption<br><span class="theme-label-th">การต่อต้านการทุจริต</span></td>
+    <td class="gap-count" style="color:#880e4f">3</td>
+    <td style="width:60%"><div class="bar-wrap"><div class="bar-fill" style="background:#880e4f;width:16%">3</div></div></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">13 indicators</td>
+  </tr>
+  <tr>
+    <td class="theme-label">🛒 Customer Responsibility<br><span class="theme-label-th">ความรับผิดชอบต่อลูกค้า</span></td>
+    <td class="gap-count" style="color:#1a6b3c">✅</td>
+    <td style="width:60%"><span class="all-good">✅ ไม่มี gap <span style="font-size:7.5pt;color:#888;">(ไม่ได้ประเมินใน Ake PDF)</span></span></td>
+    <td style="font-size:8pt;color:#777;min-width:80px">6 indicators</td>
+  </tr>
+</table></div>
+<div class="section page-break">
+<div class="sec-title">⚠️ รายการ Gap ทั้งหมด 60 รายการ — สิ่งที่ Tidlor ยังขาด</div>
+<p style="font-size:9pt;color:#555;margin-bottom:12px;">
+  รายการต่อไปนี้คือ sub-indicators ที่ Ake PDF ระบุว่า Tidlor <b>ยังไม่เปิดเผย</b>หรือ<b>ไม่มีนโยบาย</b>รองรับ — ระบบของเราครอบคลุมครบ 60/60 รายการ
+</p>
+<table class="gap-table">
+<thead>
+  <tr>
+    <th style="width:90px">Code</th>
+    <th style="width:110px">หมวด</th>
+    <th>สิ่งที่ Tidlor ยังขาด</th>
+    <th style="width:68px">ระดับ</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr>
+    <td><span class="gcode">ECC03_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่เป็นสมาชิกสมาคมด้านธุรกิจที่ลดคาร์บอน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC41_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>CEO compensation ไม่เชื่อมโยงกับเป้าหมาย GHG</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC42_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มี KPI GHG สำหรับผู้บริหาร</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC43_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่เปิดเผย Climate Risk/Opportunity ในฐานะความเสี่ยงทางธุรกิจ</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC51_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่ผูกพัน CAPEX กับเป้าหมาย Paris Agreement</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC51_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีแผนลดการลงทุนในสินทรัพย์คาร์บอนสูง</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC74_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีสมาชิกภาพในสมาคมด้านการลดคาร์บอน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC74_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีสมาชิกภาพในสมาคมด้านการลดคาร์บอน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC75_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ค่าตอบแทน CEO ยังไม่เชื่อมโยงกับผลงานด้านสภาพภูมิอากาศ</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC75_3</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ค่าตอบแทน CEO/ผู้บริหารระดับสูงยังไม่พิจารณาความคืบหน้าเป้าหมายลดก๊าซเรือนกระจก</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC76_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีการเปิดเผยตาม TCFD (ข้อ 1)</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC76_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีการเปิดเผยตาม TCFD (ข้อ 2)</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC76_3</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีการเปิดเผยตาม TCFD (ข้อ 3)</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC78_1</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีราคาคาร์บอนภายใน (Internal Carbon Price)</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">ECC78_2</span></td>
+    <td><span class="theme-chip" style="background:#1a6b3c">🌍 Climate Change</span></td>
+    <td>ไม่มีการเปิดเผย Internal Carbon Price ต่อสาธารณะ</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS01_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีการกล่าวถึงการป้องกันแรงงานเด็กในการเปิดเผยทั่วไป</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS05_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>นโยบาย Freedom of Association ยังขาด</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS05_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>นโยบาย Freedom of Association ยังขาด</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS06_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>นโยบาย Collective Bargaining ยังขาด</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS06_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>นโยบาย Collective Bargaining ยังขาด</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS07_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีนโยบายลดชั่วโมงทำงานเกินมาตรฐาน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS07_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีนโยบายลดชั่วโมงทำงานเกินมาตรฐาน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS08_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีนโยบายค่าจ้างขั้นต่ำ/ค่าจ้างที่ยุติธรรม</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS08_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีนโยบายค่าจ้างขั้นต่ำ/ค่าจ้างที่ยุติธรรม</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS11_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีโครงการพัฒนาการจ้างงานเยาวชน/ฝึกงาน</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS12_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>นโยบายแรงงานยังไม่ได้แปลเป็นภาษาที่เกี่ยวข้อง</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS14_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ยังไม่มีการดำเนินการป้องกันแรงงานเด็ก</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS14_3</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ยังไม่มีกลไกให้ตัวแทนพนักงานมีส่วนร่วมกับฝ่ายบริหาร</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS30_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีช่องทางลับสำหรับการรายงาน Bullying/Harassment</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS30_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ขาด Manager Training เรื่อง Bullying/Harassment</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS32_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่เปิดเผย % พนักงานผู้พิการ</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS33_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่เปิดเผย % พนักงานหญิงทั่วโลก</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS34_1</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีนโยบาย Equal Pay</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SLS34_2</span></td>
+    <td><span class="theme-chip" style="background:#1d4e89">👷 Labour Standards</span></td>
+    <td>ไม่มีการเปิดเผยค่าตอบแทนที่เท่าเทียม</td>
+    <td><span class="priority-high">ด่วนสูง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG01_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ประธานบริษัทไม่เป็นอิสระอย่างสมบูรณ์จาก CEO</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG21_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ผู้ถือหุ้นไม่มีสิทธิ์โหวต Executive Remuneration รายปี</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG26_1</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ขาดผู้เชี่ยวชาญด้านการเงินใน Audit Committee</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG26_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ขาดผู้เชี่ยวชาญด้านการเงินส่วนใหญ่ใน Audit Committee</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG37_1</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>Remuneration Committee มีกรรมการที่ไม่เป็น Independent</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG38_1</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>แจ้ง AGM Agenda ล่วงหน้าน้อยกว่ามาตรฐาน</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG39_1</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ระยะ deferred compensation ต่ำกว่า Best Practice</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG41_1</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ขนาดคณะกรรมการไม่สอดคล้องกับ Best Practice</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG44_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ไม่เปิดเผยผลการโหวตใน AGM อย่างละเอียด</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG47_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>สัดส่วนกรรมการหญิงต่ำกว่ามาตรฐานสากล</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GCG49_2</span></td>
+    <td><span class="theme-chip" style="background:#4a235a">🏛 Corporate Governance</span></td>
+    <td>ค่าธรรมเนียม Non-Audit เกิน Audit Fees</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR04_1</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่มีนโยบายเกี่ยวกับสิทธิเด็ก</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR04_2</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่มีกิจกรรมเกี่ยวกับสิทธิเด็ก</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR11_2</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ขาดรายงานผลลัพธ์การ Stakeholder Engagement</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR15_2</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่มีการวัดผลเชิงปริมาณของผลกระทบการลงทุนชุมชน</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR16_1</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่มีโครงสร้างส่งเสริมให้พนักงานอาสาสมัคร</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR16_2</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่มีเป้าหมายการมีส่วนร่วมอาสาสมัคร</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">SHR17_1</span></td>
+    <td><span class="theme-chip" style="background:#7b3f00">🤝 Human Rights &amp; Community</span></td>
+    <td>ไม่เปิดเผยยอดเงินบริจาค/ลงทุนชุมชนรวมทั้งหมด</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GRM10_1</span></td>
+    <td><span class="theme-chip" style="background:#6d4c41">⚖ Risk Management</span></td>
+    <td>ไม่มีนโยบาย rotation ของ Auditor/Audit Partner</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GRM10_2</span></td>
+    <td><span class="theme-chip" style="background:#6d4c41">⚖ Risk Management</span></td>
+    <td>ไม่มีการเปิดประมูล Audit Firm ใหม่เป็นระยะ</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GRM14_1</span></td>
+    <td><span class="theme-chip" style="background:#6d4c41">⚖ Risk Management</span></td>
+    <td>ไม่มีการระบุ Provision ค่าปรับ/คดีความ ESG</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GRM20_1</span></td>
+    <td><span class="theme-chip" style="background:#6d4c41">⚖ Risk Management</span></td>
+    <td>ช่องทาง Whistleblowing ยังขาดความลับ</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GRM20_2</span></td>
+    <td><span class="theme-chip" style="background:#6d4c41">⚖ Risk Management</span></td>
+    <td>ไม่มีช่องทาง Whistleblowing สำหรับผู้มีส่วนได้เสียภายนอก</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GAC12_1</span></td>
+    <td><span class="theme-chip" style="background:#880e4f">🛡 Anti-Corruption</span></td>
+    <td>ไม่เปิดเผยยอดรวมการสนับสนุนทางการเมือง</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GAC13_1</span></td>
+    <td><span class="theme-chip" style="background:#880e4f">🛡 Anti-Corruption</span></td>
+    <td>ไม่รายงานจำนวนพนักงานที่ถูกลงโทษเนื่องจาก Anti-Corruption</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+  <tr>
+    <td><span class="gcode">GAC14_1</span></td>
+    <td><span class="theme-chip" style="background:#880e4f">🛡 Anti-Corruption</span></td>
+    <td>ไม่เปิดเผยค่าใช้จ่ายจากค่าปรับ/คดีทุจริต</td>
+    <td><span class="priority-mid">กลาง</span></td>
+  </tr>
+</tbody></table></div>
+<div class="section page-break">
+<div class="sec-title">🔍 ตารางเปรียบเทียบ Indicator ทั้ง 120 ข้อ</div>
+<p style="font-size:9pt;color:#555;margin-bottom:12px;">
+  ตารางด้านล่างแสดง Indicator ครบทุกข้อ แยกตามหมวด — ฝั่งซ้ายคือ REF ว่า sub-indicator ไหนขาด, ฝั่งขวาคือที่ KB System ตรวจพบ
+</p>
+
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#1a6b3c">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        🌍 Climate Change — การเปลี่ยนแปลงสภาพอากาศ &nbsp;|&nbsp; 24 indicators, 14 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC01</td>
+      <td><div class="ind-name">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการเปลี่ยนแปลงสภาพ…</div><div class="ind-desc">รวมถึงการปล่อยก๊าซคาร์บอนไดออกไซด์หรือก๊าซเรือนกระจก ครอบคลุม a. การจั…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">ECC01_1</span><span class="sub-chip sub-ok-chip" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">ECC01_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC03</td>
+      <td><div class="ind-name">การแสดงออกถึงการให้การสนับสนุนเพื่อการบรรเทาปัญหาการเปล…</div><div class="ind-desc">a. การเป็นสมาชิกสมาคมด้านธุรกิจ b. จุดยืนของบริษัทในการสนับสนุนนโยบายแ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC03_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การเป็นสมาชิกสมาคมด้านธุรกิจ">ECC03_1</span><span class="sub-chip sub-ok-chip" title="จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบียบ">ECC03_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC05</td>
+      <td><div class="ind-name">โครงการหรือมาตรการเพื่อจัดการรับมือกับการเปลี่ยนแปลงสภา…</div><div class="ind-desc">a. บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ b. บริษ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC05_1</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุการดำเนินการที่เฉพาะเจาะจงที่ได้ดำเนินการแล้ว">ECC05_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC08</td>
+      <td><div class="ind-name">การกำกับดูแล (oversight) ด้านการเปลี่ยนแปลงสภาพภูมิอากา…</div><div class="ind-desc">a. หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารคว…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC08_1</span><span class="sub-chip sub-ok-chip" title="ระบุตำแหน่งของผู้รับผิดชอบในระดับกรรมการ">ECC08_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC14</td>
+      <td><div class="ind-name">การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 แ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 และ 2) เป็นระยะเวลา 3 ปี">ECC14_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC15</td>
+      <td><div class="ind-name">การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี">ECC15_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC22</td>
+      <td><div class="ind-name">การเปลี่ยนผ่านพลังงาน (energy transition)</div><div class="ind-desc">บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน">ECC22_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC31</td>
+      <td><div class="ind-name">การใช้พลังงาน - นโยบายหรือคำแถลงการให้คำมั่นครอบคลุม</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">ECC31_1</span><span class="sub-chip sub-ok-chip" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">ECC31_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC38</td>
+      <td><div class="ind-name">เป้าหมายเชิงปริมาณระยะสั้น (ไม่เกิน 5 ปี) เพื่อลดการปล่…</div><div class="ind-desc">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">ECC38_1</span><span class="sub-chip sub-ok-chip" title="เป้าหมายเชิงปริมาณ">ECC38_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC39</td>
+      <td><div class="ind-name">เป้าหมายเชิงปริมาณระยะยาว (&gt;5 ปี) เพื่อลดการปล่อยก๊าซเร…</div><div class="ind-desc">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">ECC39_1</span><span class="sub-chip sub-ok-chip" title="เป้าหมายเชิงปริมาณ">ECC39_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC41</td>
+      <td><div class="ind-name">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</div><div class="ind-desc">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสาก…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC41_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">ECC41_1</span><span class="sub-chip sub-gap-chip" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">ECC41_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC42</td>
+      <td><div class="ind-name">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</div><div class="ind-desc">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสาก…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC42_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">ECC42_1</span><span class="sub-chip sub-gap-chip" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">ECC42_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC43</td>
+      <td><div class="ind-name">การตระหนักรู้เกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</div><div class="ind-desc">a. เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ b. ระบุกรอบระยะเว…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC43_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ">ECC43_1</span><span class="sub-chip sub-ok-chip" title="ระบุกรอบระยะเวลา (ระยะสั้น/ระยะปานกลาง/ระยะยาว) ของความเสี่ยง/โอกาส">ECC43_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC44</td>
+      <td><div class="ind-name">ผลกระทบจากความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแ…</div><div class="ind-desc">a. บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศมาประยุกต์ใช้ในกลยุทธ์ของบริษัท">ECC44_1</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุว่าความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศส่งผลกระทบต่อการวางแผนด้านการเงินของบริษัทอย่างไร">ECC44_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC45</td>
+      <td><div class="ind-name">การวางแผนสำหรับสถานการณ์ด้านสภาพภูมิอากาศ (climate scen…</div><div class="ind-desc">a. บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผน…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ">ECC45_1</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุถึงผลกระทบต่อธุรกิจจากอย่างน้อย 1 climate scenario">ECC45_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC49</td>
+      <td><div class="ind-name">การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแบ่งตามหมวดหมู่">ECC49_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC50</td>
+      <td><div class="ind-name">กระบวนการบริหารความเสี่ยงจากการเปลี่ยนแปลงสภาพภูมิอากาศ</div><div class="ind-desc">a. รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท b. มีกระ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท">ECC50_1</span><span class="sub-chip sub-ok-chip" title="มีกระบวนการบริหารความเสี่ยงที่เฉพาะเจาะจงสำหรับความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC50_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC51</td>
+      <td><div class="ind-name">ราคาคาร์บอนภายในองค์กร (internal carbon price)</div><div class="ind-desc">a. บริษัทมีราคาคาร์บอนภายในองค์กร b. บริษัทเปิดเผยราคาคาร์บอนให้สาธารณ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC51_1</span> <span class="sub-chip sub-gap-chip">ECC51_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="บริษัทมีราคาคาร์บอนภายในองค์กร">ECC51_1</span><span class="sub-chip sub-gap-chip" title="บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ">ECC51_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC73</td>
+      <td><div class="ind-name">การมีส่วนร่วมกับองค์กรด้านการเปลี่ยนแปลงสภาพภูมิอากาศโด…</div><div class="ind-desc">a. การเป็นสมาชิกขององค์กรดังกล่าว b. การมีบทบาทเกี่ยวข้องกับองค์กรดังก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การเป็นสมาชิกขององค์กรดังกล่าว">ECC73_1</span><span class="sub-chip sub-ok-chip" title="การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว">ECC73_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC74</td>
+      <td><div class="ind-name">นโยบายหรือการให้คำมั่นของบริษัท</div><div class="ind-desc">a. ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษั…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC74_1</span> <span class="sub-chip sub-gap-chip">ECC74_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่">ECC74_1</span><span class="sub-chip sub-gap-chip" title="การแสดงออกอย่างเหมาะสมของบริษัท">ECC74_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC75</td>
+      <td><div class="ind-name">การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลกา…</div><div class="ind-desc">a. ค่าตอบแทนของ CEO b. ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC75_1</span> <span class="sub-chip sub-gap-chip">ECC75_3</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="ค่าตอบแทนของ CEO">ECC75_1</span><span class="sub-chip sub-ok-chip" title="ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO)">ECC75_2</span><span class="sub-chip sub-gap-chip" title="ค่าตอบแทนของ CEO และ/หรือผู้บริหารระดับสูงอย่างน้อย 1 คนพิจารณาถึงความคืบหน้าในการบรรลุเป้าหมายการลดก๊าซเรือนกระจกของบริษัท">ECC75_3</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC76</td>
+      <td><div class="ind-name">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเ…</div><div class="ind-desc">a. บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD b…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC76_1</span> <span class="sub-chip sub-gap-chip">ECC76_2</span> <span class="sub-chip sub-gap-chip">ECC76_3</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD">ECC76_1</span><span class="sub-chip sub-gap-chip" title="บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD">ECC76_2</span><span class="sub-chip sub-gap-chip" title="บริษัทระบุอย่างชัดเจนว่าข้อมูลที่สอดคล้องกับข้อเสนอแนะของ TCFD ปรากฏเป็นส่วนหนึ่งของรายงานประจำปี">ECC76_3</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 3 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC77</td>
+      <td><div class="ind-name">กลยุทธ์การลดการปล่อยก๊าซเรือนกระจกเพื่อบรรลุเป้าหมายระย…</div><div class="ind-desc">a. บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">ECC77_1</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุองค์ประกอบหลักของกลยุทธ์นี้ในเชิงปริมาณ">ECC77_2</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุได้ว่าการดำเนินการแต่ละโครงการหรือมาตรการจะส่งผลต่อการบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจกโดยรวมของบริษัทในสัดส่วนเชิงปริมาณเท่าไร">ECC77_3</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">ECC78</td>
+      <td><div class="ind-name">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายท…</div><div class="ind-desc">a. บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้ง…</div></td>
+      <td><span class="sub-chip sub-gap-chip">ECC78_1</span> <span class="sub-chip sub-gap-chip">ECC78_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจกในระยะยาวของบริษัท">ECC78_1</span><span class="sub-chip sub-gap-chip" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะค่อย ๆ ลดการลงทุนในสินทรัพย์หรือผลิตภัณฑ์ที่มีการปล่อยคาร์บอนสูง">ECC78_2</span><span class="sub-chip sub-ok-chip" title="บริษัทระบุวิธีการที่บริษัทใช้ในการปรับรายจ่ายฝ่ายทุนในอนาคตของบริษัทให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">ECC78_3</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#1d4e89">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        👷 Labour Standards — มาตรฐานแรงงาน &nbsp;|&nbsp; 23 indicators, 18 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS01</td>
+      <td><div class="ind-name">การป้องกันการใช้แรงงานเด็ก</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS01_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">SLS01_1</span><span class="sub-chip sub-ok-chip" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">SLS01_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS02</td>
+      <td><div class="ind-name">การป้องกันการใช้แรงงานบังคับ</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">SLS02_1</span><span class="sub-chip sub-ok-chip" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">SLS02_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS03</td>
+      <td><div class="ind-name">การไม่เลือกปฏิบัติ</div><div class="ind-desc">a. การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม b. การเผยแพร่นโยบาย…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม">SLS03_1</span><span class="sub-chip sub-ok-chip" title="เชื้อชาติ">SLS03_2</span><span class="sub-chip sub-ok-chip" title="ศาสนา">SLS03_3</span><span class="sub-chip sub-ok-chip" title="เพศสภาพ">SLS03_4</span><span class="sub-chip sub-ok-chip" title="อายุ">SLS03_5</span><span class="sub-chip sub-ok-chip" title="เพศวิถี">SLS03_6</span><span class="sub-chip sub-ok-chip" title="ความพิการ">SLS03_7</span><span class="sub-chip sub-ok-chip" title="สัญชาติ">SLS03_8</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS05</td>
+      <td><div class="ind-name">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</div><div class="ind-desc">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคาร…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS05_1</span> <span class="sub-chip sub-gap-chip">SLS05_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">SLS05_1</span><span class="sub-chip sub-gap-chip" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม">SLS05_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS06</td>
+      <td><div class="ind-name">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</div><div class="ind-desc">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคาร…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS06_1</span> <span class="sub-chip sub-gap-chip">SLS06_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">SLS06_1</span><span class="sub-chip sub-gap-chip" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง">SLS06_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS07</td>
+      <td><div class="ind-name">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำ…</div><div class="ind-desc">a. มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำง…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS07_1</span> <span class="sub-chip sub-gap-chip">SLS07_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา">SLS07_1</span><span class="sub-chip sub-gap-chip" title="มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่มากเกินควรโดยเฉพาะ">SLS07_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS08</td>
+      <td><div class="ind-name">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต…</div><div class="ind-desc">a. มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ b. การให้คำ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS08_1</span> <span class="sub-chip sub-gap-chip">SLS08_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ">SLS08_1</span><span class="sub-chip sub-gap-chip" title="การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่าจ้างที่เพียงพอต่อการดำรงชีวิต">SLS08_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS10</td>
+      <td><div class="ind-name">การมีส่วนร่วมหรือการให้คำมั่นตามกรอบการดำเนินงานที่เกี่…</div><div class="ind-desc">a. การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม">SLS10_1</span><span class="sub-chip sub-ok-chip" title="เป็นสมาชิกหรือการให้คำมั่นต่อสาธารณะว่าจะปฏิบัติตามกรอบการดำเนินงานที่ได้รับการยอมรับในระดับสากล">SLS10_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS11</td>
+      <td><div class="ind-name">นโยบายที่สนับสนุนชุมชนครอบคลุม</div><div class="ind-desc">a. การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสท…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS11_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป็นต้น">SLS11_1</span><span class="sub-chip sub-gap-chip" title="โครงการเพื่อเปิดโอกาสในการจ้างงานหรือการฝึกงานให้กลุ่มคนหนุ่มสาว">SLS11_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS12</td>
+      <td><div class="ind-name">นโยบายของบริษัทเกี่ยวกับมาตรฐานแรงงาน</div><div class="ind-desc">a. มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก b. มีการแปลนโยบายเป็นภาษ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS12_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก">SLS12_1</span><span class="sub-chip sub-gap-chip" title="มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง">SLS12_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS13</td>
+      <td><div class="ind-name">การประเมินความเสี่ยงด้านแรงงานสำหรับสถานที่ปฏิบัติงานแล…</div><div class="ind-desc">a. กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence) b. กิจ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence)">SLS13_1</span><span class="sub-chip sub-ok-chip" title="กิจการหรือโครงการที่ดำเนินการอยู่แล้ว">SLS13_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS14</td>
+      <td><div class="ind-name">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแ…</div><div class="ind-desc">a. การป้องกันการใช้แรงงานเด็ก b. การป้องกันการใช้แรงงานบังคับ c. กลไกท…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS14_1</span> <span class="sub-chip sub-gap-chip">SLS14_3</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การป้องกันการใช้แรงงานเด็ก">SLS14_1</span><span class="sub-chip sub-ok-chip" title="การป้องกันการใช้แรงงานบังคับ">SLS14_2</span><span class="sub-chip sub-gap-chip" title="กลไกที่ให้ตัวแทนพนักงานสามารถมีส่วนร่วมกับฝ่ายบริหารของบริษัท">SLS14_3</span><span class="sub-chip sub-ok-chip" title="การลดจำนวนชั่วโมงทำงานที่มากเกินควร">SLS14_4</span><span class="sub-chip sub-ok-chip" title="การสนับสนุนค่าจ้างที่เพียงพอต่อการดำรงชีวิต">SLS14_5</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS16</td>
+      <td><div class="ind-name">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับเรื่องความหลากหลา…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="เชื้อชาติ">SLS16_1</span><span class="sub-chip sub-ok-chip" title="ศาสนา">SLS16_2</span><span class="sub-chip sub-ok-chip" title="เพศสภาพ">SLS16_3</span><span class="sub-chip sub-ok-chip" title="อายุ">SLS16_4</span><span class="sub-chip sub-ok-chip" title="เพศวิถี">SLS16_5</span><span class="sub-chip sub-ok-chip" title="ความพิการ">SLS16_6</span><span class="sub-chip sub-ok-chip" title="สัญชาติ">SLS16_7</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS21</td>
+      <td><div class="ind-name">ข้อมูลเหตุการณ์การไม่ปฏิบัติตามมาตรฐานแรงงาน</div><div class="ind-desc">a. บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่างไร">SLS21_1</span><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยรายละเอียดข้อมูลการดำเนินการที่เฉพาะเจาะจง โดยระบุประเภทของเหตุการณ์ที่เกิดขึ้น">SLS21_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS24</td>
+      <td><div class="ind-name">อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา">SLS24_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS25</td>
+      <td><div class="ind-name">สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วค…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วคราว">SLS25_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS26</td>
+      <td><div class="ind-name">จำนวนชั่วโมงอบรมความรู้เฉลี่ยของพนักงาน</div><div class="ind-desc">a. จำนวนชั่วโมงทั้งหมดในฐานะบริษัท b. จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน …</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="จำนวนชั่วโมงทั้งหมดในฐานะบริษัท">SLS26_1</span><span class="sub-chip sub-ok-chip" title="จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน">SLS26_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS28</td>
+      <td><div class="ind-name">อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกั…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกับค่าเฉลี่ยของ Sector และของประเทศ">SLS28_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS29</td>
+      <td><div class="ind-name">การฝึกอบรมพนักงานเพื่อเพิ่มทักษะและความสามารถ</div><div class="ind-desc">a. นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน b. รายล…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน">SLS29_1</span><span class="sub-chip sub-ok-chip" title="รายละเอียดเกี่ยวกับการฝึกอบรมพนักงาน">SLS29_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS30</td>
+      <td><div class="ind-name">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</div><div class="ind-desc">a. การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS30_1</span> <span class="sub-chip sub-gap-chip">SLS30_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing)">SLS30_1</span><span class="sub-chip sub-gap-chip" title="การฝึกอบรมพนักงานระดับผู้จัดการเกี่ยวกับการจัดการกับรายงานหรือสถานการณ์การกลั่นแกล้งหรือการก่อกวนคุกคาม">SLS30_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS32</td>
+      <td><div class="ind-name">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS32_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก">SLS32_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS33</td>
+      <td><div class="ind-name">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS33_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="สัดส่วน (%) ของพนักงานหญิงทั่วโลก">SLS33_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SLS34</td>
+      <td><div class="ind-name">การจ่ายค่าตอบแทนที่เท่าเทียม</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SLS34_1</span> <span class="sub-chip sub-gap-chip">SLS34_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">SLS34_1</span><span class="sub-chip sub-gap-chip" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">SLS34_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#4a235a">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        🏛 Corporate Governance — บรรษัทภิบาล &nbsp;|&nbsp; 30 indicators, 11 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG01</td>
+      <td><div class="ind-name">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO</div><div class="ind-desc">a. ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ไ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG01_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรมการอิสระ หรือไม่ได้มีการเปิดเผยความเป็นกรรมการอิสระของประธานบริษัท">GCG01_1</span><span class="sub-chip sub-gap-chip" title="ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานเป็นกรรมการอิสระ">GCG01_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG02</td>
+      <td><div class="ind-name">การระบุรายละเอียดเกี่ยวกับกรรมการ</div><div class="ind-desc">a. ความเชี่ยวชาญ b. การดำรงตำแหน่งกรรมการในองค์กรอื่น</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ความเชี่ยวชาญ">GCG02_1</span><span class="sub-chip sub-ok-chip" title="การดำรงตำแหน่งกรรมการในองค์กรอื่น">GCG02_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG03</td>
+      <td><div class="ind-name">จำนวนกรรมการในคณะกรรมการบริษัท</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="จำนวนกรรมการในคณะกรรมการบริษัท">GCG03_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG04</td>
+      <td><div class="ind-name">จำนวนกรรมการอิสระในคณะกรรมการบริษัท</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="จำนวนกรรมการอิสระในคณะกรรมการบริษัท">GCG04_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG05</td>
+      <td><div class="ind-name">จำนวนผู้หญิงในคณะกรรมการบริษัท</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="จำนวนผู้หญิงในคณะกรรมการบริษัท">GCG05_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG06</td>
+      <td><div class="ind-name">การให้คำมั่นเกี่ยวกับความหลากหลายทางเพศในคณะกรรมการบริษ…</div><div class="ind-desc">a. คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท b. การกำหนด…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท">GCG06_1</span><span class="sub-chip sub-ok-chip" title="การกำหนดเป้าหมายที่จะเพิ่มสัดส่วนกรรมการหญิง">GCG06_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG07</td>
+      <td><div class="ind-name">คณะกรรมการบริษัทจัดการรับมือกับประเด็นความขัดแย้งทางผลป…</div><div class="ind-desc">a. เรื่องผลประโยชน์ทับซ้อน b. เรื่องรายการเกี่ยวโยง</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="เรื่องผลประโยชน์ทับซ้อน">GCG07_1</span><span class="sub-chip sub-ok-chip" title="เรื่องรายการเกี่ยวโยง">GCG07_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG08</td>
+      <td><div class="ind-name">การประเมินประสิทธิผลในการปฏิบัติหน้าที่ของคณะกรรมการบริ…</div><div class="ind-desc">a. การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน b. การประเมินที่ระบุรอบเวลา…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน">GCG08_1</span><span class="sub-chip sub-ok-chip" title="การประเมินที่ระบุรอบเวลาที่ชัดเจน (เช่น ทุกปีหรือทุกช่วงเวลาที่กำหนด)">GCG08_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG09</td>
+      <td><div class="ind-name">การเปิดเผยข้อมูล</div><div class="ind-desc">a. คณะกรรมการชุดย่อย b. กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมกา…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คณะกรรมการชุดย่อย">GCG09_1</span><span class="sub-chip sub-ok-chip" title="กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อมูลอื่นในลักษณะคล้ายกัน)">GCG09_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG10</td>
+      <td><div class="ind-name">การระบุจำนวนครั้งของการประชุมในแต่ละปี</div><div class="ind-desc">a. จำนวนการประชุมของคณะกรรมการบริษัท b. จำนวนการประชุมขอบคณะกรรมการชุด…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="จำนวนการประชุมของคณะกรรมการบริษัท">GCG10_1</span><span class="sub-chip sub-ok-chip" title="จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละคณะ">GCG10_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG11</td>
+      <td><div class="ind-name">การระบุอัตราการเข้าร่วมประชุม</div><div class="ind-desc">a. อัตราการเข้าร่วมประชุมของกรรมการบางคน b. อัตราการเข้าร่วมประชุมของก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="อัตราการเข้าร่วมประชุมของกรรมการบางคน">GCG11_1</span><span class="sub-chip sub-ok-chip" title="อัตราการเข้าร่วมประชุมของกรรมการแต่ละคน">GCG11_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG14</td>
+      <td><div class="ind-name">การเปิดเผยค่าตอบคงที่ (fixed) และค่าตอบแทนผันแปร (varia…</div><div class="ind-desc">a. ค่าตอบแทนของผู้บริหารระดับสูง b. ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ค่าตอบแทนของผู้บริหารระดับสูง">GCG14_1</span><span class="sub-chip sub-ok-chip" title="ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร">GCG14_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG19</td>
+      <td><div class="ind-name">การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนั…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนังสือนัดประชุมและวันที่ประชุม">GCG19_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG21</td>
+      <td><div class="ind-name">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องค่าตอบแทนของผู้บริ…</div><div class="ind-desc">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG21_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">GCG21_1</span><span class="sub-chip sub-gap-chip" title="นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจน">GCG21_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG22</td>
+      <td><div class="ind-name">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องการแต่งตั้งกรรมการ…</div><div class="ind-desc">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">GCG22_1</span><span class="sub-chip sub-ok-chip" title="นโยบายของบริษัทระบุสิทธิในการออกเสียง">GCG22_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG26</td>
+      <td><div class="ind-name">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</div><div class="ind-desc">a. แบบจำกัด (limited) b. แบบละเอียด (detailed)</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG26_1</span> <span class="sub-chip sub-gap-chip">GCG26_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="แบบจำกัด (limited)">GCG26_1</span><span class="sub-chip sub-gap-chip" title="แบบละเอียด (detailed)">GCG26_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG27</td>
+      <td><div class="ind-name">ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุม</div><div class="ind-desc">a. ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการดำเนินงานในระยะยาว">GCG27_1</span><span class="sub-chip sub-ok-chip" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงผลการดำเนินงานด้าน ESG">GCG27_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG36</td>
+      <td><div class="ind-name">สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">GCG36_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG37</td>
+      <td><div class="ind-name">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทีย…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG37_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">GCG37_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG38</td>
+      <td><div class="ind-name">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG38_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">GCG38_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG39</td>
+      <td><div class="ind-name">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG39_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">GCG39_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG41</td>
+      <td><div class="ind-name">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีใน…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG41_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">GCG41_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG42</td>
+      <td><div class="ind-name">บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว่าหนึ่งหุ้นมีหนึ่งสิทธิออกเสียง">GCG42_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG43</td>
+      <td><div class="ind-name">หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ …</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ CEO บริษัทได้แต่งตั้งให้มีหัวหน้ากรรมการอิสระ (Lead Director) หรือมีกรรมการอิสระระดับอาวุโสหรือไม่">GCG43_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG44</td>
+      <td><div class="ind-name">ความเชี่ยวชาญด้านการเงินของคณะกรรมการตรวจสอบ</div><div class="ind-desc">a. ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG44_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน">GCG44_1</span><span class="sub-chip sub-gap-chip" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระเป็นส่วนใหญ่">GCG44_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG46</td>
+      <td><div class="ind-name">องค์ประกอบของคณะกรรมการตรวจสอบซึ่งกรรมการแต่ละคนต้องไม่…</div><div class="ind-desc">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">GCG46_1</span><span class="sub-chip sub-ok-chip" title="ทุกคนเป็นกรรมการอิสระ">GCG46_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG47</td>
+      <td><div class="ind-name">องค์ประกอบของคณะกรรมการพิจารณาค่าตอบแทนซึ่งแต่ละคนต้องไ…</div><div class="ind-desc">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG47_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">GCG47_1</span><span class="sub-chip sub-gap-chip" title="ทุกคนเป็นกรรมการอิสระ">GCG47_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG48</td>
+      <td><div class="ind-name">การกำหนดค่าตอบแทนของผู้บริหารระบุ</div><div class="ind-desc">a. หลักการในภาพรวม b. กระบวนการกำหนดค่าตอบแทนอย่างละเอียด</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หลักการในภาพรวม">GCG48_1</span><span class="sub-chip sub-ok-chip" title="กระบวนการกำหนดค่าตอบแทนอย่างละเอียด">GCG48_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG49</td>
+      <td><div class="ind-name">ค่าธรรมเนียมที่จ่ายให้กับผู้สอบบัญชี</div><div class="ind-desc">a. ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GCG49_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees) ไว้แยกกัน">GCG49_1</span><span class="sub-chip sub-gap-chip" title="ยอดค่าธรรมเนียมการสอบบัญชี (audit fees) สูงกว่ายอดค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees)">GCG49_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GCG50</td>
+      <td><div class="ind-name">สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในค…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรรมการที่เทียบเท่า">GCG50_1</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#7b3f00">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        🤝 Human Rights &amp; Community — สิทธิมนุษยชน &amp; ชุมชน &nbsp;|&nbsp; 14 indicators, 7 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR03</td>
+      <td><div class="ind-name">คำแถลงเกี่ยวกับหลักการหรือวิธีการในการลงทุนในชุมชน</div><div class="ind-desc">a. คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน b. ประเด็นที่มุ่ง…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน">SHR03_1</span><span class="sub-chip sub-ok-chip" title="ประเด็นที่มุ่งเน้นในการลงทุนในชุมชนมีความเชื่อมโยงกับกลยุทธ์ทางธุรกิจของบริษัท">SHR03_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR04</td>
+      <td><div class="ind-name">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แร…</div><div class="ind-desc">a. มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SHR04_1</span> <span class="sub-chip sub-gap-chip">SHR04_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ">SHR04_1</span><span class="sub-chip sub-gap-chip" title="นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับสิทธิเด็ก การให้คำมั่นว่าจะปฏิบัติตาม Children's Rights and Business Principles">SHR04_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR05</td>
+      <td><div class="ind-name">การให้คำมั่นว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่…</div><div class="ind-desc">a. ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น b. การให…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น">SHR05_1</span><span class="sub-chip sub-ok-chip" title="การให้คำมั่นที่ชัดเจนว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่น">SHR05_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR11</td>
+      <td><div class="ind-name">การมีส่วนร่วมของผู้มีส่วนได้เสียในประเด็นปัญหาด้านสิทธิ…</div><div class="ind-desc">a. มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย b. มีการบันทึกการปร…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SHR11_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย">SHR11_1</span><span class="sub-chip sub-gap-chip" title="มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้มีส่วนได้เสียไปใช้อย่างไร">SHR11_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR15</td>
+      <td><div class="ind-name">ผลลัพธ์หรือประโยชน์ที่เกิดขึ้นจากการลงทุนในชุมชน</div><div class="ind-desc">a. ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ b. ผลลัพธ์ในเชิงปริมาณ</div></td>
+      <td><span class="sub-chip sub-gap-chip">SHR15_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ">SHR15_1</span><span class="sub-chip sub-gap-chip" title="ผลลัพธ์ในเชิงปริมาณ">SHR15_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR16</td>
+      <td><div class="ind-name">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์ก…</div><div class="ind-desc">a. หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร b. การวางรากฐาน เป้…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SHR16_1</span> <span class="sub-chip sub-gap-chip">SHR16_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร">SHR16_1</span><span class="sub-chip sub-gap-chip" title="การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ">SHR16_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR17</td>
+      <td><div class="ind-name">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่…</div></td>
+      <td><span class="sub-chip sub-gap-chip">SHR17_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน">SHR17_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR21</td>
+      <td><div class="ind-name">การให้คำมั่นต่อสาธารณะว่าจะเคารพและสนับสนุนการคุ้มครองส…</div><div class="ind-desc">a. การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน …</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราสารที่อยู่ภายในร่างตราสารระหว่างประเทศด้านสิทธิมนุษยชน">SHR21_1</span><span class="sub-chip sub-ok-chip" title="การให้คำมั่นว่าจะนำ UN Guiding Principles on Business and Human Rights หรือ OECD Guidelines for Multinational Enterprises มาปฏิบัติ">SHR21_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR22</td>
+      <td><div class="ind-name">การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญ</div><div class="ind-desc">a. การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมหรือธุรกิจ">SHR22_1</span><span class="sub-chip sub-ok-chip" title="การให้คำมั่นว่าจะให้ผู้มีส่วนได้เสียเข้ามามีส่วนร่วมในการระบุประเด็นปัญหาดังกล่าว">SHR22_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR23</td>
+      <td><div class="ind-name">การมอบหมายความรับผิดชอบและการจัดสรรทรัพยากรในการกำกับดู…</div><div class="ind-desc">เพื่อให้แน่ใจว่ามีการปฏิบัติที่ดีที่เคารพสิทธิมนุษยชน a. กรรมการหรือคณ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="กรรมการหรือคณะกรรมการชุดย่อยได้รับมอบหมายให้ทำหน้าที่รับผิดชอบการกำกับดูแลเรื่องสิทธิมนุษยชน">SHR23_1</span><span class="sub-chip sub-ok-chip" title="หน่วยงานที่เกี่ยวข้องได้รับมอบหมายให้ทำหน้าที่รับผิดชอบและได้รับการจัดสรรทรัพยากรในการปฏิบัติงานในแต่ละวันอย่างชัดเจน">SHR23_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR24</td>
+      <td><div class="ind-name">การให้คำมั่นด้านสิทธิมนุษยชนเป็นส่วนหนึ่งของแนวทางปฏิบั…</div><div class="ind-desc">a. มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษย…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มีส่วนได้เสียทุกกลุ่ม">SHR24_1</span><span class="sub-chip sub-ok-chip" title="พนักงานทั้งหมด หรือบางกลุ่ม/แผนได้รับการฝึกอบรมเกี่ยวกับนโยบายด้านสิทธิมนุษยชน">SHR24_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR25</td>
+      <td><div class="ind-name">การประเมินและบรรเทาผลกระทบด้านสิทธิมนุษยชน</div><div class="ind-desc">a. บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งข…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนการทำธุรกิจ">SHR25_1</span><span class="sub-chip sub-ok-chip" title="การเปิดเผยการดำเนินการเพื่อหลีกเลี่ยง ป้องกัน และบรรเทาประเด็นปัญหาด้านสิทธิมนุษยชน">SHR25_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR26</td>
+      <td><div class="ind-name">กลไกการร้องทุกข์และการให้คำมั่นว่าจะเยียวยาบุคคลและชุมช…</div><div class="ind-desc">a. บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิท…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนและการรับประกันการรักษาความลับ/การปกปิดตัวตน">SHR26_1</span><span class="sub-chip sub-ok-chip" title="บริษัทให้คำมั่นว่าจะเยียวยาฝ่ายที่ได้รับผลกระทบ">SHR26_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SHR27</td>
+      <td><div class="ind-name">ข้อมูลเหตุการณ์และการละเมิดสิทธิมนุษยชน</div><div class="ind-desc">a. บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">SHR27_1</span><span class="sub-chip sub-ok-chip" title="บริษัทเปิดเผยข้อมูลการดำเนินการหรือสิ่งที่ได้เรียนรู้ หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">SHR27_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#6d4c41">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        ⚖ Risk Management — การบริหารความเสี่ยง &nbsp;|&nbsp; 10 indicators, 5 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM01</td>
+      <td><div class="ind-name">บทบาทของคณะกรรมการบริษัทมีหน้าที่ควบคุมดูแล (oversight)…</div><div class="ind-desc">a. คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ย…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">GRM01_1</span><span class="sub-chip sub-ok-chip" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">GRM01_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM02</td>
+      <td><div class="ind-name">ผู้บริหารสูงสุดที่ทำหน้าที่ดูแลการบริหารความเสี่ยง</div><div class="ind-desc">a. เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board risk committee)">GRM02_1</span><span class="sub-chip sub-ok-chip" title="เป็นผู้บริหารคนละคนกับผู้บริหารที่ทำหน้าที่ดูแลการตรวจสอบ (Head of Audit)">GRM02_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM04</td>
+      <td><div class="ind-name">การอ้างอิงมาตรฐานต่าง ๆ เพื่อสะท้อนความเป็นระบบและความโ…</div><div class="ind-desc">a. บริษัทใช้มาตรฐานการบริหารความเสี่ยง หรือกรอบการทำงานต่าง ๆ เช่น ISO…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทใช้มาตรฐานการบริหารความเสี่ยง เช่น ISO31000 COSO IRM FERMA BASEL">GRM04_1</span><span class="sub-chip sub-ok-chip" title="รายงานของบริษัทใช้มาตรฐาน GRI/IIRC/SASB">GRM04_2</span><span class="sub-chip sub-ok-chip" title="GRI">GRM04_3</span><span class="sub-chip sub-ok-chip" title="IIRC">GRM04_4</span><span class="sub-chip sub-ok-chip" title="SASB">GRM04_5</span><span class="sub-chip sub-ok-chip" title="มาตรฐานอื่น">GRM04_6</span><span class="sub-chip sub-ok-chip" title="โปรดระบุชื่อมาตรฐาน">GRM04_7</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM05</td>
+      <td><div class="ind-name">คณะกรรมการบริษัททำหน้าที่ควบคุมดูแล (oversight) เรื่องต…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="หลักปฏิบัติ หลักจรรยาบรรณ หรือหลักเกณฑ์อื่นที่เทียบเท่า">GRM05_1</span><span class="sub-chip sub-ok-chip" title="ความเสี่ยงด้าน ESG">GRM05_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM07</td>
+      <td><div class="ind-name">จรรยาบรรณธุรกิจ/กฎบัตร/นโยบายของบริษัท หรือเอกสารอื่นที…</div><div class="ind-desc">a. ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท b. กรอบการทำงานด้า…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท">GRM07_1</span><span class="sub-chip sub-ok-chip" title="กรอบการทำงานด้านการบริหารความเสี่ยงดังกล่าวครอบคลุมถึงความเสี่ยงด้าน ESG แบบเฉพาะเจาะจง">GRM07_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM08</td>
+      <td><div class="ind-name">แนวทางดำเนินการในกรณีที่เกิดการไม่ปฏิบัติตามข้อกำหนด</div><div class="ind-desc">a. บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว b. บริษัทรายงาน…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว">GRM08_1</span><span class="sub-chip sub-ok-chip" title="บริษัทรายงานจำนวนกรณีหรือเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">GRM08_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM10</td>
+      <td><div class="ind-name">การให้คำมั่นของบริษัท</div><div class="ind-desc">a. บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ b. บริษัทให้คำมั่นว…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GRM10_1</span> <span class="sub-chip sub-gap-chip">GRM10_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ">GRM10_1</span><span class="sub-chip sub-gap-chip" title="บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ">GRM10_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM12</td>
+      <td><div class="ind-name">การดำเนินการของบริษัท</div><div class="ind-desc">a. ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และร…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">GRM12_1</span><span class="sub-chip sub-ok-chip" title="ทบทวนประสิทธิผลของหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นระยะ">GRM12_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM14</td>
+      <td><div class="ind-name">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GRM14_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว">GRM14_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GRM20</td>
+      <td><div class="ind-name">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็น…</div><div class="ind-desc">เพื่อเป็นช่องทางการรายงานการละเมิดหลักปฏิบัติหรือนโยบายของบริษัทสำหรับ…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GRM20_1</span> <span class="sub-chip sub-gap-chip">GRM20_2</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื่น ๆ ที่ทำงานร่วมกับบริษัท">GRM20_1</span><span class="sub-chip sub-gap-chip" title="ผู้มีส่วนได้เสียภายนอกอื่น ๆ และประชาชนทั่วไป">GRM20_2</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 2 GAP</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#880e4f">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        🛡 Anti-Corruption — การต่อต้านการทุจริต &nbsp;|&nbsp; 13 indicators, 3 gaps
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC01</td>
+      <td><div class="ind-name">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการต่อต้านการทุจริ…</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">GAC01_1</span><span class="sub-chip sub-ok-chip" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">GAC01_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC02</td>
+      <td><div class="ind-name">ระบบจัดการเพื่อจัดการรับมือกับประเด็นปัญหาด้านการทุจริต…</div><div class="ind-desc">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">GAC02_1</span><span class="sub-chip sub-ok-chip" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">GAC02_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC03</td>
+      <td><div class="ind-name">นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่อการเมือง">GAC03_1</span><span class="sub-chip sub-ok-chip" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC03_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC04</td>
+      <td><div class="ind-name">โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต">GAC04_1</span><span class="sub-chip sub-ok-chip" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC04_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC05</td>
+      <td><div class="ind-name">กลไกการแจ้งเบาะแส (whistleblowing)</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="กลไกการแจ้งเบาะแส (whistleblowing)">GAC05_1</span><span class="sub-chip sub-ok-chip" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC05_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC07</td>
+      <td><div class="ind-name">การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน">GAC07_1</span><span class="sub-chip sub-ok-chip" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC07_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC08</td>
+      <td><div class="ind-name">การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะก…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะกรรมการบริษัท">GAC08_1</span><span class="sub-chip sub-ok-chip" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC08_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC09</td>
+      <td><div class="ind-name">การประเมินความเสี่ยงที่จะเกิดการทุจริตในการดำเนินงานของ…</div><div class="ind-desc">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน b. การต่…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน">GAC09_1</span><span class="sub-chip sub-ok-chip" title="การต่อด้านการทุจริตอย่างครบถ้วน">GAC09_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC10</td>
+      <td><div class="ind-name">กระบวนการสำหรับจัดการรับมือกับการทุจริตในการดำเนินงาน ซ…</div><div class="ind-desc">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต b. การต่อด้านการทุจริตอย่างครบ…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต">GAC10_1</span><span class="sub-chip sub-ok-chip" title="การต่อด้านการทุจริตอย่างครบถ้วน">GAC10_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC11</td>
+      <td><div class="ind-name">วิธีการดำเนินการสำหรับตัวกลาง ซึ่งรวมถึงผู้รับเหมา (con…</div><div class="ind-desc">a. การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับม…</div></td>
+      <td><span class="status-ok">✅ ผ่านแล้ว</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุจริตสำหรับตัวกลาง">GAC11_1</span><span class="sub-chip sub-ok-chip" title="การสื่อสารนโยบายการต่อด้านการทุจริตให้ตัวกลางรับทราบ">GAC11_2</span></td>
+      <td style="text-align:center"><span class="status-ok">✅ OK</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC12</td>
+      <td><div class="ind-name">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</div></td>
+      <td><span class="sub-chip sub-gap-chip">GAC12_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง">GAC12_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC13</td>
+      <td><div class="ind-name">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจาก…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GAC13_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต">GAC13_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">GAC14</td>
+      <td><div class="ind-name">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับก…</div></td>
+      <td><span class="sub-chip sub-gap-chip">GAC14_1</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-gap-chip" title="การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต">GAC14_1</span></td>
+      <td style="text-align:center"><span class="status-gap">⚠ 1 GAP</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="ind-table" style="margin-bottom:20px">
+  <thead>
+    <tr style="background:#0d47a1">
+      <th style="width:68px">Code</th>
+      <th>ชื่อ Indicator + สิ่งที่วัด</th>
+      <th style="width:20%">REF — Gap ที่ขาด</th>
+      <th style="width:26%">KB System — Sub-indicators</th>
+      <th style="width:52px">สถานะ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="5" style="background:#f0f0f0;font-weight:700;font-size:9pt;padding:7px 10px">
+        🛒 Customer Responsibility — ความรับผิดชอบต่อลูกค้า &nbsp;|&nbsp; 6 indicators, 0 gaps — ⚠️ Ake PDF ไม่ได้ประเมิน
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR06</td>
+      <td><div class="ind-name">การดำเนินการที่ใช้เพื่อปรับปรุงนโยบายการขาย/การให้สินเช…</div><div class="ind-desc">a. การฝึกอบรมพนักงานขาย b. นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอ…</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การฝึกอบรมพนักงานขาย">SCR06_1</span><span class="sub-chip sub-ok-chip" title="นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ">SCR06_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR64</td>
+      <td><div class="ind-name">การโฆษณาหรือการทำการตลาดสำหรับผลิตภัณฑ์สินเชื่อเพื่อผู้…</div><div class="ind-desc">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงก…</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">SCR64_1</span><span class="sub-chip sub-ok-chip" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะทำการตลาดหรือโฆษณาอย่างมีความรับผิดชอบ">SCR64_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR65</td>
+      <td><div class="ind-name">การมีส่วนร่วมในโครงการเพื่อการให้สินเชื่อแก่ผู้บริโภคอย…</div><div class="ind-desc">a. การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม b. การปรับใช้หรือกา…</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม">SCR65_1</span><span class="sub-chip sub-ok-chip" title="การปรับใช้หรือการสนับสนุนหลักปฏิบัติ/แนวปฏิบัติที่เกี่ยวข้อง">SCR65_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR66</td>
+      <td><div class="ind-name">การดำเนินการที่แสดงถึงแนวทางการโฆษณา การทำการตลาด หรือก…</div><div class="ind-desc">a. แนวทางในการดำเนินการโดยละเอียด b. พนักงานได้รับการฝึกอบรมหรือบริษัท…</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="แนวทางในการดำเนินการโดยละเอียด">SCR66_1</span><span class="sub-chip sub-ok-chip" title="พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการตรวจสอบ">SCR66_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR67</td>
+      <td><div class="ind-name">ผลกระทบด้านลบของผลิตภัณฑ์สินเชื่อต่อผู้บริโภค</div><div class="ind-desc">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงก…</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">SCR67_1</span><span class="sub-chip sub-ok-chip" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะลดผลกระทบด้านลบของผลิตภัณฑ์">SCR67_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:500;color:#1a2f4e">SCR68</td>
+      <td><div class="ind-name">การดำเนินการเพื่อจัดการรับมือกับผลกระทบด้านลบของผลิตภัณ…</div><div class="ind-desc">a. การตระหนักถึงกลุ่มเปราะบาง b. โครงการเพื่อปกป้องกลุ่มเปราะบาง</div></td>
+      <td><span class="status-na">ไม่ได้ประเมิน</span></td>
+      <td style="font-size:7.5pt"><span class="sub-chip sub-ok-chip" title="การตระหนักถึงกลุ่มเปราะบาง">SCR68_1</span><span class="sub-chip sub-ok-chip" title="โครงการเพื่อปกป้องกลุ่มเปราะบาง">SCR68_2</span></td>
+      <td style="text-align:center"><span class="status-na">N/A</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="footer">
+  <span>FTSE ESG Gap Analysis — TIDLOR | KB System v1.0</span>
+  <span>REF: Tidlor_FTSE_Gap_Analysis (By Ake).pdf + FTSE ESG RC11 2024-2025 | 21 พ.ค. 2569</span>
+</div>
+</div>
+</body></html>

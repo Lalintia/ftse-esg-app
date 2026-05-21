@@ -1,5 +1,6 @@
 """Analysis API endpoints."""
 
+import asyncio
 import logging
 from uuid import UUID
 
@@ -49,8 +50,8 @@ async def create_analysis(
     subsector_code_to_use: str | None = body.subsector_code
 
     if body.subsector_code != "auto":
-        subsector_result = (
-            supabase.table("icb_subsectors")
+        subsector_result = await asyncio.to_thread(
+            lambda: supabase.table("icb_subsectors")
             .select("id")
             .eq("code", body.subsector_code)
             .limit(1)
@@ -61,7 +62,7 @@ async def create_analysis(
         else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid subsector code: {body.subsector_code}",
+                detail="Invalid subsector code.",
             )
     else:
         subsector_code_to_use = None
@@ -74,7 +75,9 @@ async def create_analysis(
             "subsector_id": subsector_id,
         }
 
-        result = supabase.table("analyses").insert(insert_data).execute()
+        result = await asyncio.to_thread(
+            lambda: supabase.table("analyses").insert(insert_data).execute()
+        )
         analysis_id = result.data[0]["id"]
     except Exception as exc:
         logger.error("Failed to create analysis: %s", exc)
@@ -94,8 +97,8 @@ async def create_analysis(
     # Keep only the latest 20 analyses — delete oldest beyond limit
     _MAX_ANALYSES = 20
     try:
-        old = (
-            supabase.table("analyses")
+        old = await asyncio.to_thread(
+            lambda: supabase.table("analyses")
             .select("id")
             .order("created_at", desc=True)
             .range(_MAX_ANALYSES, _MAX_ANALYSES + 100)
@@ -103,7 +106,9 @@ async def create_analysis(
         )
         if old.data:
             old_ids = [row["id"] for row in old.data]
-            supabase.table("analyses").delete().in_("id", old_ids).execute()
+            await asyncio.to_thread(
+                lambda: supabase.table("analyses").delete().in_("id", old_ids).execute()
+            )
             logger.info("Cleaned up %d old analyses (keeping latest %d)", len(old_ids), _MAX_ANALYSES)
     except Exception as cleanup_exc:
         logger.warning("Failed to clean up old analyses: %s", cleanup_exc)
@@ -162,8 +167,8 @@ async def list_analyses(
     """
 
     # Get total count (limit 0 to avoid fetching rows)
-    count_result = (
-        supabase.table("analyses")
+    count_result = await asyncio.to_thread(
+        lambda: supabase.table("analyses")
         .select("id", count="exact")
         .limit(0)
         .execute()
@@ -171,8 +176,8 @@ async def list_analyses(
     total = count_result.count or 0
 
     # Get paginated results
-    result = (
-        supabase.table("analyses")
+    result = await asyncio.to_thread(
+        lambda: supabase.table("analyses")
         .select(
             "id, company_name, company_url, status, overall_score, "
             "environmental_score, social_score, governance_score, "
@@ -210,8 +215,8 @@ async def get_analysis(
     analysis_id_str = str(analysis_id)
 
     # Get analysis record
-    analysis_result = (
-        supabase.table("analyses")
+    analysis_result = await asyncio.to_thread(
+        lambda: supabase.table("analyses")
         .select("*")
         .eq("id", analysis_id_str)
         .limit(1)
@@ -225,8 +230,8 @@ async def get_analysis(
 
     # Get FTSE results with indicator details
     try:
-        ftse_results = (
-            supabase.table("analysis_ftse_results")
+        ftse_results = await asyncio.to_thread(
+            lambda: supabase.table("analysis_ftse_results")
             .select(
                 "id, status, score, evidence, confidence, ai_reasoning, "
                 "source_url, source_page_title, "
@@ -237,9 +242,9 @@ async def get_analysis(
             .execute()
         )
     except Exception:
-        logger.warning("Join query failed for FTSE results, using simple query")
-        ftse_results = (
-            supabase.table("analysis_ftse_results")
+        logger.warning("Join query failed for FTSE results, using simple query", exc_info=True)
+        ftse_results = await asyncio.to_thread(
+            lambda: supabase.table("analysis_ftse_results")
             .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title")
             .eq("analysis_id", analysis_id_str)
             .execute()
@@ -247,8 +252,8 @@ async def get_analysis(
 
     # Get IFRS results with requirement details
     try:
-        ifrs_results = (
-            supabase.table("analysis_ifrs_results")
+        ifrs_results = await asyncio.to_thread(
+            lambda: supabase.table("analysis_ifrs_results")
             .select(
                 "id, status, evidence, confidence, ai_reasoning, "
                 "ifrs_requirements(paragraph_ref, standard, chapter, "
@@ -259,16 +264,16 @@ async def get_analysis(
         )
     except Exception:
         logger.warning("Join query failed for IFRS results, using simple query")
-        ifrs_results = (
-            supabase.table("analysis_ifrs_results")
+        ifrs_results = await asyncio.to_thread(
+            lambda: supabase.table("analysis_ifrs_results")
             .select("id, requirement_id, status, evidence, confidence, ai_reasoning")
             .eq("analysis_id", analysis_id_str)
             .execute()
         )
 
     # Get sitemap recommendations
-    sitemap_results = (
-        supabase.table("sitemap_recommendations")
+    sitemap_results = await asyncio.to_thread(
+        lambda: supabase.table("sitemap_recommendations")
         .select("*")
         .eq("analysis_id", analysis_id_str)
         .order("priority")

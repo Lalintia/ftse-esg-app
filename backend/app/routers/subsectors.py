@@ -1,5 +1,6 @@
 """Subsector listing endpoint for the ICB dropdown."""
 
+import asyncio
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -26,8 +27,8 @@ async def list_subsectors(
         HTTPException: If the database query fails.
     """
     try:
-        response = (
-            supabase.table("icb_subsectors")
+        response = await asyncio.to_thread(
+            lambda: supabase.table("icb_subsectors")
             .select("code, name, industry_name, supersector_name")
             .order("code")
             .execute()

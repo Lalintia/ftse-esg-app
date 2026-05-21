@@ -21,6 +21,8 @@ frontend/node_modules/
 # Misc
 .DS_Store
 *.log
+*.backup
+*.backup2
 
 # Agent skills (installed via npx skills add)
 .agents/

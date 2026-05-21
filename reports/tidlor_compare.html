@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TIDLOR — Ake PDF vs SI (ShareInvestor)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ake-color: #2c3e50;
+  --kb-color:  #1a6b3c;
+  --both-color:#1d4e89;
+  --ake-only:  #7b3f00;
+  --kb-only:   #0d47a1;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-600: #6c757d;
+  --radius: 6px;
+}
+@page {
+  size: A4 portrait;
+  margin: 12mm 13mm 16mm 13mm;
+  @bottom-center {
+    content: "หน้า " counter(page) " / " counter(pages);
+    font-size: 7pt;
+    color: #aaa;
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
+}
+@media print {
+  .no-print { display: none; }
+  body { font-size: 8pt; line-height: 1.4; }
+  .page-wrap { padding: 0; max-width: 100%; }
+
+  /* Cover อยู่หน้า 1 คนเดียว */
+  .cover { page-break-after: always; break-after: always; border-radius: 0; }
+
+  /* Section breaks */
+  .page-break { page-break-before: always; break-before: always; }
+
+  /* ===== TABLE FLOW — แก้ปัญหาหลัก ===== */
+  /* thead repeat ทุกหน้าเมื่อตารางข้ามหน้า */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  /* ห้ามตัด row กลางอากาศ */
+  tr { page-break-inside: avoid; break-inside: avoid; }
+  table { page-break-inside: auto; break-inside: auto; }
+
+  /* หัว section / theme ต้องอยู่กับแถวแรกของตาราง — ห้ามทิ้งไว้ท้ายหน้าคนเดียว */
+  .sec-title  { page-break-after: avoid; break-after: avoid; }
+  .theme-head { page-break-after: avoid; break-after: avoid; }
+
+  /* theme-block ใหญ่เกินกว่าจะ avoid ทั้งก้อน — ปล่อย flow ธรรมชาติ */
+  .theme-block { page-break-inside: auto; break-inside: auto; margin-bottom: 10px; }
+
+  /* block เล็กๆ ให้ไม่ตัด */
+  .diff-box     { page-break-inside: avoid; break-inside: avoid; }
+  .compare-cols { page-break-inside: avoid; break-inside: avoid; }
+
+  /* ===== COMPACT SPACING ===== */
+  .section      { margin-bottom: 10px; }
+  .cover        { padding: 18px 20px 14px; }
+  .cover h1     { font-size: 16pt; }
+  .cover .sub   { margin-bottom: 10px; }
+  .cover-cols   { margin-top: 10px; gap: 8px; }
+  .cover-col    { padding: 9px 12px; }
+  .sec-title    { font-size: 10pt; margin-bottom: 8px; padding-bottom: 4px; }
+  .theme-head   { padding: 5px 10px; font-size: 9pt; }
+
+  /* ตารางหลัก — ลด padding ให้จุข้อมูลได้มากขึ้น */
+  .ind-table td, .ind-table th { padding: 3px 5px; font-size: 7.5pt; }
+  .theme-table td { padding: 5px 7px; }
+  .theme-table th { padding: 5px 7px; font-size: 7.5pt; }
+
+  /* Chips เล็กลงสำหรับ print */
+  .chip     { font-size: 6.5pt; padding: 1px 3px; margin: 1px 2px; }
+  .ind-code { font-size: 7.5pt; }
+
+  /* Warning box compact */
+  div[style*="background:#fff8e1"] { padding: 8px 12px; font-size: 7.5pt; }
+}
+body {
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 9.5pt;
+  color: #222;
+  background: #fff;
+  line-height: 1.55;
+}
+.page-wrap { max-width: 182mm; margin: 0 auto; padding: 16px; }
+
+/* Cover */
+.cover {
+  background: linear-gradient(135deg, #0f1b2d 0%, #1a2f4e 100%);
+  color: #fff;
+  padding: 32px 28px 28px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+.cover-badge {
+  display: inline-block;
+  background: #f4a020;
+  color: #fff;
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.cover h1 { font-size: 20pt; font-weight: 700; margin-bottom: 4px; }
+.cover .sub { font-size: 10pt; opacity: 0.75; margin-bottom: 18px; }
+.cover-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.cover-col {
+  background: rgba(255,255,255,0.09);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.cover-col .col-title {
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+.cover-col .stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  margin-bottom: 4px;
+}
+.cover-col .stat-row .val { font-weight: 700; }
+.cover-col.ake-col .col-title { color: #90caf9; }
+.cover-col.kb-col  .col-title { color: #a5d6a7; }
+
+/* Section */
+.section { margin-bottom: 24px; }
+.sec-title {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #0f1b2d;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+/* Compare grid */
+.compare-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.col-box {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.col-box .col-head {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 9.5pt;
+  color: #fff;
+}
+.col-box.ake .col-head { background: var(--ake-color); }
+.col-box.kb  .col-head { background: var(--kb-color);  }
+.col-box .col-body { padding: 10px 12px; font-size: 9pt; }
+.col-body .row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid var(--gray-200); padding-bottom: 5px; }
+.col-body .row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.col-body .row .lbl { color: var(--gray-600); }
+.col-body .row .val { font-weight: 600; }
+
+/* Ensure table headers repeat across print pages (also default on screen) */
+thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+
+/* Theme comparison table */
+.theme-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 20px; }
+.theme-table th {
+  background: var(--gray-100);
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 8.5pt;
+  color: var(--gray-600);
+  border-bottom: 2px solid var(--gray-200);
+}
+.theme-table td { padding: 7px 10px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+.theme-table tr:last-child td { border-bottom: none; }
+
+/* Theme header in detail */
+.theme-block { margin-bottom: 20px; }
+.theme-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.theme-head .cnt { margin-left: auto; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 8.5pt; }
+
+/* Indicator table */
+.ind-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; border: 1px solid var(--gray-200); border-top: none; }
+.ind-table th {
+  background: var(--gray-100);
+  padding: 6px 8px;
+  font-size: 8pt;
+  font-weight: 600;
+  color: var(--gray-600);
+  border-bottom: 2px solid var(--gray-200);
+  border-right: 1px solid var(--gray-200);
+  text-align: left;
+}
+.ind-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--gray-200);
+  border-right: 1px solid var(--gray-200);
+  vertical-align: top;
+}
+.ind-table tr:last-child td { border-bottom: none; }
+.ind-table tr:nth-child(even) td { background: var(--gray-100); }
+
+.ind-code { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #1a2f4e; font-size: 8.5pt; }
+
+/* Sub-indicator chips */
+.chip { display: inline-block; padding: 1px 5px; border-radius: 8px; font-size: 7.5pt; font-family: 'IBM Plex Mono', monospace; margin: 1px; }
+.chip-ake  { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; font-weight: 600; }
+.chip-kb   { background: #f0faf4; color: #1a6b3c; border: 1px solid #a8d5b9; }
+.chip-both { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; font-weight: 600; }
+.chip-none { color: var(--gray-600); font-size: 8pt; font-family: 'Noto Sans Thai', sans-serif; }
+
+/* Match badge */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 8pt; font-weight: 600; }
+.badge-match  { background: #e8f5e9; color: #1b5e20; }
+.badge-ake-only { background: #fff3e0; color: #bf360c; }
+.badge-kb-only  { background: #e3f2fd; color: #0d47a1; }
+.badge-na { background: var(--gray-100); color: var(--gray-600); }
+
+/* Check mark */
+.chk  { color: #1b5e20; font-weight: 700; }
+.dash { color: var(--gray-600); }
+
+/* Summary diff box */
+.diff-box { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; background: var(--gray-100); }
+.diff-box .diff-row { display: flex; gap: 16px; margin-bottom: 6px; font-size: 9pt; }
+.diff-box .diff-row:last-child { margin-bottom: 0; }
+.diff-label { font-weight: 700; min-width: 160px; }
+
+.note { font-size: 8pt; color: var(--gray-600); font-style: italic; margin-top: 4px; }
+
+/* Footer */
+.footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid var(--gray-200); font-size: 7.5pt; color: #aaa; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+
+<div class="cover">
+  <div class="cover-badge">FTSE Russell ESG — System Comparison</div>
+  <h1>Ake PDF vs SI (ShareInvestor)</h1>
+  <div class="sub">บริษัท ติดล้อ โฮลดิ้งส์ จำกัด (มหาชน) — TIDLOR</div>
+  <div class="cover-cols">
+    <div class="cover-col ake-col">
+      <div class="col-title">📋 Ake PDF (ผู้เชี่ยวชาญ)</div>
+      <div class="stat-row"><span>Themes ที่ประเมิน</span><span class="val">7 Themes</span></div>
+      <div class="stat-row"><span>Indicators</span><span class="val">120</span></div>
+      <div class="stat-row"><span>Sub-indicators</span><span class="val">219</span></div>
+      <div class="stat-row"><span>Gaps ที่พบ</span><span class="val">62 ทั้งหมด (60 applicable)</span></div>
+    </div>
+    <div class="cover-col kb-col">
+      <div class="col-title">🤖 SI — ShareInvestor (ระบบเรา)</div>
+      <div class="stat-row"><span>Themes ที่ประเมิน</span><span class="val">7 Themes</span></div>
+      <div class="stat-row"><span>Indicators</span><span class="val">120</span></div>
+      <div class="stat-row"><span>Sub-indicators</span><span class="val">237</span></div>
+      <div class="stat-row"><span>หมายเหตุ</span><span class="val">รวม CR</span></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="section">
+<div class="sec-title">📊 ภาพรวมการเปรียบเทียบ</div>
+<div class="compare-cols">
+  <div class="col-box ake">
+    <div class="col-head">📋 Ake PDF — สิ่งที่ผู้เชี่ยวชาญพบ</div>
+    <div class="col-body">
+      <div class="row"><span class="lbl">อุตสาหกรรม (ICB)</span><span class="val">Specialized Consumer Services</span></div>
+      <div class="row"><span class="lbl">Themes ที่ประเมิน</span><span class="val">7 Themes (รวม CR — 0 gaps)</span></div>
+      <div class="row"><span class="lbl">Indicators ที่พบ</span><span class="val">120 ข้อ</span></div>
+      <div class="row"><span class="lbl">Sub-indicators ที่พบ</span><span class="val">219 รายการ</span></div>
+    </div>
+  </div>
+  <div class="col-box kb">
+    <div class="col-head">🤖 SI (ShareInvestor) — สิ่งที่ระบบเราพบ</div>
+    <div class="col-body">
+      <div class="row"><span class="lbl">อุตสาหกรรม (ICB)</span><span class="val">Consumer Finance / Consumer Lending (30201020)</span></div>
+      <div class="row"><span class="lbl">Themes ที่ประเมิน</span><span class="val">7 Themes (รวม CR)</span></div>
+      <div class="row"><span class="lbl">Indicators ที่พบ</span><span class="val">120 ข้อ</span></div>
+      <div class="row"><span class="lbl">Sub-indicators ที่พบ</span><span class="val">237 รายการ</span></div>
+    </div>
+  </div>
+</div>
+<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px 16px;margin-bottom:14px;font-size:8.5pt;line-height:1.7;">
+  <b>⚠️ ขอบเขตของรายงานฉบับนี้</b><br>
+  ระบบ SI (ShareInvestor) <b>ตรวจเฉพาะ "โครงสร้าง"</b> เท่านั้น — คือระบุว่า Tidlor อยู่ในอุตสาหกรรมอะไร (ICB subsector) แล้วดึงรายการ indicators และ sub-indicators ที่ <b>ควรจะถูกประเมิน</b> ตามมาตรฐาน FTSE ESG RC11<br>
+  ระบบ <b>ยังไม่ได้</b>เข้าไปอ่านเว็บไซต์ Tidlor หรือเอกสาร 56-1 One Report / ESG Report จริง — การตัดสินว่า Tidlor "ผ่าน" หรือ "ไม่ผ่าน" แต่ละข้อยังไม่ได้ทำ
+</div>
+<div class="diff-box">
+  <div class="diff-row">
+    <span class="diff-label">✅ ตรงกัน</span>
+    <span>Indicators: ทั้งสองระบบพบ <b>120 ข้อ</b> เหมือนกัน (ใน 6 themes ร่วมกัน)</span>
+  </div>
+  <div class="diff-row">
+    <span class="diff-label">ℹ️ Customer Responsibility</span>
+    <span>Ake ประเมิน CR (6 indicators) — พบ <b>0 gaps</b> / SI พบ 6 indicators / 12 sub-indicators เช่นกัน</span>
+  </div>
+  <div class="diff-row">
+    <span class="diff-label">📌 Sub-indicators</span>
+    <span>Ake พบ 219 / SI พบ 237 — ต่างกัน +18 เนื่องจาก SI ใช้ Phase 31 ที่แตก sub-questions ละเอียดกว่า</span>
+  </div>
+  <div class="diff-row">
+    <span class="diff-label">📍 Gaps (sub-indicator)</span>
+    <span>Ake พบ gaps <b>62 รายการ</b> รวม SLS27 (South Africa) / <b>60 รายการ</b> ที่ applicable กับ TIDLOR — KB ครอบคลุมครบทั้งหมด</span>
+  </div>
+</div>
+</div>
+
+
+<div class="section">
+<div class="sec-title">🏷 เปรียบเทียบ Themes ที่แต่ละระบบพบ</div>
+<p class="note" style="margin-bottom:10px;">
+  <b>วิธีอ่าน:</b> แต่ละ Theme มีหลายข้อย่อย (sub-indicators) — ตัวเลขสีแดง = ข้อที่ยังขาด (gaps) / ตัวเลขสีเทา = จำนวนข้อทั้งหมดใน theme นั้น
+</p>
+<style>
+.bar-wrap { background:#eee; border-radius:4px; height:6px; width:80px; display:inline-block; vertical-align:middle; margin-left:4px; }
+.bar-fill  { height:6px; border-radius:4px; }
+</style>
+<table class="theme-table">
+<thead>
+  <tr>
+    <th style="width:155px;">Theme</th>
+    <th style="width:130px;text-align:center;">📋 Ake PDF<br><span style="font-weight:400;font-size:7.5pt;">พบ gaps / ข้อทั้งหมด</span></th>
+    <th style="width:130px;text-align:center;">🤖 SI (ShareInvestor)<br><span style="font-weight:400;font-size:7.5pt;">พบ gaps / ข้อทั้งหมด</span></th>
+    <th>หมายเหตุ</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr>
+    <td><span style="background:#1a6b3c;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">🌍 Climate Change</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">15</span><span style="color:#888;font-size:8pt;"> / 46 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:32%;background:#c0392b;"></div></div></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">15</span><span style="color:#888;font-size:8pt;"> / 48 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:31%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">ทั้งสองระบบสอดคล้องกัน</span></td>
+  </tr>
+  <tr style="background:#f5f8ff;page-break-before:avoid;break-before:avoid;">
+    <td colspan="4" style="padding:6px 12px 8px 20px;border-bottom:2px solid #c5d5f5;">
+      <span style="font-size:7.5pt;color:#0d47a1;font-weight:700;">📌 SI มีเพิ่ม 2 ข้อ (RC11 2024-2025 / Phase31 expansion):</span><br>
+      <div style="margin-top:4px;line-height:2;"><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">ECC77_3</span><span style="font-size:7pt;color:#444;margin-left:5px;">บริษัทระบุได้ว่าการดำเนินการแต่ละมาตรการจะส่งผลต่อการบรรลุเป…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">ECC78_3</span><span style="font-size:7pt;color:#444;margin-left:5px;">บริษัทระบุวิธีปรับ CAPEX ในอนาคตให้สอดคล้องกับเป้าหมายลดการป…</span></span></div>
+    </td>
+  </tr>
+  <tr>
+    <td><span style="background:#1d4e89;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">👷 Labour Standards</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">21</span><span style="color:#aaa;font-size:7.5pt;"> (ไม่ทราบ)</span><br></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">19</span><span style="color:#888;font-size:8pt;"> / 55 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:34%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">Ake: 21 gaps รวม 2 ข้อแอฟริกาใต้ (SLS27) ที่ไม่เกี่ยวกับ TH — KB: นับ 19 gaps ที่ applicable กับไทย</span></td>
+  </tr>
+  <tr style="background:#f5f8ff;page-break-before:avoid;break-before:avoid;">
+    <td colspan="4" style="padding:6px 12px 8px 20px;border-bottom:2px solid #c5d5f5;">
+      <span style="font-size:7.5pt;color:#0d47a1;font-weight:700;">📌 SI มีเพิ่ม 11 ข้อ (RC11 2024-2025 / Phase31 expansion):</span><br>
+      <div style="margin-top:4px;line-height:2;"><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS03_4</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS03 Phase31: นโยบาย non-discrimination ครอบคลุม เพศสภาพ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS03_5</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS03 Phase31: นโยบาย non-discrimination ครอบคลุม อายุ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS03_6</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS03 Phase31: นโยบาย non-discrimination ครอบคลุม เพศวิถี</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS03_7</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS03 Phase31: นโยบาย non-discrimination ครอบคลุม ความพิการ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS03_8</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS03 Phase31: นโยบาย non-discrimination ครอบคลุม สัญชาติ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม ศาสนา</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_3</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม เพศสภาพ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_4</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม อายุ</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_5</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม เพศวิถี</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_6</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม ความพิก…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">SLS16_7</span><span style="font-size:7pt;color:#444;margin-left:5px;">SLS16 Phase31: นโยบาย diversity &amp; inclusion ครอบคลุม สัญชาติ</span></span></div>
+    </td>
+  </tr>
+  <tr>
+    <td><span style="background:#4a235a;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">🏛 Corporate Governance</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">11</span><span style="color:#888;font-size:8pt;"> / 46 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:23%;background:#c0392b;"></div></div></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">11</span><span style="color:#888;font-size:8pt;"> / 48 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:22%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">ทั้งสองระบบสอดคล้องกัน</span></td>
+  </tr>
+  <tr style="background:#f5f8ff;page-break-before:avoid;break-before:avoid;">
+    <td colspan="4" style="padding:6px 12px 8px 20px;border-bottom:2px solid #c5d5f5;">
+      <span style="font-size:7.5pt;color:#0d47a1;font-weight:700;">📌 SI มีเพิ่ม 2 ข้อ (RC11 2024-2025 / Phase31 expansion):</span><br>
+      <div style="margin-top:4px;line-height:2;"><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GCG43_1</span><span style="font-size:7pt;color:#444;margin-left:5px;">กรณี Chairman=CEO: บริษัทแต่งตั้ง Lead Director หรือกรรมการอ…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GCG50_1</span><span style="font-size:7pt;color:#444;margin-left:5px;">สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรร…</span></span></div>
+    </td>
+  </tr>
+  <tr>
+    <td><span style="background:#7b3f00;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">🤝 Human Rights &amp; Community</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">7</span><span style="color:#888;font-size:8pt;"> / 27 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:25%;background:#c0392b;"></div></div></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">7</span><span style="color:#888;font-size:8pt;"> / 27 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:25%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">ทั้งสองระบบสอดคล้องกัน</span></td>
+  </tr>
+  <tr>
+    <td><span style="background:#6d4c41;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">⚖ Risk Management</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">5</span><span style="color:#888;font-size:8pt;"> / 19 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:26%;background:#c0392b;"></div></div></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">5</span><span style="color:#888;font-size:8pt;"> / 24 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:20%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">ทั้งสองระบบสอดคล้องกัน</span></td>
+  </tr>
+  <tr style="background:#f5f8ff;page-break-before:avoid;break-before:avoid;">
+    <td colspan="4" style="padding:6px 12px 8px 20px;border-bottom:2px solid #c5d5f5;">
+      <span style="font-size:7.5pt;color:#0d47a1;font-weight:700;">📌 SI มีเพิ่ม 5 ข้อ (RC11 2024-2025 / Phase31 expansion):</span><br>
+      <div style="margin-top:4px;line-height:2;"><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GRM04_3</span><span style="font-size:7pt;color:#444;margin-left:5px;">GRM04 Phase31: รายงานใช้มาตรฐาน GRI (แยกจาก GRM04_2 ที่รวม G…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GRM04_4</span><span style="font-size:7pt;color:#444;margin-left:5px;">GRM04 Phase31: รายงานใช้มาตรฐาน IIRC</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GRM04_5</span><span style="font-size:7pt;color:#444;margin-left:5px;">GRM04 Phase31: รายงานใช้มาตรฐาน SASB</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GRM04_6</span><span style="font-size:7pt;color:#444;margin-left:5px;">GRM04 Phase31: รายงานใช้มาตรฐานอื่น</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GRM04_7</span><span style="font-size:7pt;color:#444;margin-left:5px;">GRM04 Phase31: โปรดระบุชื่อมาตรฐาน</span></span></div>
+    </td>
+  </tr>
+  <tr>
+    <td><span style="background:#880e4f;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">🛡 Anti-Corruption</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#c0392b;">3</span><span style="color:#aaa;font-size:7.5pt;"> (ไม่ทราบ)</span><br></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">3</span><span style="color:#888;font-size:8pt;"> / 23 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:13%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-match">ตรงกัน ✓</span> <span style="color:#555;">ทั้งสองระบบสอดคล้องกัน</span></td>
+  </tr>
+  <tr style="background:#f5f8ff;page-break-before:avoid;break-before:avoid;">
+    <td colspan="4" style="padding:6px 12px 8px 20px;border-bottom:2px solid #c5d5f5;">
+      <span style="font-size:7.5pt;color:#0d47a1;font-weight:700;">📌 SI มีเพิ่ม 5 ข้อ (RC11 2024-2025 / Phase31 expansion):</span><br>
+      <div style="margin-top:4px;line-height:2;"><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GAC03_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">GAC03 Phase31: คณะกรรมการดูแลนโยบาย anti-corruption — ครอบคล…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GAC04_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">GAC04 Phase31: Due diligence เพื่อระบุความเสี่ยงทุจริต — ครอ…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GAC05_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">GAC05 Phase31: ช่องทาง whistleblowing สำหรับพนักงาน — ครอบคล…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GAC07_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">GAC07 Phase31: สื่อสารนโยบาย anti-corruption ถึงพนักงานทุกคน…</span></span><span style="display:inline-block;background:#e8f0fe;border:1px solid #c5d5f5;border-radius:6px;padding:3px 8px;margin:3px 4px 3px 0;white-space:nowrap;"><span style="font-family:monospace;font-size:7.5pt;color:#0d47a1;font-weight:600;">GAC08_2</span><span style="font-size:7pt;color:#444;margin-left:5px;">GAC08 Phase31: ฝึกอบรมพนักงานด้าน anti-corruption — ครอบคลุม…</span></span></div>
+    </td>
+  </tr>
+  <tr>
+    <td><span style="background:#0d47a1;color:#fff;padding:3px 10px;border-radius:10px;font-size:8.5pt;font-weight:600;">🛒 Customer Responsibility</span></td>
+    <td style="text-align:center;padding:8px;"><span style="color:#aaa;font-size:8.5pt;">— ไม่ได้ประเมิน<br>(CR ไม่มีในไฟล์ Excel<br>ที่ Wankaew ส่ง)</span></td>
+    <td style="text-align:center;padding:8px;"><span style="font-size:13pt;font-weight:700;color:#1a6b3c;">0</span><span style="color:#888;font-size:8pt;"> / 12 ข้อ</span><br><div class="bar-wrap"><div class="bar-fill" style="width:0%;background:#1a6b3c;"></div></div></td>
+    <td style="font-size:8pt;vertical-align:middle;"><span class="badge badge-kb-only">SI เท่านั้น</span> <span style="color:#555;">SI ครอบคลุม CR แต่ Ake ไม่ได้ประเมิน</span></td>
+  </tr>
+</tbody></table>
+<p class="note" style="margin-top:6px;">* Ake denominators (46, 46, 19, 27) ยืนยันจาก annotation หน้า 4 ของ Ake PDF — Labour Standards และ Anti-Corruption ไม่มีตัวเลข denominator ใน PDF</p>
+</div>
+<div class="section page-break"><div class="sec-title">🔍 รายละเอียด Indicators แยกตาม Theme</div>
+<p class="note" style="margin-bottom:12px;">
+  คอลัมน์ "Ake PDF" แสดง sub-indicators ที่ Ake ระบุชัดเจนในรายงาน (จากการ extract PDF) — sub-indicators ที่ Ake ไม่ได้ระบุในรายงานจะแสดง "—"<br>
+  คอลัมน์ "SI (ShareInvestor)" แสดง sub-indicators ทั้งหมดที่ระบบเราพบ
+</p>
+
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#1a6b3c;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          🌍 Climate Change<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">24 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">ECC01</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการเปลี่ยนแปลงสภาพ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">รวมถึงการปล่อยก๊าซคาร์บอนไดออกไซด์หรือก๊าซเรือนกระจก ครอบคลุม a. การจัดการรับมือ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">ECC01_1</span><span class="chip chip-kb" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">ECC01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC03</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การแสดงออกถึงการให้การสนับสนุนเพื่อการบรรเทาปัญหาการเปล…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกสมาคมด้านธุรกิจ b. จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบีย…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC03_1</span></div></td>
+        <td><div><span class="chip chip-both" title="การเป็นสมาชิกสมาคมด้านธุรกิจ">✓ ECC03_1</span><span class="chip chip-kb" title="จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบียบ">ECC03_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">โครงการหรือมาตรการเพื่อจัดการรับมือกับการเปลี่ยนแปลงสภา…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ b. บริษัทระบุการด…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC05_1</span><span class="chip chip-kb" title="บริษัทระบุการดำเนินการที่เฉพาะเจาะจงที่ได้ดำเนินการแล้ว">ECC05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC08</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การกำกับดูแล (oversight) ด้านการเปลี่ยนแปลงสภาพภูมิอากา…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC08_1</span><span class="chip chip-kb" title="ระบุตำแหน่งของผู้รับผิดชอบในระดับกรรมการ">ECC08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC14</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 แ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 และ 2) เป็นระยะเวลา 3 ปี">ECC14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC15</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี">ECC15_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC22</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปลี่ยนผ่านพลังงาน (energy transition)</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน">ECC22_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC31</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การใช้พลังงาน - นโยบายหรือคำแถลงการให้คำมั่นครอบคลุม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระท…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">ECC31_1</span><span class="chip chip-kb" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">ECC31_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC38</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">เป้าหมายเชิงปริมาณระยะสั้น (ไม่เกิน 5 ปี) เพื่อลดการปล่…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">ECC38_1</span><span class="chip chip-kb" title="เป้าหมายเชิงปริมาณ">ECC38_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC39</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">เป้าหมายเชิงปริมาณระยะยาว (&gt;5 ปี) เพื่อลดการปล่อยก๊าซเร…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">ECC39_1</span><span class="chip chip-kb" title="เป้าหมายเชิงปริมาณ">ECC39_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC41</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC41_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">ECC41_1</span><span class="chip chip-both" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">✓ ECC41_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC42</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC42_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">ECC42_1</span><span class="chip chip-both" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">✓ ECC42_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC43</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การตระหนักรู้เกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ b. ระบุกรอบระยะเวลา (ระยะสั…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC43_1</span></div></td>
+        <td><div><span class="chip chip-both" title="เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ">✓ ECC43_1</span><span class="chip chip-kb" title="ระบุกรอบระยะเวลา (ระยะสั้น/ระยะปานกลาง/ระยะยาว) ของความเสี่ยง/โอกาส">ECC43_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC44</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ผลกระทบจากความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศมาประยุกต์ใช้ในกลยุทธ์ของบริษัท">ECC44_1</span><span class="chip chip-kb" title="บริษัทระบุว่าความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศส่งผลกระทบต่อการวางแผนด้านการเงินของบริษัทอย่างไร">ECC44_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC45</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การวางแผนสำหรับสถานการณ์ด้านสภาพภูมิอากาศ (climate scen…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ b. …</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ">ECC45_1</span><span class="chip chip-kb" title="บริษัทระบุถึงผลกระทบต่อธุรกิจจากอย่างน้อย 1 climate scenario">ECC45_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC49</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแบ่งตามหมวดหมู่">ECC49_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC50</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กระบวนการบริหารความเสี่ยงจากการเปลี่ยนแปลงสภาพภูมิอากาศ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท b. มีกระบวนการบริห…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท">ECC50_1</span><span class="chip chip-kb" title="มีกระบวนการบริหารความเสี่ยงที่เฉพาะเจาะจงสำหรับความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">ECC50_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC51</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ราคาคาร์บอนภายในองค์กร (internal carbon price)</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทมีราคาคาร์บอนภายในองค์กร b. บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC51_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC51_2</span></div></td>
+        <td><div><span class="chip chip-both" title="บริษัทมีราคาคาร์บอนภายในองค์กร">✓ ECC51_1</span><span class="chip chip-both" title="บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ">✓ ECC51_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC73</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การมีส่วนร่วมกับองค์กรด้านการเปลี่ยนแปลงสภาพภูมิอากาศโด…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกขององค์กรดังกล่าว b. การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การเป็นสมาชิกขององค์กรดังกล่าว">ECC73_1</span><span class="chip chip-kb" title="การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว">ECC73_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC74</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือการให้คำมั่นของบริษัท</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืน…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC74_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC74_2</span></div></td>
+        <td><div><span class="chip chip-both" title="ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่">✓ ECC74_1</span><span class="chip chip-both" title="การแสดงออกอย่างเหมาะสมของบริษัท">✓ ECC74_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC75</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลกา…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของ CEO b. ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO) …</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC75_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC75_3</span></div></td>
+        <td><div><span class="chip chip-both" title="ค่าตอบแทนของ CEO">✓ ECC75_1</span><span class="chip chip-kb" title="ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO)">ECC75_2</span><span class="chip chip-both" title="ค่าตอบแทนของ CEO และ/หรือผู้บริหารระดับสูงอย่างน้อย 1 คนพิจารณาถึงความคืบหน้าในการบรรลุเป้าหมายการลดก๊าซเรือนกระจกของบริษัท">✓ ECC75_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC76</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD b. บริษัทมี…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC76_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC76_2</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC76_3</span></div></td>
+        <td><div><span class="chip chip-both" title="บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD">✓ ECC76_1</span><span class="chip chip-both" title="บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD">✓ ECC76_2</span><span class="chip chip-both" title="บริษัทระบุอย่างชัดเจนว่าข้อมูลที่สอดคล้องกับข้อเสนอแนะของ TCFD ปรากฏเป็นส่วนหนึ่งของรายงานประจำปี">✓ ECC76_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 3 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC77</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กลยุทธ์การลดการปล่อยก๊าซเรือนกระจกเพื่อบรรลุเป้าหมายระย…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">ECC77_1</span><span class="chip chip-kb" title="บริษัทระบุองค์ประกอบหลักของกลยุทธ์นี้ในเชิงปริมาณ">ECC77_2</span><span class="chip chip-kb" title="บริษัทระบุได้ว่าการดำเนินการแต่ละโครงการหรือมาตรการจะส่งผลต่อการบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจกโดยรวมของบริษัทในสัดส่วนเชิงปริมาณเท่าไร">ECC77_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC78</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายท…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดค…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC78_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ ECC78_2</span></div></td>
+        <td><div><span class="chip chip-both" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจกในระยะยาวของบริษัท">✓ ECC78_1</span><span class="chip chip-both" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะค่อย ๆ ลดการลงทุนในสินทรัพย์หรือผลิตภัณฑ์ที่มีการปล่อยคาร์บอนสูง">✓ ECC78_2</span><span class="chip chip-kb" title="บริษัทระบุวิธีการที่บริษัทใช้ในการปรับรายจ่ายฝ่ายทุนในอนาคตของบริษัทให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">ECC78_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#1d4e89;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          👷 Labour Standards<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">23 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SLS01</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การป้องกันการใช้แรงงานเด็ก</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS01_1</span></div></td>
+        <td><div><span class="chip chip-both" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">✓ SLS01_1</span><span class="chip chip-kb" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">SLS01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS02</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การป้องกันการใช้แรงงานบังคับ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">SLS02_1</span><span class="chip chip-kb" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">SLS02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS03</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การไม่เลือกปฏิบัติ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม b. การเผยแพร่นโยบาย/หลักการ/ห…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม">SLS03_1</span><span class="chip chip-kb" title="เชื้อชาติ">SLS03_2</span><span class="chip chip-kb" title="ศาสนา">SLS03_3</span><span class="chip chip-kb" title="เพศสภาพ">SLS03_4</span><span class="chip chip-kb" title="อายุ">SLS03_5</span><span class="chip chip-kb" title="เพศวิถี">SLS03_6</span><span class="chip chip-kb" title="ความพิการ">SLS03_7</span><span class="chip chip-kb" title="สัญชาติ">SLS03_8</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสน…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS05_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS05_2</span></div></td>
+        <td><div><span class="chip chip-both" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">✓ SLS05_1</span><span class="chip chip-both" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม">✓ SLS05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS06</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสน…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS06_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS06_2</span></div></td>
+        <td><div><span class="chip chip-both" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">✓ SLS06_1</span><span class="chip chip-both" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง">✓ SLS06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS07</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS07_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS07_2</span></div></td>
+        <td><div><span class="chip chip-both" title="มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา">✓ SLS07_1</span><span class="chip chip-both" title="มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่มากเกินควรโดยเฉพาะ">✓ SLS07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS08</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ b. การให้คำมั่นว่าจะใ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS08_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS08_2</span></div></td>
+        <td><div><span class="chip chip-both" title="มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ">✓ SLS08_1</span><span class="chip chip-both" title="การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่าจ้างที่เพียงพอต่อการดำรงชีวิต">✓ SLS08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS10</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การมีส่วนร่วมหรือการให้คำมั่นตามกรอบการดำเนินงานที่เกี่…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม b…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม">SLS10_1</span><span class="chip chip-kb" title="เป็นสมาชิกหรือการให้คำมั่นต่อสาธารณะว่าจะปฏิบัติตามกรอบการดำเนินงานที่ได้รับการยอมรับในระดับสากล">SLS10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS11</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายที่สนับสนุนชุมชนครอบคลุม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS11_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป็นต้น">SLS11_1</span><span class="chip chip-both" title="โครงการเพื่อเปิดโอกาสในการจ้างงานหรือการฝึกงานให้กลุ่มคนหนุ่มสาว">✓ SLS11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS12</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายของบริษัทเกี่ยวกับมาตรฐานแรงงาน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก b. มีการแปลนโยบายเป็นภาษาต่าง ๆ ที…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS12_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก">SLS12_1</span><span class="chip chip-both" title="มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง">✓ SLS12_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS13</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การประเมินความเสี่ยงด้านแรงงานสำหรับสถานที่ปฏิบัติงานแล…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence) b. กิจการหรือโคร…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence)">SLS13_1</span><span class="chip chip-kb" title="กิจการหรือโครงการที่ดำเนินการอยู่แล้ว">SLS13_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS14</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การป้องกันการใช้แรงงานเด็ก b. การป้องกันการใช้แรงงานบังคับ c. กลไกที่ให้ตัวแท…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS14_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS14_3</span></div></td>
+        <td><div><span class="chip chip-both" title="การป้องกันการใช้แรงงานเด็ก">✓ SLS14_1</span><span class="chip chip-kb" title="การป้องกันการใช้แรงงานบังคับ">SLS14_2</span><span class="chip chip-both" title="กลไกที่ให้ตัวแทนพนักงานสามารถมีส่วนร่วมกับฝ่ายบริหารของบริษัท">✓ SLS14_3</span><span class="chip chip-kb" title="การลดจำนวนชั่วโมงทำงานที่มากเกินควร">SLS14_4</span><span class="chip chip-kb" title="การสนับสนุนค่าจ้างที่เพียงพอต่อการดำรงชีวิต">SLS14_5</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS16</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับเรื่องความหลากหลา…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="เชื้อชาติ">SLS16_1</span><span class="chip chip-kb" title="ศาสนา">SLS16_2</span><span class="chip chip-kb" title="เพศสภาพ">SLS16_3</span><span class="chip chip-kb" title="อายุ">SLS16_4</span><span class="chip chip-kb" title="เพศวิถี">SLS16_5</span><span class="chip chip-kb" title="ความพิการ">SLS16_6</span><span class="chip chip-kb" title="สัญชาติ">SLS16_7</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS21</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ข้อมูลเหตุการณ์การไม่ปฏิบัติตามมาตรฐานแรงงาน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่าง…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่างไร">SLS21_1</span><span class="chip chip-kb" title="บริษัทเปิดเผยรายละเอียดข้อมูลการดำเนินการที่เฉพาะเจาะจง โดยระบุประเภทของเหตุการณ์ที่เกิดขึ้น">SLS21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS24</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา">SLS24_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS25</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วค…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วคราว">SLS25_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS26</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนชั่วโมงอบรมความรู้เฉลี่ยของพนักงาน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. จำนวนชั่วโมงทั้งหมดในฐานะบริษัท b. จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="จำนวนชั่วโมงทั้งหมดในฐานะบริษัท">SLS26_1</span><span class="chip chip-kb" title="จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน">SLS26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS28</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกั…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกับค่าเฉลี่ยของ Sector และของประเทศ">SLS28_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS29</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การฝึกอบรมพนักงานเพื่อเพิ่มทักษะและความสามารถ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน b. รายละเอียดเกี่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน">SLS29_1</span><span class="chip chip-kb" title="รายละเอียดเกี่ยวกับการฝึกอบรมพนักงาน">SLS29_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS30</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblo…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS30_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS30_2</span></div></td>
+        <td><div><span class="chip chip-both" title="การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing)">✓ SLS30_1</span><span class="chip chip-both" title="การฝึกอบรมพนักงานระดับผู้จัดการเกี่ยวกับการจัดการกับรายงานหรือสถานการณ์การกลั่นแกล้งหรือการก่อกวนคุกคาม">✓ SLS30_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS32</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS32_1</span></div></td>
+        <td><div><span class="chip chip-both" title="สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก">✓ SLS32_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS33</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS33_1</span></div></td>
+        <td><div><span class="chip chip-both" title="สัดส่วน (%) ของพนักงานหญิงทั่วโลก">✓ SLS33_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS34</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การจ่ายค่าตอบแทนที่เท่าเทียม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS34_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SLS34_2</span></div></td>
+        <td><div><span class="chip chip-both" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">✓ SLS34_1</span><span class="chip chip-both" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">✓ SLS34_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#4a235a;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          🏛 Corporate Governance<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">30 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GCG01</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรม…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG01_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรมการอิสระ หรือไม่ได้มีการเปิดเผยความเป็นกรรมการอิสระของประธานบริษัท">GCG01_1</span><span class="chip chip-both" title="ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานเป็นกรรมการอิสระ">✓ GCG01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG02</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การระบุรายละเอียดเกี่ยวกับกรรมการ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความเชี่ยวชาญ b. การดำรงตำแหน่งกรรมการในองค์กรอื่น</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ความเชี่ยวชาญ">GCG02_1</span><span class="chip chip-kb" title="การดำรงตำแหน่งกรรมการในองค์กรอื่น">GCG02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG03</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนกรรมการในคณะกรรมการบริษัท</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="จำนวนกรรมการในคณะกรรมการบริษัท">GCG03_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG04</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนกรรมการอิสระในคณะกรรมการบริษัท</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="จำนวนกรรมการอิสระในคณะกรรมการบริษัท">GCG04_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนผู้หญิงในคณะกรรมการบริษัท</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="จำนวนผู้หญิงในคณะกรรมการบริษัท">GCG05_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG06</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นเกี่ยวกับความหลากหลายทางเพศในคณะกรรมการบริษ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท b. การกำหนดเป้าหมายที…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท">GCG06_1</span><span class="chip chip-kb" title="การกำหนดเป้าหมายที่จะเพิ่มสัดส่วนกรรมการหญิง">GCG06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG07</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">คณะกรรมการบริษัทจัดการรับมือกับประเด็นความขัดแย้งทางผลป…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เรื่องผลประโยชน์ทับซ้อน b. เรื่องรายการเกี่ยวโยง</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="เรื่องผลประโยชน์ทับซ้อน">GCG07_1</span><span class="chip chip-kb" title="เรื่องรายการเกี่ยวโยง">GCG07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG08</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การประเมินประสิทธิผลในการปฏิบัติหน้าที่ของคณะกรรมการบริ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน b. การประเมินที่ระบุรอบเวลาที่ชัดเจน …</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน">GCG08_1</span><span class="chip chip-kb" title="การประเมินที่ระบุรอบเวลาที่ชัดเจน (เช่น ทุกปีหรือทุกช่วงเวลาที่กำหนด)">GCG08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG09</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยข้อมูล</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คณะกรรมการชุดย่อย b. กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คณะกรรมการชุดย่อย">GCG09_1</span><span class="chip chip-kb" title="กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อมูลอื่นในลักษณะคล้ายกัน)">GCG09_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG10</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การระบุจำนวนครั้งของการประชุมในแต่ละปี</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. จำนวนการประชุมของคณะกรรมการบริษัท b. จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละค…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="จำนวนการประชุมของคณะกรรมการบริษัท">GCG10_1</span><span class="chip chip-kb" title="จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละคณะ">GCG10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG11</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การระบุอัตราการเข้าร่วมประชุม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อัตราการเข้าร่วมประชุมของกรรมการบางคน b. อัตราการเข้าร่วมประชุมของกรรมการแต่ล…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="อัตราการเข้าร่วมประชุมของกรรมการบางคน">GCG11_1</span><span class="chip chip-kb" title="อัตราการเข้าร่วมประชุมของกรรมการแต่ละคน">GCG11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG14</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยค่าตอบคงที่ (fixed) และค่าตอบแทนผันแปร (varia…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของผู้บริหารระดับสูง b. ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ค่าตอบแทนของผู้บริหารระดับสูง">GCG14_1</span><span class="chip chip-kb" title="ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร">GCG14_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG19</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนั…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนังสือนัดประชุมและวันที่ประชุม">GCG19_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG21</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องค่าตอบแทนของผู้บริ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียงขอ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG21_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">GCG21_1</span><span class="chip chip-both" title="นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจน">✓ GCG21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG22</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องการแต่งตั้งกรรมการ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียง</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">GCG22_1</span><span class="chip chip-kb" title="นโยบายของบริษัทระบุสิทธิในการออกเสียง">GCG22_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG26</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. แบบจำกัด (limited) b. แบบละเอียด (detailed)</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG26_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG26_2</span></div></td>
+        <td><div><span class="chip chip-both" title="แบบจำกัด (limited)">✓ GCG26_1</span><span class="chip chip-both" title="แบบละเอียด (detailed)">✓ GCG26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG27</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุม</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการดำเนินงานในระยะยาว">GCG27_1</span><span class="chip chip-kb" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงผลการดำเนินงานด้าน ESG">GCG27_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG36</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบก…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">GCG36_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG37</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทีย…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG37_1</span></div></td>
+        <td><div><span class="chip chip-both" title="สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">✓ GCG37_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG38</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG38_1</span></div></td>
+        <td><div><span class="chip chip-both" title="จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">✓ GCG38_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG39</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG39_1</span></div></td>
+        <td><div><span class="chip chip-both" title="จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">✓ GCG39_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG41</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีใน…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG41_1</span></div></td>
+        <td><div><span class="chip chip-both" title="ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">✓ GCG41_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG42</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว่าหนึ่งหุ้นมีหนึ่งสิทธิออกเสียง">GCG42_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG43</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ …</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ CEO บริษัทได้แต่งตั้งให้มีหัวหน้ากรรมการอิสระ (Lead Director) หรือมีกรรมการอิสระระดับอาวุโสหรือไม่">GCG43_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG44</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ความเชี่ยวชาญด้านการเงินของคณะกรรมการตรวจสอบ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน b. ในค…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG44_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน">GCG44_1</span><span class="chip chip-both" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระเป็นส่วนใหญ่">✓ GCG44_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG46</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">องค์ประกอบของคณะกรรมการตรวจสอบซึ่งกรรมการแต่ละคนต้องไม่…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">GCG46_1</span><span class="chip chip-kb" title="ทุกคนเป็นกรรมการอิสระ">GCG46_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG47</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">องค์ประกอบของคณะกรรมการพิจารณาค่าตอบแทนซึ่งแต่ละคนต้องไ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG47_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">GCG47_1</span><span class="chip chip-both" title="ทุกคนเป็นกรรมการอิสระ">✓ GCG47_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG48</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การกำหนดค่าตอบแทนของผู้บริหารระบุ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักการในภาพรวม b. กระบวนการกำหนดค่าตอบแทนอย่างละเอียด</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="หลักการในภาพรวม">GCG48_1</span><span class="chip chip-kb" title="กระบวนการกำหนดค่าตอบแทนอย่างละเอียด">GCG48_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG49</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ค่าธรรมเนียมที่จ่ายให้กับผู้สอบบัญชี</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GCG49_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees) ไว้แยกกัน">GCG49_1</span><span class="chip chip-both" title="ยอดค่าธรรมเนียมการสอบบัญชี (audit fees) สูงกว่ายอดค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees)">✓ GCG49_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG50</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในค…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรรมการที่เทียบเท่า">GCG50_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#7b3f00;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          🤝 Human Rights &amp; Community<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">14 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SHR03</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">คำแถลงเกี่ยวกับหลักการหรือวิธีการในการลงทุนในชุมชน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน b. ประเด็นที่มุ่งเน้นในการล…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน">SHR03_1</span><span class="chip chip-kb" title="ประเด็นที่มุ่งเน้นในการลงทุนในชุมชนมีความเชื่อมโยงกับกลยุทธ์ทางธุรกิจของบริษัท">SHR03_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR04</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แร…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR04_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR04_2</span></div></td>
+        <td><div><span class="chip chip-both" title="มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ">✓ SHR04_1</span><span class="chip chip-both" title="นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับสิทธิเด็ก การให้คำมั่นว่าจะปฏิบัติตาม Children's Rights and Business Principles">✓ SHR04_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น b. การให้คำมั่นที่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น">SHR05_1</span><span class="chip chip-kb" title="การให้คำมั่นที่ชัดเจนว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่น">SHR05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR11</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การมีส่วนร่วมของผู้มีส่วนได้เสียในประเด็นปัญหาด้านสิทธิ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย b. มีการบันทึกการประชุมหรือรา…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR11_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย">SHR11_1</span><span class="chip chip-both" title="มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้มีส่วนได้เสียไปใช้อย่างไร">✓ SHR11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR15</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ผลลัพธ์หรือประโยชน์ที่เกิดขึ้นจากการลงทุนในชุมชน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ b. ผลลัพธ์ในเชิงปริมาณ</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR15_2</span></div></td>
+        <td><div><span class="chip chip-kb" title="ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ">SHR15_1</span><span class="chip chip-both" title="ผลลัพธ์ในเชิงปริมาณ">✓ SHR15_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR16</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์ก…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร b. การวางรากฐาน เป้าหมาย หรือ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR16_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR16_2</span></div></td>
+        <td><div><span class="chip chip-both" title="หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร">✓ SHR16_1</span><span class="chip chip-both" title="การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ">✓ SHR16_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR17</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ SHR17_1</span></div></td>
+        <td><div><span class="chip chip-both" title="ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน">✓ SHR17_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR21</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นต่อสาธารณะว่าจะเคารพและสนับสนุนการคุ้มครองส…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราส…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราสารที่อยู่ภายในร่างตราสารระหว่างประเทศด้านสิทธิมนุษยชน">SHR21_1</span><span class="chip chip-kb" title="การให้คำมั่นว่าจะนำ UN Guiding Principles on Business and Human Rights หรือ OECD Guidelines for Multinational Enterprises มาปฏิบัติ">SHR21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR22</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญ</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมห…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมหรือธุรกิจ">SHR22_1</span><span class="chip chip-kb" title="การให้คำมั่นว่าจะให้ผู้มีส่วนได้เสียเข้ามามีส่วนร่วมในการระบุประเด็นปัญหาดังกล่าว">SHR22_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR23</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การมอบหมายความรับผิดชอบและการจัดสรรทรัพยากรในการกำกับดู…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">เพื่อให้แน่ใจว่ามีการปฏิบัติที่ดีที่เคารพสิทธิมนุษยชน a. กรรมการหรือคณะกรรมการชุ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="กรรมการหรือคณะกรรมการชุดย่อยได้รับมอบหมายให้ทำหน้าที่รับผิดชอบการกำกับดูแลเรื่องสิทธิมนุษยชน">SHR23_1</span><span class="chip chip-kb" title="หน่วยงานที่เกี่ยวข้องได้รับมอบหมายให้ทำหน้าที่รับผิดชอบและได้รับการจัดสรรทรัพยากรในการปฏิบัติงานในแต่ละวันอย่างชัดเจน">SHR23_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR24</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นด้านสิทธิมนุษยชนเป็นส่วนหนึ่งของแนวทางปฏิบั…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มี…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มีส่วนได้เสียทุกกลุ่ม">SHR24_1</span><span class="chip chip-kb" title="พนักงานทั้งหมด หรือบางกลุ่ม/แผนได้รับการฝึกอบรมเกี่ยวกับนโยบายด้านสิทธิมนุษยชน">SHR24_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR25</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การประเมินและบรรเทาผลกระทบด้านสิทธิมนุษยชน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนกา…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนการทำธุรกิจ">SHR25_1</span><span class="chip chip-kb" title="การเปิดเผยการดำเนินการเพื่อหลีกเลี่ยง ป้องกัน และบรรเทาประเด็นปัญหาด้านสิทธิมนุษยชน">SHR25_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR26</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กลไกการร้องทุกข์และการให้คำมั่นว่าจะเยียวยาบุคคลและชุมช…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนแ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนและการรับประกันการรักษาความลับ/การปกปิดตัวตน">SHR26_1</span><span class="chip chip-kb" title="บริษัทให้คำมั่นว่าจะเยียวยาฝ่ายที่ได้รับผลกระทบ">SHR26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR27</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ข้อมูลเหตุการณ์และการละเมิดสิทธิมนุษยชน</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เก…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">SHR27_1</span><span class="chip chip-kb" title="บริษัทเปิดเผยข้อมูลการดำเนินการหรือสิ่งที่ได้เรียนรู้ หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">SHR27_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#6d4c41;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          ⚖ Risk Management<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">10 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GRM01</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">บทบาทของคณะกรรมการบริษัทมีหน้าที่ควบคุมดูแล (oversight)…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง b. คณะกร…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">GRM01_1</span><span class="chip chip-kb" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">GRM01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM02</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ผู้บริหารสูงสุดที่ทำหน้าที่ดูแลการบริหารความเสี่ยง</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board risk committee)">GRM02_1</span><span class="chip chip-kb" title="เป็นผู้บริหารคนละคนกับผู้บริหารที่ทำหน้าที่ดูแลการตรวจสอบ (Head of Audit)">GRM02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM04</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การอ้างอิงมาตรฐานต่าง ๆ เพื่อสะท้อนความเป็นระบบและความโ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทใช้มาตรฐานการบริหารความเสี่ยง หรือกรอบการทำงานต่าง ๆ เช่น ISO31000 COSO…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทใช้มาตรฐานการบริหารความเสี่ยง เช่น ISO31000 COSO IRM FERMA BASEL">GRM04_1</span><span class="chip chip-kb" title="รายงานของบริษัทใช้มาตรฐาน GRI/IIRC/SASB">GRM04_2</span><span class="chip chip-kb" title="GRI">GRM04_3</span><span class="chip chip-kb" title="IIRC">GRM04_4</span><span class="chip chip-kb" title="SASB">GRM04_5</span><span class="chip chip-kb" title="มาตรฐานอื่น">GRM04_6</span><span class="chip chip-kb" title="โปรดระบุชื่อมาตรฐาน">GRM04_7</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">คณะกรรมการบริษัททำหน้าที่ควบคุมดูแล (oversight) เรื่องต…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="หลักปฏิบัติ หลักจรรยาบรรณ หรือหลักเกณฑ์อื่นที่เทียบเท่า">GRM05_1</span><span class="chip chip-kb" title="ความเสี่ยงด้าน ESG">GRM05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM07</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">จรรยาบรรณธุรกิจ/กฎบัตร/นโยบายของบริษัท หรือเอกสารอื่นที…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท b. กรอบการทำงานด้านการบริหาร…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท">GRM07_1</span><span class="chip chip-kb" title="กรอบการทำงานด้านการบริหารความเสี่ยงดังกล่าวครอบคลุมถึงความเสี่ยงด้าน ESG แบบเฉพาะเจาะจง">GRM07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM08</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">แนวทางดำเนินการในกรณีที่เกิดการไม่ปฏิบัติตามข้อกำหนด</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว b. บริษัทรายงานจำนวนกรณีห…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว">GRM08_1</span><span class="chip chip-kb" title="บริษัทรายงานจำนวนกรณีหรือเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">GRM08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM10</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การให้คำมั่นของบริษัท</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ b. บริษัทให้คำมั่นว่าจะเปิดให…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GRM10_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GRM10_2</span></div></td>
+        <td><div><span class="chip chip-both" title="บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ">✓ GRM10_1</span><span class="chip chip-both" title="บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ">✓ GRM10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM12</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การดำเนินการของบริษัท</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">GRM12_1</span><span class="chip chip-kb" title="ทบทวนประสิทธิผลของหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นระยะ">GRM12_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM14</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบ…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GRM14_1</span></div></td>
+        <td><div><span class="chip chip-both" title="ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว">✓ GRM14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM20</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็น…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">เพื่อเป็นช่องทางการรายงานการละเมิดหลักปฏิบัติหรือนโยบายของบริษัทสำหรับ a. พนักงา…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GRM20_1</span> <span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GRM20_2</span></div></td>
+        <td><div><span class="chip chip-both" title="พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื่น ๆ ที่ทำงานร่วมกับบริษัท">✓ GRM20_1</span><span class="chip chip-both" title="ผู้มีส่วนได้เสียภายนอกอื่น ๆ และประชาชนทั่วไป">✓ GRM20_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 2 ระบุ</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#880e4f;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          🛡 Anti-Corruption<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">13 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GAC01</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการต่อต้านการทุจริ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระท…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">GAC01_1</span><span class="chip chip-kb" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">GAC01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC02</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ระบบจัดการเพื่อจัดการรับมือกับประเด็นปัญหาด้านการทุจริต…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระท…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">GAC02_1</span><span class="chip chip-kb" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">GAC02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC03</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่อการเมือง">GAC03_1</span><span class="chip chip-kb" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC03_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC04</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต">GAC04_1</span><span class="chip chip-kb" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC04_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC05</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กลไกการแจ้งเบาะแส (whistleblowing)</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="กลไกการแจ้งเบาะแส (whistleblowing)">GAC05_1</span><span class="chip chip-kb" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC07</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน">GAC07_1</span><span class="chip chip-kb" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC08</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะก…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะกรรมการบริษัท">GAC08_1</span><span class="chip chip-kb" title="การต่อต้านการทุจริตอย่างครบถ้วน">GAC08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC09</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การประเมินความเสี่ยงที่จะเกิดการทุจริตในการดำเนินงานของ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน b. การต่อด้านการทุ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน">GAC09_1</span><span class="chip chip-kb" title="การต่อด้านการทุจริตอย่างครบถ้วน">GAC09_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC10</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">กระบวนการสำหรับจัดการรับมือกับการทุจริตในการดำเนินงาน ซ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต b. การต่อด้านการทุจริตอย่างครบถ้วน</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต">GAC10_1</span><span class="chip chip-kb" title="การต่อด้านการทุจริตอย่างครบถ้วน">GAC10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC11</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">วิธีการดำเนินการสำหรับตัวกลาง ซึ่งรวมถึงผู้รับเหมา (con…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุ…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุจริตสำหรับตัวกลาง">GAC11_1</span><span class="chip chip-kb" title="การสื่อสารนโยบายการต่อด้านการทุจริตให้ตัวกลางรับทราบ">GAC11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC12</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GAC12_1</span></div></td>
+        <td><div><span class="chip chip-both" title="การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง">✓ GAC12_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC13</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจาก…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GAC13_1</span></div></td>
+        <td><div><span class="chip chip-both" title="การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต">✓ GAC13_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC14</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับก…</div></td>
+        <td><div><span class="chip chip-ake" title="ระบุใน Ake PDF">⚑ GAC14_1</span></div></td>
+        <td><div><span class="chip chip-both" title="การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต">✓ GAC14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-ake-only">Ake: 1 ระบุ</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="theme-block">
+  <table class="ind-table">
+    <thead>
+      <tr style="page-break-after:avoid;break-after:avoid;">
+        <td colspan="5" style="background:#0d47a1;color:#fff;padding:7px 12px;font-weight:700;font-size:9.5pt;">
+          🛒 Customer Responsibility<span style="background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:10px;font-size:8pt;margin-left:8px;">6 indicators</span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width:75px;">Code</th>
+        <th style="width:36%;">ชื่อ Indicator</th>
+        <th>Ake PDF — Sub-indicators ที่ระบุ</th>
+        <th>SI (ShareInvestor) — Sub-indicators ทั้งหมด</th>
+        <th style="width:80px;text-align:center;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SCR06</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การดำเนินการที่ใช้เพื่อปรับปรุงนโยบายการขาย/การให้สินเช…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การฝึกอบรมพนักงานขาย b. นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การฝึกอบรมพนักงานขาย">SCR06_1</span><span class="chip chip-kb" title="นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ">SCR06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR64</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การโฆษณาหรือการทำการตลาดสำหรับผลิตภัณฑ์สินเชื่อเพื่อผู้…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">SCR64_1</span><span class="chip chip-kb" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะทำการตลาดหรือโฆษณาอย่างมีความรับผิดชอบ">SCR64_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR65</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การมีส่วนร่วมในโครงการเพื่อการให้สินเชื่อแก่ผู้บริโภคอย…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม b. การปรับใช้หรือการสนับสนุนห…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม">SCR65_1</span><span class="chip chip-kb" title="การปรับใช้หรือการสนับสนุนหลักปฏิบัติ/แนวปฏิบัติที่เกี่ยวข้อง">SCR65_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR66</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การดำเนินการที่แสดงถึงแนวทางการโฆษณา การทำการตลาด หรือก…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. แนวทางในการดำเนินการโดยละเอียด b. พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการต…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="แนวทางในการดำเนินการโดยละเอียด">SCR66_1</span><span class="chip chip-kb" title="พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการตรวจสอบ">SCR66_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR67</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">ผลกระทบด้านลบของผลิตภัณฑ์สินเชื่อต่อผู้บริโภค</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่…</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">SCR67_1</span><span class="chip chip-kb" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะลดผลกระทบด้านลบของผลิตภัณฑ์">SCR67_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR68</span></td>
+        <td><div style="font-weight:600;font-size:8.5pt;">การดำเนินการเพื่อจัดการรับมือกับผลกระทบด้านลบของผลิตภัณ…</div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การตระหนักถึงกลุ่มเปราะบาง b. โครงการเพื่อปกป้องกลุ่มเปราะบาง</div></td>
+        <td><span class="chip-none">— ไม่ได้ระบุใน PDF</span></td>
+        <td><div><span class="chip chip-kb" title="การตระหนักถึงกลุ่มเปราะบาง">SCR68_1</span><span class="chip chip-kb" title="โครงการเพื่อปกป้องกลุ่มเปราะบาง">SCR68_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">ตรงกัน</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<div class="section page-break">
+<div class="sec-title">📌 Sub-indicators ที่ Ake PDF ระบุชัดเจน vs SI (ShareInvestor)</div>
+<div class="diff-box">
+  <div class="diff-row">
+    <span class="diff-label">Sub-indicators ที่ Ake ระบุใน PDF</span>
+    <span><b>62 รายการ</b> รวม SLS27_1-2 (South Africa — ไม่เกี่ยวข้องกับ TIDLOR) / <b>60 รายการ applicable</b></span>
+  </div>
+  <div class="diff-row">
+    <span class="diff-label">SI มีครบ</span>
+    <span><b>60/62 รายการ</b> (97%) — SI ครอบคลุม sub-indicators ที่ Ake ระบุทั้ง 62 รายการ</span>
+  </div>
+</div>
+<table class="ind-table">
+<thead>
+  <tr>
+    <th style="width:100px;">Sub-indicator</th>
+    <th style="width:80px;">Indicator</th>
+    <th>ชื่อ Indicator</th>
+    <th>Theme</th>
+    <th>Sub-indicator วัดอะไร</th>
+    <th style="width:80px;text-align:center;">SI (ShareInvestor)</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC03_1</span></td>
+    <td><span class="ind-code">ECC03</span></td>
+    <td style="font-size:8pt;">การแสดงออกถึงการให้การสนับสนุนเพื่อการบรรเทาปัญหาการเปล…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">การเป็นสมาชิกสมาคมด้านธุรกิจ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC41_2</span></td>
+    <td><span class="ind-code">ECC41</span></td>
+    <td style="font-size:8pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC42_2</span></td>
+    <td><span class="ind-code">ECC42</span></td>
+    <td style="font-size:8pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อม…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC43_1</span></td>
+    <td><span class="ind-code">ECC43</span></td>
+    <td style="font-size:8pt;">การตระหนักรู้เกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC51_1</span></td>
+    <td><span class="ind-code">ECC51</span></td>
+    <td style="font-size:8pt;">ราคาคาร์บอนภายในองค์กร (internal carbon price)</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทมีราคาคาร์บอนภายในองค์กร</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC51_2</span></td>
+    <td><span class="ind-code">ECC51</span></td>
+    <td style="font-size:8pt;">ราคาคาร์บอนภายในองค์กร (internal carbon price)</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC74_1</span></td>
+    <td><span class="ind-code">ECC74</span></td>
+    <td style="font-size:8pt;">นโยบายหรือการให้คำมั่นของบริษัท</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC74_2</span></td>
+    <td><span class="ind-code">ECC74</span></td>
+    <td style="font-size:8pt;">นโยบายหรือการให้คำมั่นของบริษัท</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">การแสดงออกอย่างเหมาะสมของบริษัท</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC75_1</span></td>
+    <td><span class="ind-code">ECC75</span></td>
+    <td style="font-size:8pt;">การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลกา…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">ค่าตอบแทนของ CEO</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC75_3</span></td>
+    <td><span class="ind-code">ECC75</span></td>
+    <td style="font-size:8pt;">การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลกา…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">ค่าตอบแทนของ CEO และ/หรือผู้บริหารระดับสูงอย่างน้อย 1 คนพิจารณาถึงความคืบหน้าในการบรรลุเป้าหมายการลดก๊าซเรือนกระจกของบริษัท</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC76_1</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC76_2</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC76_3</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทระบุอย่างชัดเจนว่าข้อมูลที่สอดคล้องกับข้อเสนอแนะของ TCFD ปรากฏเป็นส่วนหนึ่งของรายงานประจำปี</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC78_1</span></td>
+    <td><span class="ind-code">ECC78</span></td>
+    <td style="font-size:8pt;">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายท…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจกในระยะยาวของบริษัท</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ ECC78_2</span></td>
+    <td><span class="ind-code">ECC78</span></td>
+    <td style="font-size:8pt;">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายท…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8pt;">บริษัทให้คำมั่นอย่างชัดเจนว่าจะค่อย ๆ ลดการลงทุนในสินทรัพย์หรือผลิตภัณฑ์ที่มีการปล่อยคาร์บอนสูง</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GAC12_1</span></td>
+    <td><span class="ind-code">GAC12</span></td>
+    <td style="font-size:8pt;">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</td>
+    <td><span style="background:#880e4f;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8pt;">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GAC13_1</span></td>
+    <td><span class="ind-code">GAC13</span></td>
+    <td style="font-size:8pt;">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจาก…</td>
+    <td><span style="background:#880e4f;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8pt;">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GAC14_1</span></td>
+    <td><span class="ind-code">GAC14</span></td>
+    <td style="font-size:8pt;">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับก…</td>
+    <td><span style="background:#880e4f;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8pt;">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG01_2</span></td>
+    <td><span class="ind-code">GCG01</span></td>
+    <td style="font-size:8pt;">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานเป็นกรรมการอิสระ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG21_2</span></td>
+    <td><span class="ind-code">GCG21</span></td>
+    <td style="font-size:8pt;">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องค่าตอบแทนของผู้บริ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจน</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG26_1</span></td>
+    <td><span class="ind-code">GCG26</span></td>
+    <td style="font-size:8pt;">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">แบบจำกัด (limited)</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG26_2</span></td>
+    <td><span class="ind-code">GCG26</span></td>
+    <td style="font-size:8pt;">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">แบบละเอียด (detailed)</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG37_1</span></td>
+    <td><span class="ind-code">GCG37</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทีย…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG38_1</span></td>
+    <td><span class="ind-code">GCG38</span></td>
+    <td style="font-size:8pt;">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG39_1</span></td>
+    <td><span class="ind-code">GCG39</span></td>
+    <td style="font-size:8pt;">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG41_1</span></td>
+    <td><span class="ind-code">GCG41</span></td>
+    <td style="font-size:8pt;">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีใน…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG44_2</span></td>
+    <td><span class="ind-code">GCG44</span></td>
+    <td style="font-size:8pt;">ความเชี่ยวชาญด้านการเงินของคณะกรรมการตรวจสอบ</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระเป็นส่วนใหญ่</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG47_2</span></td>
+    <td><span class="ind-code">GCG47</span></td>
+    <td style="font-size:8pt;">องค์ประกอบของคณะกรรมการพิจารณาค่าตอบแทนซึ่งแต่ละคนต้องไ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">ทุกคนเป็นกรรมการอิสระ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GCG49_2</span></td>
+    <td><span class="ind-code">GCG49</span></td>
+    <td style="font-size:8pt;">ค่าธรรมเนียมที่จ่ายให้กับผู้สอบบัญชี</td>
+    <td><span style="background:#4a235a;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8pt;">ยอดค่าธรรมเนียมการสอบบัญชี (audit fees) สูงกว่ายอดค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees)</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GRM10_1</span></td>
+    <td><span class="ind-code">GRM10</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นของบริษัท</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8pt;">บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GRM10_2</span></td>
+    <td><span class="ind-code">GRM10</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นของบริษัท</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8pt;">บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GRM14_1</span></td>
+    <td><span class="ind-code">GRM14</span></td>
+    <td style="font-size:8pt;">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบ…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8pt;">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GRM20_1</span></td>
+    <td><span class="ind-code">GRM20</span></td>
+    <td style="font-size:8pt;">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็น…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8pt;">พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื่น ๆ ที่ทำงานร่วมกับบริษัท</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ GRM20_2</span></td>
+    <td><span class="ind-code">GRM20</span></td>
+    <td style="font-size:8pt;">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็น…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8pt;">ผู้มีส่วนได้เสียภายนอกอื่น ๆ และประชาชนทั่วไป</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR04_1</span></td>
+    <td><span class="ind-code">SHR04</span></td>
+    <td style="font-size:8pt;">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แร…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR04_2</span></td>
+    <td><span class="ind-code">SHR04</span></td>
+    <td style="font-size:8pt;">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แร…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับสิทธิเด็ก การให้คำมั่นว่าจะปฏิบัติตาม Children's Rights and Business Principles</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR11_2</span></td>
+    <td><span class="ind-code">SHR11</span></td>
+    <td style="font-size:8pt;">การมีส่วนร่วมของผู้มีส่วนได้เสียในประเด็นปัญหาด้านสิทธิ…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้มีส่วนได้เสียไปใช้อย่างไร</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR15_2</span></td>
+    <td><span class="ind-code">SHR15</span></td>
+    <td style="font-size:8pt;">ผลลัพธ์หรือประโยชน์ที่เกิดขึ้นจากการลงทุนในชุมชน</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">ผลลัพธ์ในเชิงปริมาณ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR16_1</span></td>
+    <td><span class="ind-code">SHR16</span></td>
+    <td style="font-size:8pt;">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์ก…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR16_2</span></td>
+    <td><span class="ind-code">SHR16</span></td>
+    <td style="font-size:8pt;">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์ก…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SHR17_1</span></td>
+    <td><span class="ind-code">SHR17</span></td>
+    <td style="font-size:8pt;">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8pt;">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS01_1</span></td>
+    <td><span class="ind-code">SLS01</span></td>
+    <td style="font-size:8pt;">การป้องกันการใช้แรงงานเด็ก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS05_1</span></td>
+    <td><span class="ind-code">SLS05</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS05_2</span></td>
+    <td><span class="ind-code">SLS05</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS06_1</span></td>
+    <td><span class="ind-code">SLS06</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS06_2</span></td>
+    <td><span class="ind-code">SLS06</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS07_1</span></td>
+    <td><span class="ind-code">SLS07</span></td>
+    <td style="font-size:8pt;">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำ…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS07_2</span></td>
+    <td><span class="ind-code">SLS07</span></td>
+    <td style="font-size:8pt;">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำ…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่มากเกินควรโดยเฉพาะ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS08_1</span></td>
+    <td><span class="ind-code">SLS08</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS08_2</span></td>
+    <td><span class="ind-code">SLS08</span></td>
+    <td style="font-size:8pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่าจ้างที่เพียงพอต่อการดำรงชีวิต</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS11_2</span></td>
+    <td><span class="ind-code">SLS11</span></td>
+    <td style="font-size:8pt;">นโยบายที่สนับสนุนชุมชนครอบคลุม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">โครงการเพื่อเปิดโอกาสในการจ้างงานหรือการฝึกงานให้กลุ่มคนหนุ่มสาว</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS12_2</span></td>
+    <td><span class="ind-code">SLS12</span></td>
+    <td style="font-size:8pt;">นโยบายของบริษัทเกี่ยวกับมาตรฐานแรงงาน</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS14_1</span></td>
+    <td><span class="ind-code">SLS14</span></td>
+    <td style="font-size:8pt;">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแ…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การป้องกันการใช้แรงงานเด็ก</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS14_3</span></td>
+    <td><span class="ind-code">SLS14</span></td>
+    <td style="font-size:8pt;">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแ…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">กลไกที่ให้ตัวแทนพนักงานสามารถมีส่วนร่วมกับฝ่ายบริหารของบริษัท</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS27_1</span></td>
+    <td><span class="ind-code">SLS27</span></td>
+    <td style="font-size:8pt;">สำหรับบริษัทที่มีการดำเนินธุรกิจในแอฟริกาใต้: มีหลักฐาน…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การกำหนดเป้าหมายในการสนับสนุน B-BBEE</td>
+    <td style="text-align:center;"><span class="badge badge-ake-only">❌ ไม่มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS27_2</span></td>
+    <td><span class="ind-code">SLS27</span></td>
+    <td style="font-size:8pt;">สำหรับบริษัทที่มีการดำเนินธุรกิจในแอฟริกาใต้: มีหลักฐาน…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) ของ Historically Disadvantaged South Africans (HDSA) ที่ดำรงตำแหน่งผู้บริหาร</td>
+    <td style="text-align:center;"><span class="badge badge-ake-only">❌ ไม่มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS30_1</span></td>
+    <td><span class="ind-code">SLS30</span></td>
+    <td style="font-size:8pt;">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing)</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS30_2</span></td>
+    <td><span class="ind-code">SLS30</span></td>
+    <td style="font-size:8pt;">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การฝึกอบรมพนักงานระดับผู้จัดการเกี่ยวกับการจัดการกับรายงานหรือสถานการณ์การกลั่นแกล้งหรือการก่อกวนคุกคาม</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS32_1</span></td>
+    <td><span class="ind-code">SLS32</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS33_1</span></td>
+    <td><span class="ind-code">SLS33</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS34_1</span></td>
+    <td><span class="ind-code">SLS34</span></td>
+    <td style="font-size:8pt;">การจ่ายค่าตอบแทนที่เท่าเทียม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+  <tr>
+    <td><span class="chip chip-ake">⚑ SLS34_2</span></td>
+    <td><span class="ind-code">SLS34</span></td>
+    <td style="font-size:8pt;">การจ่ายค่าตอบแทนที่เท่าเทียม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:1px 6px;border-radius:8px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8pt;">การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ</td>
+    <td style="text-align:center;"><span class="badge badge-match">✅ มีใน KB</span></td>
+  </tr>
+</tbody></table></div>
+
+<div class="footer">
+  <span>TIDLOR — Ake PDF vs SI (ShareInvestor) Comparison | จัดทำโดย ShareInvestor</span>
+  <span>อ้างอิง: Tidlor_FTSE_Gap_Analysis (By Ake).pdf + FTSE ESG RC11 2024-2025</span>
+</div>
+</div></body></html>

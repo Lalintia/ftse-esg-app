@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FTSE ESG Gap Analysis — TIDLOR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand-dark: #0f1b2d;
+    --brand-mid:  #1a2f4e;
+    --brand-accent: #f4a020;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-400: #adb5bd;
+    --gray-700: #495057;
+    --gap-bg:    #fff5f5;
+    --gap-text:  #c0392b;
+    --ok-bg:     #f0faf4;
+    --ok-text:   #1a6b3c;
+    --extra-bg:  #fffde7;
+    --extra-text:#e65100;
+    --radius: 6px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  @page { size: A4; margin: 15mm 14mm; }
+  @media print {
+    .no-print { display: none; }
+    body { font-size: 9pt; }
+    .page-break { page-break-before: always; }
+    .theme-section { page-break-inside: avoid; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
+  }
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    font-size: 10pt;
+    color: #222;
+    background: #fff;
+    line-height: 1.5;
+  }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-mid) 100%);
+    color: #fff;
+    padding: 40px 36px 36px;
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(244,160,32,0.12);
+  }
+  .cover-badge {
+    display: inline-block;
+    background: var(--brand-accent);
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .cover h1 { font-size: 22pt; font-weight: 700; margin-bottom: 4px; }
+  .cover .subtitle { font-size: 11pt; opacity: 0.8; margin-bottom: 16px; }
+  .cover-meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+  .cover-meta-item { background: rgba(255,255,255,0.1); padding: 10px 16px; border-radius: var(--radius); }
+  .cover-meta-item .label { font-size: 7.5pt; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cover-meta-item .value { font-size: 13pt; font-weight: 700; margin-top: 2px; }
+
+  /* Summary stats */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .s-num { font-size: 20pt; font-weight: 700; color: var(--brand-mid); }
+  .stat-card .s-label { font-size: 8pt; color: var(--gray-700); margin-top: 2px; }
+  .stat-card.match .s-num { color: #1a6b3c; }
+  .stat-card.gap   .s-num { color: #c0392b; }
+
+  /* Comparison table */
+  .compare-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .col-header {
+    padding: 10px 14px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-weight: 700;
+    font-size: 10pt;
+    color: #fff;
+  }
+  .col-header.ref  { background: #2c3e50; }
+  .col-header.sys  { background: var(--brand-mid); }
+
+  /* Theme section */
+  .theme-section { margin-bottom: 28px; }
+  .theme-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11pt;
+  }
+  .theme-header .theme-count {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 9pt;
+    font-weight: 600;
+  }
+  .theme-header .theme-gap-count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 9pt;
+    color: #ffe082;
+    font-weight: 600;
+  }
+
+  /* Main indicator table */
+  .ind-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    border: 1px solid var(--gray-200);
+    border-top: none;
+  }
+  .ind-table th {
+    background: var(--gray-100);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+    color: var(--gray-700);
+    border-bottom: 2px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
+  }
+  .ind-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
+    vertical-align: top;
+  }
+  .ind-table tr:last-child td { border-bottom: none; }
+  .ind-table tr:nth-child(even) td { background: var(--gray-100); }
+
+  /* Code cell */
+  .ind-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 9pt;
+    color: var(--brand-mid);
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 8pt;
+    font-weight: 600;
+  }
+  .badge-match  { background: var(--ok-bg);    color: var(--ok-text); }
+  .badge-gap    { background: var(--gap-bg);   color: var(--gap-text); }
+  .badge-extra  { background: var(--extra-bg); color: var(--extra-text); }
+
+  /* Sub-indicator chips */
+  .sub-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .sub-ok  { display: inline-block; background: var(--ok-bg);  color: var(--ok-text);  border: 1px solid #a8d5b9; padding: 1px 6px; border-radius: 10px; font-size: 7.5pt; font-family: 'IBM Plex Mono', monospace; }
+  .sub-gap { display: inline-block; background: var(--gap-bg); color: var(--gap-text); border: 1px solid #f1a9a0; padding: 1px 6px; border-radius: 10px; font-size: 7.5pt; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+  /* Summary by theme */
+  .theme-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .theme-sum-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .theme-sum-card .tscard-head {
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 9pt;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+  }
+  .theme-sum-card .tscard-body {
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+  }
+  .theme-sum-card .tscard-body .metric { text-align: center; }
+  .theme-sum-card .tscard-body .metric .val { font-size: 16pt; font-weight: 700; color: var(--brand-mid); }
+  .theme-sum-card .tscard-body .metric .lab { font-size: 7.5pt; color: var(--gray-700); }
+  .theme-sum-card .tscard-body .metric.gap .val { color: var(--gap-text); }
+
+  /* Gap legend */
+  .legend { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 8.5pt; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Footer */
+  .report-footer {
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 7.5pt;
+    color: var(--gray-400);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  h2 { font-size: 13pt; font-weight: 700; color: var(--brand-dark); margin-bottom: 12px; }
+  h3 { font-size: 11pt; font-weight: 600; color: var(--brand-mid); margin-bottom: 8px; }
+  .section { margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+
+<div class="cover">
+  <div class="cover-badge">FTSE Russell ESG Assessment</div>
+  <h1>Gap Analysis Report</h1>
+  <div class="subtitle">บริษัท ติดล้อ โฮลดิ้งส์ จำกัด (มหาชน) — TIDLOR</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">ข้อมูลอ้างอิง</div>
+      <div class="value">Ake PDF + KB System</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">วันที่จัดทำ</div>
+      <div class="value">21 พฤษภาคม 2569</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Themes ที่ประเมิน</div>
+      <div class="value">7 Themes</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Gap Sub-indicators</div>
+      <div class="value">58 ตัว</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+<h2>📊 สรุปภาพรวมการเปรียบเทียบ</h2>
+
+
+<div class="stat-grid">
+  <div class="stat-card match">
+    <div class="s-num">120</div>
+    <div class="s-label">Indicators (REF Ake PDF)</div>
+  </div>
+  <div class="stat-card match">
+    <div class="s-num">120</div>
+    <div class="s-label">Indicators (KB System) ✅ ตรงกัน</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num">219</div>
+    <div class="s-label">Sub-indicators (REF Ake PDF)</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num">237</div>
+    <div class="s-label">Sub-indicators (KB System) <span style="font-size:10pt;color:#e65100">+18</span></div>
+  </div>
+</div>
+
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+  <div style="border:1px solid #e9ecef;border-radius:6px;padding:16px;background:#f8f9fa;">
+    <div style="font-weight:700;color:#2c3e50;margin-bottom:8px;font-size:10pt;">📋 REF — Ake PDF</div>
+    <div style="font-size:9pt;color:#495057;line-height:1.8;">
+      <b>Industry:</b> Financials<br>
+      <b>Supersector:</b> Financial Services<br>
+      <b>Subsector:</b> Specialized Consumer Services<br>
+      <b>หมายเหตุ:</b> ใช้ Specialized Consumer Services เพราะ Tidlor ให้บริการสินเชื่อเช่าซื้อ+ประกัน
+    </div>
+  </div>
+  <div style="border:1px solid #e9ecef;border-radius:6px;padding:16px;background:#f0faf4;">
+    <div style="font-weight:700;color:#1a6b3c;margin-bottom:8px;font-size:10pt;">🤖 KB System (ระบบ ESG ของเรา)</div>
+    <div style="font-size:9pt;color:#495057;line-height:1.8;">
+      <b>Industry:</b> Financials<br>
+      <b>ICB Code:</b> 30201020<br>
+      <b>Subsector:</b> Consumer Lending<br>
+      <b>หมายเหตุ:</b> ทั้งสองระบบใช้ Themes เดียวกัน 7 Themes — ผลลัพธ์ตรงกัน ✅
+    </div>
+  </div>
+</div>
+
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1a6b3c;"></div><b style="color:#1a6b3c;">✓ OK</b> — Tidlor มีข้อมูลแล้ว (sub-indicator ผ่าน)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c0392b;"></div><b style="color:#c0392b;">⚠ GAP</b> — Tidlor ยังขาด / ยังไม่เปิดเผยข้อมูล (Ake PDF ระบุว่าเป็น gap)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div><b style="color:#e65100;">+EXTRA</b> — KB System นับมากกว่า REF (Phase 31 expansion) — ไม่ใช่ข้อผิดพลาด</div>
+</div>
+</div>
+
+<div class="section page-break"><h2>📈 สรุปตามหมวดหลัก (ESG Theme)</h2>
+<div class="theme-summary">
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#1a6b3c;">
+      <span>🌍 Climate Change</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">24</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">14</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">9</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#1d4e89;">
+      <span>👷 Labour Standards</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">23</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">18</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">12</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#4a235a;">
+      <span>🏛 Corporate Governance</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">30</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">11</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">10</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#7b3f00;">
+      <span>🤝 Human Rights &amp; Community</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">14</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">7</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">5</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#6d4c41;">
+      <span>⚖ Risk Management</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">10</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">5</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">3</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#880e4f;">
+      <span>🛡 Anti-Corruption</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">13</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">3</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">3</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+
+  <div class="theme-sum-card">
+    <div class="tscard-head" style="background:#0d47a1;">
+      <span>🛒 Customer Responsibility</span>
+    </div>
+    <div class="tscard-body">
+      <div class="metric"><div class="val">6</div><div class="lab">Indicators</div></div>
+      <div class="metric gap"><div class="val">0</div><div class="lab">Gap Sub-inds</div></div>
+      <div class="metric"><div class="val">0</div><div class="lab">Indicators ที่มี Gap</div></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section page-break"><h2>🔍 รายละเอียด Indicator แยกตามหมวด</h2>
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#1a6b3c;">
+    <span>🌍 Climate Change</span>
+    <span class="theme-count">24 indicators</span>
+    <span class="theme-gap-count">⚠ 14 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">ECC01</span></td>
+        <td><div title="รวมถึงการปล่อยก๊าซคาร์บอนไดออกไซด์หรือก๊าซเรือนกระจก ครอบคลุม a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีก"><b>นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">รวมถึงการปล่อยก๊าซคาร์บอนไดออกไซด์หรือก๊าซเรือนกระจก ครอบคลุม a. การจัดการรับมือกับประเด็น…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ ECC01_1</span><span class="sub-ok" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">✓ ECC01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC03</span></td>
+        <td><div title="a. การเป็นสมาชิกสมาคมด้านธุรกิจ b. จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบียบ"><b>การแสดงออกถึงการให้การสนับสนุนเพื่อการบรรเทาปัญหาการเปลี่ยนแปลงสภาพภูมิอากาศผ่าน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกสมาคมด้านธุรกิจ b. จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบียบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC03_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การเป็นสมาชิกสมาคมด้านธุรกิจ">⚠ ECC03_1</span><span class="sub-ok" title="จุดยืนของบริษัทในการสนับสนุนนโยบายและกฎระเบียบ">✓ ECC03_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC05</span></td>
+        <td><div title="a. บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ b. บริษัทระบุการดำเนินการที่เฉพาะเจาะจงที่ได้ดำเนินการแล้"><b>โครงการหรือมาตรการเพื่อจัดการรับมือกับการเปลี่ยนแปลงสภาพภูมิอากาศโดยเน้นการปรับตัว (adaptation)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ b. บริษัทระบุการดำเนินการที…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทระบุถึงแนวทางการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ">✓ ECC05_1</span><span class="sub-ok" title="บริษัทระบุการดำเนินการที่เฉพาะเจาะจงที่ได้ดำเนินการแล้ว">✓ ECC05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC08</span></td>
+        <td><div title="a. หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ b. ระบุตำแ"><b>การกำกับดูแล (oversight) ด้านการเปลี่ยนแปลงสภาพภูมิอากาศโดยคณะกรรมการบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้านการเปลี่…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หลักฐานว่า คณะกรรมการ หรือคณะกรรมการชุดย่อยได้ควบคุมดูแลการบริหารความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">✓ ECC08_1</span><span class="sub-ok" title="ระบุตำแหน่งของผู้รับผิดชอบในระดับกรรมการ">✓ ECC08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC14</span></td>
+        <td><div title="การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 และ 2) เป็นระยะเวลา 3 ปี"><b>การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 และ 2) เป็นระยะเวลา 3 ปี</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การปล่อยก๊าซเรือนกระจกทั้งหมดจากการดำเนินงาน (Scope 1 และ 2) เป็นระยะเวลา 3 ปี">✓ ECC14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC15</span></td>
+        <td><div title="การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี"><b>การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การใช้พลังงานทั้งหมดเป็นระยะเวลา 3 ปี">✓ ECC15_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC22</span></td>
+        <td><div title="บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน"><b>การเปลี่ยนผ่านพลังงาน (energy transition)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับการลงทุนในกิจกรรมการเปลี่ยนผ่านพลังงาน">✓ ECC22_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC31</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ"><b>การใช้พลังงาน - นโยบายหรือคำแถลงการให้คำมั่นครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ ECC31_1</span><span class="sub-ok" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ หรือปรับปรุงประสิทธิภาพ">✓ ECC31_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC38</span></td>
+        <td><div title="(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ b. เป้าหมายเชิงปริมาณ"><b>เป้าหมายเชิงปริมาณระยะสั้น (ไม่เกิน 5 ปี) เพื่อลดการปล่อยก๊าซเรือนกระจก</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงป…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">✓ ECC38_1</span><span class="sub-ok" title="เป้าหมายเชิงปริมาณ">✓ ECC38_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC39</span></td>
+        <td><div title="(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ b. เป้าหมายเชิงปริมาณ"><b>เป้าหมายเชิงปริมาณระยะยาว (&gt;5 ปี) เพื่อลดการปล่อยก๊าซเรือนกระจก</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">(Scope 1 และ/หรือ Scope 2 และ/หรือ Scope 3) a. เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงป…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="เป้าหมายด้านกระบวนการที่ไม่ใช่เป้าหมายเชิงปริมาณ">✓ ECC39_1</span><span class="sub-ok" title="เป้าหมายเชิงปริมาณ">✓ ECC39_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC41</span></td>
+        <td><div title="a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ"><b>การทวนสอบโดยอิสระ (independent verification) สำหรับข้อมูลการปล่อยก๊าซเรือนกระจกจากการดำเนินงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรั…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC41_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">✓ ECC41_1</span><span class="sub-gap" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">⚠ ECC41_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC42</span></td>
+        <td><div title="a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ"><b>การทวนสอบโดยอิสระ (independent verification) สำหรับข้อมูลการใช้พลังงานในการดำเนินงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก b. มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรั…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC42_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การทวนสอบอิสระโดยบุคคล/หน่วยงานภายนอก">✓ ECC42_1</span><span class="sub-gap" title="มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ">⚠ ECC42_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC43</span></td>
+        <td><div title="a. เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ b. ระบุกรอบระยะเวลา (ระยะสั้น/ระยะปานกลาง/ระยะยาว) ของความเสี่ยง/โอ"><b>การตระหนักรู้เกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ b. ระบุกรอบระยะเวลา (ระยะสั้น/ระยะปาน…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC43_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ">⚠ ECC43_1</span><span class="sub-ok" title="ระบุกรอบระยะเวลา (ระยะสั้น/ระยะปานกลาง/ระยะยาว) ของความเสี่ยง/โอกาส">✓ ECC43_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC44</span></td>
+        <td><div title="a. บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศมาประยุกต์ใช้ในกลยุทธ"><b>ผลกระทบจากความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทระบุรายละเอียดว่าได้นำประเด็นความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศมาประยุกต์ใช้ในกลยุทธ์ของบริษัท">✓ ECC44_1</span><span class="sub-ok" title="บริษัทระบุว่าความเสี่ยงและโอกาสที่เกี่ยวข้องกับการเปลี่ยนแปลงสภาพภูมิอากาศส่งผลกระทบต่อการวางแผนด้านการเงินของบริษัทอย่างไร">✓ ECC44_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC45</span></td>
+        <td><div title="a. บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ b. บริษัทระบุถึงผลกระทบต่อธุรกิจจากอย่างน้อ"><b>การวางแผนสำหรับสถานการณ์ด้านสภาพภูมิอากาศ (climate scenario)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ b. บริษัทระบุ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทระบุถึง climate scenario ที่อุณหภูมิสูงขึ้น 2 องศาในการวางแผนธุรกิจ">✓ ECC45_1</span><span class="sub-ok" title="บริษัทระบุถึงผลกระทบต่อธุรกิจจากอย่างน้อย 1 climate scenario">✓ ECC45_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC49</span></td>
+        <td><div title="การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแบ่งตามหมวดหมู่"><b>การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแบ่งตามหมวดหมู่</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การปล่อยก๊าซเรือนกระจกจาก Scope 3 เป็นระยะเวลา 3 ปีโดยแบ่งตามหมวดหมู่">✓ ECC49_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC50</span></td>
+        <td><div title="a. รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท b. มีกระบวนการบริหารความเสี่ยงที่เฉพาะเจาะจงสำหรับความเสี่"><b>กระบวนการบริหารความเสี่ยงจากการเปลี่ยนแปลงสภาพภูมิอากาศ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท b. มีกระบวนการบริหารความเสี่…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="รวมอยู่เป็นส่วนหนึ่งของการบริหารความเสี่ยงทั้งหมดของบริษัท">✓ ECC50_1</span><span class="sub-ok" title="มีกระบวนการบริหารความเสี่ยงที่เฉพาะเจาะจงสำหรับความเสี่ยงด้านการเปลี่ยนแปลงสภาพภูมิอากาศ">✓ ECC50_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC51</span></td>
+        <td><div title="a. บริษัทมีราคาคาร์บอนภายในองค์กร b. บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ"><b>ราคาคาร์บอนภายในองค์กร (internal carbon price)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทมีราคาคาร์บอนภายในองค์กร b. บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC51_1</span> <span class="sub-gap">⚠ ECC51_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="บริษัทมีราคาคาร์บอนภายในองค์กร">⚠ ECC51_1</span><span class="sub-gap" title="บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ">⚠ ECC51_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC73</span></td>
+        <td><div title="a. การเป็นสมาชิกขององค์กรดังกล่าว b. การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว"><b>การมีส่วนร่วมกับองค์กรด้านการเปลี่ยนแปลงสภาพภูมิอากาศโดยเฉพาะ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกขององค์กรดังกล่าว b. การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การเป็นสมาชิกขององค์กรดังกล่าว">✓ ECC73_1</span><span class="sub-ok" title="การมีบทบาทเกี่ยวข้องกับองค์กรดังกล่าว">✓ ECC73_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC74</span></td>
+        <td><div title="a. ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่ b."><b>นโยบายหรือการให้คำมั่นของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมกา…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC74_1</span> <span class="sub-gap">⚠ ECC74_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่">⚠ ECC74_1</span><span class="sub-gap" title="การแสดงออกอย่างเหมาะสมของบริษัท">⚠ ECC74_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC75</span></td>
+        <td><div title="a. ค่าตอบแทนของ CEO b. ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO) c. ค่าตอบแทนของ CEO และ/หรือผู้บริหารระด"><b>การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลการดำเนินงานด้านการเปลี่ยนแปลงสภาพภูมิอากาศ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของ CEO b. ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO) c. ค่าตอบแ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC75_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="ค่าตอบแทนของ CEO">⚠ ECC75_1</span><span class="sub-ok" title="ค่าตอบแทนของผู้บริหารระดับสูงอย่างน้อย 1 คน (นอกจาก CEO)">✓ ECC75_2</span><span class="sub-ok" title="ค่าตอบแทนของ CEO และ/หรือผู้บริหารระดับสูงอย่างน้อย 1 คนพิจารณาถึงความคืบหน้าในการบรรลุเป้าหมายการลดก๊าซเรือนกระจกของบริษัท">✓ ECC75_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC76</span></td>
+        <td><div title="a. บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD b. บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD c. บริษัทระบ"><b>การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD b. บริษัทมีรายชื่อเป็…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC76_1</span> <span class="sub-gap">⚠ ECC76_2</span> <span class="sub-gap">⚠ ECC76_3</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD">⚠ ECC76_1</span><span class="sub-gap" title="บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD">⚠ ECC76_2</span><span class="sub-gap" title="บริษัทระบุอย่างชัดเจนว่าข้อมูลที่สอดคล้องกับข้อเสนอแนะของ TCFD ปรากฏเป็นส่วนหนึ่งของรายงานประจำปี">⚠ ECC76_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 3 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC77</span></td>
+        <td><div title="a. บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจก b. บริษัทระบุองค์ประกอบ"><b>กลยุทธ์การลดการปล่อยก๊าซเรือนกระจกเพื่อบรรลุเป้าหมายระยะสั้น ระยะปานกลางและระยะยาวของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่อยก๊าซเรือ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทระบุโครงการหรือมาตรการที่ตั้งใจจะดำเนินการเพื่อบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">✓ ECC77_1</span><span class="sub-ok" title="บริษัทระบุองค์ประกอบหลักของกลยุทธ์นี้ในเชิงปริมาณ">✓ ECC77_2</span><span class="sub-ok" title="บริษัทระบุได้ว่าการดำเนินการแต่ละโครงการหรือมาตรการจะส่งผลต่อการบรรลุเป้าหมายการลดการปล่อยก๊าซเรือนกระจกโดยรวมของบริษัทในสัดส่วนเชิงปริมาณเท่าไร">✓ ECC77_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">ECC78</span></td>
+        <td><div title="a. บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระ"><b>การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายทุน (capital expenditures) ในอนาคตของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ ECC78_1</span> <span class="sub-gap">⚠ ECC78_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจกในระยะยาวของบริษัท">⚠ ECC78_1</span><span class="sub-gap" title="บริษัทให้คำมั่นอย่างชัดเจนว่าจะค่อย ๆ ลดการลงทุนในสินทรัพย์หรือผลิตภัณฑ์ที่มีการปล่อยคาร์บอนสูง">⚠ ECC78_2</span><span class="sub-ok" title="บริษัทระบุวิธีการที่บริษัทใช้ในการปรับรายจ่ายฝ่ายทุนในอนาคตของบริษัทให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจก">✓ ECC78_3</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#1d4e89;">
+    <span>👷 Labour Standards</span>
+    <span class="theme-count">23 indicators</span>
+    <span class="theme-gap-count">⚠ 18 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SLS01</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเผยแพร่นโยบาย/หลักการ/หลักปฏิบั"><b>การป้องกันการใช้แรงงานเด็ก</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS01_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">⚠ SLS01_1</span><span class="sub-ok" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">✓ SLS01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS02</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเผยแพร่นโยบาย/หลักการ/หลักปฏิบั"><b>การป้องกันการใช้แรงงานบังคับ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">✓ SLS02_1</span><span class="sub-ok" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">✓ SLS02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS03</span></td>
+        <td><div title="a. การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม b. การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ โดยครอบคลุมอย่างน้อย 5 หัวข้อ"><b>การไม่เลือกปฏิบัติ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม b. การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการเรื่องการไม่เลือกปฏิบัติ/ความเท่าเทียม">✓ SLS03_1</span><span class="sub-ok" title="เชื้อชาติ">✓ SLS03_2</span><span class="sub-ok" title="ศาสนา">✓ SLS03_3</span><span class="sub-ok" title="เพศสภาพ">✓ SLS03_4</span><span class="sub-ok" title="อายุ">✓ SLS03_5</span><span class="sub-ok" title="เพศวิถี">✓ SLS03_6</span><span class="sub-ok" title="ความพิการ">✓ SLS03_7</span><span class="sub-ok" title="สัญชาติ">✓ SLS03_8</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS05</span></td>
+        <td><div title="a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม"><b>นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรี…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS05_1</span> <span class="sub-gap">⚠ SLS05_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">⚠ SLS05_1</span><span class="sub-gap" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม">⚠ SLS05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS06</span></td>
+        <td><div title="a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง"><b>นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น b. ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS06_1</span> <span class="sub-gap">⚠ SLS06_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น">⚠ SLS06_1</span><span class="sub-gap" title="ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง">⚠ SLS06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS07</span></td>
+        <td><div title="a. มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา b. มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่"><b>นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำงานที่มากเกินควร</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา b. มุ่งเน…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS07_1</span> <span class="sub-gap">⚠ SLS07_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา">⚠ SLS07_1</span><span class="sub-gap" title="มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่มากเกินควรโดยเฉพาะ">⚠ SLS07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS08</span></td>
+        <td><div title="a. มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ b. การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่า"><b>นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต่ำหรือค่าจ้างที่เพียงพอต่อการดำรงชีวิต</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ b. การให้คำมั่นว่าจะให้ค่าตอบแท…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS08_1</span> <span class="sub-gap">⚠ SLS08_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ">⚠ SLS08_1</span><span class="sub-gap" title="การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่าจ้างที่เพียงพอต่อการดำรงชีวิต">⚠ SLS08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS10</span></td>
+        <td><div title="a. การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม b. เป็นสมาชิกหรือการให้คำมั่นต่อสาธารณะว่"><b>การมีส่วนร่วมหรือการให้คำมั่นตามกรอบการดำเนินงานที่เกี่ยวข้องกับมาตรฐานแรงงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม b. เป็นสมาช…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การเข้าร่วมในโครงการ ความร่วมมือ กิจกรรมเวิร์คช็อปที่เกี่ยวข้องในอุตสาหกรรม">✓ SLS10_1</span><span class="sub-ok" title="เป็นสมาชิกหรือการให้คำมั่นต่อสาธารณะว่าจะปฏิบัติตามกรอบการดำเนินงานที่ได้รับการยอมรับในระดับสากล">✓ SLS10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS11</span></td>
+        <td><div title="a. การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป็นต้น b. โครงการเพื่อเปิดโอกาสในการจ้างง"><b>นโยบายที่สนับสนุนชุมชนครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป็นต้น b. โ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS11_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจ้างงานกลุ่มผู้ด้อยโอกาส เช่น ผู้ที่ขาดโอกาสทางการศึกษาและโอกาสทางสังคม เป็นต้น">✓ SLS11_1</span><span class="sub-gap" title="โครงการเพื่อเปิดโอกาสในการจ้างงานหรือการฝึกงานให้กลุ่มคนหนุ่มสาว">⚠ SLS11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS12</span></td>
+        <td><div title="a. มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก b. มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง"><b>นโยบายของบริษัทเกี่ยวกับมาตรฐานแรงงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก b. มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS12_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="มีการสื่อสารนโยบายให้พนักงานรับทราบทั่วโลก">✓ SLS12_1</span><span class="sub-gap" title="มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง">⚠ SLS12_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS13</span></td>
+        <td><div title="a. กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence) b. กิจการหรือโครงการที่ดำเนินการอยู่แล้ว"><b>การประเมินความเสี่ยงด้านแรงงานสำหรับสถานที่ปฏิบัติงานและห่วงโซ่อุปทาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence) b. กิจการหรือโครงการที่ดำเ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="กิจการหรือโครงการใหม่ที่อาจจะเกิดขึ้นในอนาคต (due diligence)">✓ SLS13_1</span><span class="sub-ok" title="กิจการหรือโครงการที่ดำเนินการอยู่แล้ว">✓ SLS13_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS14</span></td>
+        <td><div title="a. การป้องกันการใช้แรงงานเด็ก b. การป้องกันการใช้แรงงานบังคับ c. กลไกที่ให้ตัวแทนพนักงานสามารถมีส่วนร่วมกับฝ่ายบริหารของ"><b>บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแรงงานในเรื่องดังต่อไปนี้</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การป้องกันการใช้แรงงานเด็ก b. การป้องกันการใช้แรงงานบังคับ c. กลไกที่ให้ตัวแทนพนักงานสา…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS14_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การป้องกันการใช้แรงงานเด็ก">⚠ SLS14_1</span><span class="sub-ok" title="การป้องกันการใช้แรงงานบังคับ">✓ SLS14_2</span><span class="sub-ok" title="กลไกที่ให้ตัวแทนพนักงานสามารถมีส่วนร่วมกับฝ่ายบริหารของบริษัท">✓ SLS14_3</span><span class="sub-ok" title="การลดจำนวนชั่วโมงทำงานที่มากเกินควร">✓ SLS14_4</span><span class="sub-ok" title="การสนับสนุนค่าจ้างที่เพียงพอต่อการดำรงชีวิต">✓ SLS14_5</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS16</span></td>
+        <td><div title="บริษัทได้ดำเนินการเพื่อจัดการรับมือกับเรื่องความหลากหลาย ความเท่าเทียม หรือการการเลือกปฏิบัติที่มีพื้นฐานมาจาก เชื้อชาติ"><b>บริษัทได้ดำเนินการเพื่อจัดการรับมือกับเรื่องความหลากหลาย ความเท่าเทียม หรือการการเลือกปฏิบัติที่มีพื้นฐานมาจาก เชื้อชาติ ศาสนา เพศสภาพ อายุ เพศวิถี ความพิการ สัญชาติ</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="เชื้อชาติ">✓ SLS16_1</span><span class="sub-ok" title="ศาสนา">✓ SLS16_2</span><span class="sub-ok" title="เพศสภาพ">✓ SLS16_3</span><span class="sub-ok" title="อายุ">✓ SLS16_4</span><span class="sub-ok" title="เพศวิถี">✓ SLS16_5</span><span class="sub-ok" title="ความพิการ">✓ SLS16_6</span><span class="sub-ok" title="สัญชาติ">✓ SLS16_7</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS21</span></td>
+        <td><div title="a. บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่างไร b. บริษัทเปิดเผยรายละเอียดข้อมูลการดำ"><b>ข้อมูลเหตุการณ์การไม่ปฏิบัติตามมาตรฐานแรงงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่างไร b. บริษ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทเปิดเผยจำนวนเหตุการณ์ แต่ไม่เปิดเผยว่าบริษัทจัดการกับเหตุการณ์นั้นอย่างไร">✓ SLS21_1</span><span class="sub-ok" title="บริษัทเปิดเผยรายละเอียดข้อมูลการดำเนินการที่เฉพาะเจาะจง โดยระบุประเภทของเหตุการณ์ที่เกิดขึ้น">✓ SLS21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS24</span></td>
+        <td><div title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา"><b>อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา">✓ SLS24_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS25</span></td>
+        <td><div title="สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วคราว"><b>สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วคราว</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="สัดส่วน (%) ของพนักงานที่เป็นผู้รับเหมาหรือพนักงานชั่วคราว">✓ SLS25_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS26</span></td>
+        <td><div title="a. จำนวนชั่วโมงทั้งหมดในฐานะบริษัท b. จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน"><b>จำนวนชั่วโมงอบรมความรู้เฉลี่ยของพนักงาน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. จำนวนชั่วโมงทั้งหมดในฐานะบริษัท b. จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="จำนวนชั่วโมงทั้งหมดในฐานะบริษัท">✓ SLS26_1</span><span class="sub-ok" title="จำนวนชั่วโมงโดยเฉลี่ยต่อพนักงาน 1 คน">✓ SLS26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS28</span></td>
+        <td><div title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกับค่าเฉลี่ยของ Sector และของประเทศ"><b>อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกับค่าเฉลี่ยของ Sector และของประเทศ</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="อัตราการลาออกโดยสมัครใจของพนักงานเดิมเวลา เปรียบเทียบกับค่าเฉลี่ยของ Sector และของประเทศ">✓ SLS28_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS29</span></td>
+        <td><div title="a. นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน b. รายละเอียดเกี่ยวกับการฝึกอบรมพนักงาน"><b>การฝึกอบรมพนักงานเพื่อเพิ่มทักษะและความสามารถ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน b. รายละเอียดเกี่ยวกับการฝึ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะจัดการฝึกอบรมให้แก่พนักงาน">✓ SLS29_1</span><span class="sub-ok" title="รายละเอียดเกี่ยวกับการฝึกอบรมพนักงาน">✓ SLS29_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS30</span></td>
+        <td><div title="a. การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing) b. การฝึกอบรมพนักงานระดับผู้จัดการ"><b>การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing) b. ก…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS30_1</span> <span class="sub-gap">⚠ SLS30_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing)">⚠ SLS30_1</span><span class="sub-gap" title="การฝึกอบรมพนักงานระดับผู้จัดการเกี่ยวกับการจัดการกับรายงานหรือสถานการณ์การกลั่นแกล้งหรือการก่อกวนคุกคาม">⚠ SLS30_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS32</span></td>
+        <td><div title="สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก"><b>สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS32_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก">⚠ SLS32_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS33</span></td>
+        <td><div title="สัดส่วน (%) ของพนักงานหญิงทั่วโลก"><b>สัดส่วน (%) ของพนักงานหญิงทั่วโลก</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS33_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="สัดส่วน (%) ของพนักงานหญิงทั่วโลก">⚠ SLS33_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SLS34</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเผยแพร่นโยบาย/หลักการ/หลักปฏิบั"><b>การจ่ายค่าตอบแทนที่เท่าเทียม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น b. การเ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SLS34_1</span> <span class="sub-gap">⚠ SLS34_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น">⚠ SLS34_1</span><span class="sub-gap" title="การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ">⚠ SLS34_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#4a235a;">
+    <span>🏛 Corporate Governance</span>
+    <span class="theme-count">30 indicators</span>
+    <span class="theme-gap-count">⚠ 11 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GCG01</span></td>
+        <td><div title="a. ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรมการอิสระ หรือไม่ได้มีการเปิดเผยความเป็นก"><b>ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรมการอิสระ ห…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG01_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ประธานบริษัทไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานบริษัทไม่ได้เป็นกรรมการอิสระ หรือไม่ได้มีการเปิดเผยความเป็นกรรมการอิสระของประธานบริษัท">✓ GCG01_1</span><span class="sub-gap" title="ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานเป็นกรรมการอิสระ">⚠ GCG01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG02</span></td>
+        <td><div title="a. ความเชี่ยวชาญ b. การดำรงตำแหน่งกรรมการในองค์กรอื่น"><b>การระบุรายละเอียดเกี่ยวกับกรรมการ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความเชี่ยวชาญ b. การดำรงตำแหน่งกรรมการในองค์กรอื่น</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ความเชี่ยวชาญ">✓ GCG02_1</span><span class="sub-ok" title="การดำรงตำแหน่งกรรมการในองค์กรอื่น">✓ GCG02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG03</span></td>
+        <td><div title="จำนวนกรรมการในคณะกรรมการบริษัท"><b>จำนวนกรรมการในคณะกรรมการบริษัท</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="จำนวนกรรมการในคณะกรรมการบริษัท">✓ GCG03_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG04</span></td>
+        <td><div title="จำนวนกรรมการอิสระในคณะกรรมการบริษัท"><b>จำนวนกรรมการอิสระในคณะกรรมการบริษัท</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="จำนวนกรรมการอิสระในคณะกรรมการบริษัท">✓ GCG04_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG05</span></td>
+        <td><div title="จำนวนผู้หญิงในคณะกรรมการบริษัท"><b>จำนวนผู้หญิงในคณะกรรมการบริษัท</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="จำนวนผู้หญิงในคณะกรรมการบริษัท">✓ GCG05_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG06</span></td>
+        <td><div title="a. คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท b. การกำหนดเป้าหมายที่จะเพิ่มสัดส่วนกรรมการหญิง"><b>การให้คำมั่นเกี่ยวกับความหลากหลายทางเพศในคณะกรรมการบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท b. การกำหนดเป้าหมายที่จะเพิ่มสั…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คำแถลงว่าจะสนับสนุนความหลากหลายทางเพศในคณะกรรมการบริษัท">✓ GCG06_1</span><span class="sub-ok" title="การกำหนดเป้าหมายที่จะเพิ่มสัดส่วนกรรมการหญิง">✓ GCG06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG07</span></td>
+        <td><div title="a. เรื่องผลประโยชน์ทับซ้อน b. เรื่องรายการเกี่ยวโยง"><b>คณะกรรมการบริษัทจัดการรับมือกับประเด็นความขัดแย้งทางผลประโยชน์</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เรื่องผลประโยชน์ทับซ้อน b. เรื่องรายการเกี่ยวโยง</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="เรื่องผลประโยชน์ทับซ้อน">✓ GCG07_1</span><span class="sub-ok" title="เรื่องรายการเกี่ยวโยง">✓ GCG07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG08</span></td>
+        <td><div title="a. การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน b. การประเมินที่ระบุรอบเวลาที่ชัดเจน (เช่น ทุกปีหรือทุกช่วงเวลาที่กำหนด)"><b>การประเมินประสิทธิผลในการปฏิบัติหน้าที่ของคณะกรรมการบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน b. การประเมินที่ระบุรอบเวลาที่ชัดเจน (เช่น ทุกป…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การประเมินที่ไม่ได้ระบุรอบเวลาที่ชัดเจน">✓ GCG08_1</span><span class="sub-ok" title="การประเมินที่ระบุรอบเวลาที่ชัดเจน (เช่น ทุกปีหรือทุกช่วงเวลาที่กำหนด)">✓ GCG08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG09</span></td>
+        <td><div title="a. คณะกรรมการชุดย่อย b. กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อมูลอื่นในลักษณะคล้ายกัน)"><b>การเปิดเผยข้อมูล</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คณะกรรมการชุดย่อย b. กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อมูลอื่นในล…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คณะกรรมการชุดย่อย">✓ GCG09_1</span><span class="sub-ok" title="กฎบัตรของคณะกรรมการ ขอบเขตการทำงานของคณะกรรมการ (หรือข้อมูลอื่นในลักษณะคล้ายกัน)">✓ GCG09_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG10</span></td>
+        <td><div title="a. จำนวนการประชุมของคณะกรรมการบริษัท b. จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละคณะ"><b>การระบุจำนวนครั้งของการประชุมในแต่ละปี</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. จำนวนการประชุมของคณะกรรมการบริษัท b. จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละคณะ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="จำนวนการประชุมของคณะกรรมการบริษัท">✓ GCG10_1</span><span class="sub-ok" title="จำนวนการประชุมขอบคณะกรรมการชุดย่อยแต่ละคณะ">✓ GCG10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG11</span></td>
+        <td><div title="a. อัตราการเข้าร่วมประชุมของกรรมการบางคน b. อัตราการเข้าร่วมประชุมของกรรมการแต่ละคน"><b>การระบุอัตราการเข้าร่วมประชุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. อัตราการเข้าร่วมประชุมของกรรมการบางคน b. อัตราการเข้าร่วมประชุมของกรรมการแต่ละคน</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="อัตราการเข้าร่วมประชุมของกรรมการบางคน">✓ GCG11_1</span><span class="sub-ok" title="อัตราการเข้าร่วมประชุมของกรรมการแต่ละคน">✓ GCG11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG14</span></td>
+        <td><div title="a. ค่าตอบแทนของผู้บริหารระดับสูง b. ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร"><b>การเปิดเผยค่าตอบคงที่ (fixed) และค่าตอบแทนผันแปร (variable) ของกรรมการและผู้บริหารครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของผู้บริหารระดับสูง b. ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ค่าตอบแทนของผู้บริหารระดับสูง">✓ GCG14_1</span><span class="sub-ok" title="ค่าตอบแทนของกรรมการที่ไม่ใช่ผู้บริหาร">✓ GCG14_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG19</span></td>
+        <td><div title="การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนังสือนัดประชุมและวันที่ประชุม"><b>การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนังสือนัดประชุมและวันที่ประชุม</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การประชุมสามัญประจำปี (AGM) จำนวนวันระหว่างวันที่ส่งหนังสือนัดประชุมและวันที่ประชุม">✓ GCG19_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG21</span></td>
+        <td><div title="a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจ"><b>สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องค่าตอบแทนของผู้บริหาร</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG21_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">✓ GCG21_1</span><span class="sub-gap" title="นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจน">⚠ GCG21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG22</span></td>
+        <td><div title="a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียง"><b>สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องการแต่งตั้งกรรมการและการปลดจากตำแหน่ง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM b. นโยบายของบริษัทระบุสิทธิในการออกเสียง</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หลักฐานว่าผู้ถือหุ้นออกเสียงใน AGM">✓ GCG22_1</span><span class="sub-ok" title="นโยบายของบริษัทระบุสิทธิในการออกเสียง">✓ GCG22_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG26</span></td>
+        <td><div title="a. แบบจำกัด (limited) b. แบบละเอียด (detailed)"><b>การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. แบบจำกัด (limited) b. แบบละเอียด (detailed)</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG26_1</span> <span class="sub-gap">⚠ GCG26_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="แบบจำกัด (limited)">⚠ GCG26_1</span><span class="sub-gap" title="แบบละเอียด (detailed)">⚠ GCG26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG27</span></td>
+        <td><div title="a. ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการดำเนินงานในระยะยาว b. ค่าตอบแทนของผู้บริ"><b>ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการดำเนินงานใ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงสิ่งจูงใจหรือกลไกที่เชื่อมโยงกับผลการดำเนินงานในระยะยาว">✓ GCG27_1</span><span class="sub-ok" title="ค่าตอบแทนของผู้บริหารระดับสูงครอบคลุมถึงผลการดำเนินงานด้าน ESG">✓ GCG27_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG36</span></td>
+        <td><div title="สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ"><b>สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="สัดส่วน (%) กรรมการอิสระในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">✓ GCG36_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG37</span></td>
+        <td><div title="สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ"><b>สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG37_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">⚠ GCG37_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG38</span></td>
+        <td><div title="จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ"><b>จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG38_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ">⚠ GCG38_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG39</span></td>
+        <td><div title="จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล"><b>จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG39_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">⚠ GCG39_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG41</span></td>
+        <td><div title="ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล"><b>ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG41_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล">⚠ GCG41_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG42</span></td>
+        <td><div title="บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว่าหนึ่งหุ้นมีหนึ่งสิทธิออกเสียง"><b>บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว่าหนึ่งหุ้นมีหนึ่งสิทธิออกเสียง</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทกำหนดสิทธิในการออกเสียงในแต่ละวาระการประชุม AGM ว่าหนึ่งหุ้นมีหนึ่งสิทธิออกเสียง">✓ GCG42_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG43</span></td>
+        <td><div title="หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ CEO บริษัทได้แต่งตั้งให้มีหัวหน้ากรรมการอิสระ (Lead Director) หรื"><b>หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ CEO บริษัทได้แต่งตั้งให้มีหัวหน้ากรรมการอิสระ (Lead Director) หรือมีกรรมการอิสระระดับอาวุโสหรือไม่</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หากบริษัทไม่มีประธานที่ไม่ใช่ผู้บริหารแยกเป็นคนละคนกับ CEO บริษัทได้แต่งตั้งให้มีหัวหน้ากรรมการอิสระ (Lead Director) หรือมีกรรมการอิสระระดับอาวุโสหรือไม่">✓ GCG43_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG44</span></td>
+        <td><div title="a. ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน b. ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงิ"><b>ความเชี่ยวชาญด้านการเงินของคณะกรรมการตรวจสอบ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน b. ในคณะกรรมการต…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG44_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระอย่างน้อย 1 คน">✓ GCG44_1</span><span class="sub-gap" title="ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระเป็นส่วนใหญ่">⚠ GCG44_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG46</span></td>
+        <td><div title="a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ"><b>องค์ประกอบของคณะกรรมการตรวจสอบซึ่งกรรมการแต่ละคนต้องไม่ใช่กรรมการที่เป็นผู้บริหาร โดยคณะกรรมการตรวจสอบมีองค์ประกอบ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">✓ GCG46_1</span><span class="sub-ok" title="ทุกคนเป็นกรรมการอิสระ">✓ GCG46_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG47</span></td>
+        <td><div title="a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ"><b>องค์ประกอบของคณะกรรมการพิจารณาค่าตอบแทนซึ่งแต่ละคนต้องไม่ใช่กรรมการที่เป็นผู้บริหาร</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ครึ่งหนึ่งเป็นกรรมการอิสระ b. ทุกคนเป็นกรรมการอิสระ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG47_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ครึ่งหนึ่งเป็นกรรมการอิสระ">✓ GCG47_1</span><span class="sub-gap" title="ทุกคนเป็นกรรมการอิสระ">⚠ GCG47_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG48</span></td>
+        <td><div title="a. หลักการในภาพรวม b. กระบวนการกำหนดค่าตอบแทนอย่างละเอียด"><b>การกำหนดค่าตอบแทนของผู้บริหารระบุ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักการในภาพรวม b. กระบวนการกำหนดค่าตอบแทนอย่างละเอียด</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หลักการในภาพรวม">✓ GCG48_1</span><span class="sub-ok" title="กระบวนการกำหนดค่าตอบแทนอย่างละเอียด">✓ GCG48_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG49</span></td>
+        <td><div title="a. ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees) ไว้แยกกัน b. ยอดค"><b>ค่าธรรมเนียมที่จ่ายให้กับผู้สอบบัญชี</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GCG49_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ระบุข้อมูลค่าธรรมเนียมการสอบบัญชี (audit fees) และค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees) ไว้แยกกัน">✓ GCG49_1</span><span class="sub-gap" title="ยอดค่าธรรมเนียมการสอบบัญชี (audit fees) สูงกว่ายอดค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees)">⚠ GCG49_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GCG50</span></td>
+        <td><div title="สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรรมการที่เทียบเท่า"><b>สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรรมการที่เทียบเท่า</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="สัดส่วน (%) ของกรรมการผู้หญิงในคณะกรรมการบริหาร หรือในคณะกรรมการที่เทียบเท่า">✓ GCG50_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#7b3f00;">
+    <span>🤝 Human Rights &amp; Community</span>
+    <span class="theme-count">14 indicators</span>
+    <span class="theme-gap-count">⚠ 7 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SHR03</span></td>
+        <td><div title="a. คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน b. ประเด็นที่มุ่งเน้นในการลงทุนในชุมชนมีความเชื่อมโยงกับกลยุทธ์ทางธ"><b>คำแถลงเกี่ยวกับหลักการหรือวิธีการในการลงทุนในชุมชน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน b. ประเด็นที่มุ่งเน้นในการลงทุนในชุมช…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คำแถลงครอบคลุมประเด็นที่มุ่งเน้นในการลงทุนในชุมชน">✓ SHR03_1</span><span class="sub-ok" title="ประเด็นที่มุ่งเน้นในการลงทุนในชุมชนมีความเชื่อมโยงกับกลยุทธ์ทางธุรกิจของบริษัท">✓ SHR03_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR04</span></td>
+        <td><div title="a. มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ b. นโยบายหรือคำแถลงการให้คำมั่นเกี่ยว"><b>นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แรงงานเด็ก)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ b. นโยบ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SHR04_1</span> <span class="sub-gap">⚠ SHR04_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ">⚠ SHR04_1</span><span class="sub-gap" title="นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับสิทธิเด็ก การให้คำมั่นว่าจะปฏิบัติตาม Children's Rights and Business Principles">⚠ SHR04_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR05</span></td>
+        <td><div title="a. ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น b. การให้คำมั่นที่ชัดเจนว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้าง"><b>การให้คำมั่นว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่น</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น b. การให้คำมั่นที่ชัดเจนว่าจ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ความคิดเห็นเกี่ยวกับการจ้างงาน/การจัดซื้อจัดจ้างในท้องถิ่น">✓ SHR05_1</span><span class="sub-ok" title="การให้คำมั่นที่ชัดเจนว่าจะจ้างงานและ/หรือจัดซื้อจัดจ้างในท้องถิ่น">✓ SHR05_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR11</span></td>
+        <td><div title="a. มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย b. มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้"><b>การมีส่วนร่วมของผู้มีส่วนได้เสียในประเด็นปัญหาด้านสิทธิมนุษยชน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย b. มีการบันทึกการประชุมหรือรายงานว่าบริ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SHR11_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="มีหลักฐานว่ามีการปรึกษาหารือกับผู้มีส่วนได้เสีย">✓ SHR11_1</span><span class="sub-gap" title="มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้มีส่วนได้เสียไปใช้อย่างไร">⚠ SHR11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR15</span></td>
+        <td><div title="a. ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ b. ผลลัพธ์ในเชิงปริมาณ"><b>ผลลัพธ์หรือประโยชน์ที่เกิดขึ้นจากการลงทุนในชุมชน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ b. ผลลัพธ์ในเชิงปริมาณ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SHR15_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ผลลัพธ์ที่ไม่ใช้เชิงปริมาณ">✓ SHR15_1</span><span class="sub-gap" title="ผลลัพธ์ในเชิงปริมาณ">⚠ SHR15_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR16</span></td>
+        <td><div title="a. หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร b. การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ"><b>กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์กรการกุศล</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร b. การวางรากฐาน เป้าหมาย หรือโครงสร้างเ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SHR16_1</span> <span class="sub-gap">⚠ SHR16_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร">⚠ SHR16_1</span><span class="sub-gap" title="การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ">⚠ SHR16_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR17</span></td>
+        <td><div title="ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน"><b>ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ SHR17_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน">⚠ SHR17_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR21</span></td>
+        <td><div title="a. การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราสารที่อยู่ภายในร่างตราสารระหว่างประเทศด้า"><b>การให้คำมั่นต่อสาธารณะว่าจะเคารพและสนับสนุนการคุ้มครองสิทธิมนุษยชนตามมาตรฐานสากล</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราสารที่อยู่ภ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การให้คำมั่นของบริษัทโดยอ้างอิงตราสารระหว่างประเทศด้านสิทธิมนุษยชน รวมถึงตราสารที่อยู่ภายในร่างตราสารระหว่างประเทศด้านสิทธิมนุษยชน">✓ SHR21_1</span><span class="sub-ok" title="การให้คำมั่นว่าจะนำ UN Guiding Principles on Business and Human Rights หรือ OECD Guidelines for Multinational Enterprises มาปฏิบัติ">✓ SHR21_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR22</span></td>
+        <td><div title="a. การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมหรือธุรกิจ b. การให้คำมั่นว่าจะให้ผู้มีส่"><b>การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมหรือธุรกิจ …</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การระบุประเด็นปัญหาด้านสิทธิมนุษยชนที่สำคัญที่สุดที่เฉพาะเจาะจงกับอุตสาหกรรมหรือธุรกิจ">✓ SHR22_1</span><span class="sub-ok" title="การให้คำมั่นว่าจะให้ผู้มีส่วนได้เสียเข้ามามีส่วนร่วมในการระบุประเด็นปัญหาดังกล่าว">✓ SHR22_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR23</span></td>
+        <td><div title="เพื่อให้แน่ใจว่ามีการปฏิบัติที่ดีที่เคารพสิทธิมนุษยชน a. กรรมการหรือคณะกรรมการชุดย่อยได้รับมอบหมายให้ทำหน้าที่รับผิดชอบก"><b>การมอบหมายความรับผิดชอบและการจัดสรรทรัพยากรในการกำกับดูแล (oversight)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">เพื่อให้แน่ใจว่ามีการปฏิบัติที่ดีที่เคารพสิทธิมนุษยชน a. กรรมการหรือคณะกรรมการชุดย่อยได้รั…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="กรรมการหรือคณะกรรมการชุดย่อยได้รับมอบหมายให้ทำหน้าที่รับผิดชอบการกำกับดูแลเรื่องสิทธิมนุษยชน">✓ SHR23_1</span><span class="sub-ok" title="หน่วยงานที่เกี่ยวข้องได้รับมอบหมายให้ทำหน้าที่รับผิดชอบและได้รับการจัดสรรทรัพยากรในการปฏิบัติงานในแต่ละวันอย่างชัดเจน">✓ SHR23_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR24</span></td>
+        <td><div title="a. มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มีส่วนได้เสียทุกกลุ่ม b. พนักงานทั้งหมด หร"><b>การให้คำมั่นด้านสิทธิมนุษยชนเป็นส่วนหนึ่งของแนวทางปฏิบัติของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มีส่วนได้เสี…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="มีการสื่อสารอย่างชัดเจนเกี่ยวกับความคาดหวังเรื่องการเคารพสิทธิมนุษยชนให้ผู้มีส่วนได้เสียทุกกลุ่ม">✓ SHR24_1</span><span class="sub-ok" title="พนักงานทั้งหมด หรือบางกลุ่ม/แผนได้รับการฝึกอบรมเกี่ยวกับนโยบายด้านสิทธิมนุษยชน">✓ SHR24_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR25</span></td>
+        <td><div title="a. บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนการทำธุรกิจ b. การเปิดเผยการดำเนินการเพื่อ"><b>การประเมินและบรรเทาผลกระทบด้านสิทธิมนุษยชน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนการทำธุรกิจ …</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทประเมินผลกระทบด้านสิทธิมนุษยชนอย่างต่อเนื่องโดยเป็นส่วนหนึ่งของกระบวนการทำธุรกิจ">✓ SHR25_1</span><span class="sub-ok" title="การเปิดเผยการดำเนินการเพื่อหลีกเลี่ยง ป้องกัน และบรรเทาประเด็นปัญหาด้านสิทธิมนุษยชน">✓ SHR25_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR26</span></td>
+        <td><div title="a. บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนและการรับประกันการรักษาความลับ/การปกปิดตั"><b>กลไกการร้องทุกข์และการให้คำมั่นว่าจะเยียวยาบุคคลและชุมชนที่ได้รับผลกระทบจากการดำเนินธุรกิจของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนและการรับปร…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทเปิดเผยข้อมูลเกี่ยวกับกลไกอย่างเป็นทางการที่ครอบคลุมเรื่องสิทธิมนุษยชนและการรับประกันการรักษาความลับ/การปกปิดตัวตน">✓ SHR26_1</span><span class="sub-ok" title="บริษัทให้คำมั่นว่าจะเยียวยาฝ่ายที่ได้รับผลกระทบ">✓ SHR26_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SHR27</span></td>
+        <td><div title="a. บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน b. บริษัทเปิดเผยข้อ"><b>ข้อมูลเหตุการณ์และการละเมิดสิทธิมนุษยชน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทเปิดเผยข้อมูลเหตุการณ์การละเมิดสิทธิมนุษยชน หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">✓ SHR27_1</span><span class="sub-ok" title="บริษัทเปิดเผยข้อมูลการดำเนินการหรือสิ่งที่ได้เรียนรู้ หรือแถลงว่าไม่มีเหตุการณ์เกิดขึ้นในรอบการรายงาน">✓ SHR27_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#6d4c41;">
+    <span>⚖ Risk Management</span>
+    <span class="theme-count">10 indicators</span>
+    <span class="theme-gap-count">⚠ 5 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GRM01</span></td>
+        <td><div title="a. คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง b. คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกร"><b>บทบาทของคณะกรรมการบริษัทมีหน้าที่ควบคุมดูแล (oversight) การบริหารความเสี่ยง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง b. คณะกรรมการบริษั…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">✓ GRM01_1</span><span class="sub-ok" title="คณะกรรมการบริษัทมีหน้าที่ทบทวนประสิทธิผลของกระบวนการบริหารความเสี่ยง">✓ GRM01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM02</span></td>
+        <td><div title="a. เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board risk committee) b. เป็นผู้บริหารคนละคนก"><b>ผู้บริหารสูงสุดที่ทำหน้าที่ดูแลการบริหารความเสี่ยง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board risk comm…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="เป็นผู้บริหารที่รายงานตรงต่อ CEO หรือมีคณะกรรมการชุดย่อยด้านความเสี่ยง (board risk committee)">✓ GRM02_1</span><span class="sub-ok" title="เป็นผู้บริหารคนละคนกับผู้บริหารที่ทำหน้าที่ดูแลการตรวจสอบ (Head of Audit)">✓ GRM02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM04</span></td>
+        <td><div title="a. บริษัทใช้มาตรฐานการบริหารความเสี่ยง หรือกรอบการทำงานต่าง ๆ เช่น ISO31000 COSO IRM FERMA BASEL b. รายงานของบริษัทใช้มา"><b>การอ้างอิงมาตรฐานต่าง ๆ เพื่อสะท้อนความเป็นระบบและความโปร่งใสในการบริหารความเสี่ยง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทใช้มาตรฐานการบริหารความเสี่ยง หรือกรอบการทำงานต่าง ๆ เช่น ISO31000 COSO IRM FERMA…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทใช้มาตรฐานการบริหารความเสี่ยง เช่น ISO31000 COSO IRM FERMA BASEL">✓ GRM04_1</span><span class="sub-ok" title="รายงานของบริษัทใช้มาตรฐาน GRI/IIRC/SASB">✓ GRM04_2</span><span class="sub-ok" title="GRI">✓ GRM04_3</span><span class="sub-ok" title="IIRC">✓ GRM04_4</span><span class="sub-ok" title="SASB">✓ GRM04_5</span><span class="sub-ok" title="มาตรฐานอื่น">✓ GRM04_6</span><span class="sub-ok" title="โปรดระบุชื่อมาตรฐาน">✓ GRM04_7</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM05</span></td>
+        <td><div title="คณะกรรมการบริษัททำหน้าที่ควบคุมดูแล (oversight) เรื่องต่อไปนี้เป็นเฉพาะ: หลักปฏิบัติ หลักจรรยาบรรณ หรือหลักเกณฑ์อื่นที่เ"><b>คณะกรรมการบริษัททำหน้าที่ควบคุมดูแล (oversight) เรื่องต่อไปนี้เป็นเฉพาะ: หลักปฏิบัติ หลักจรรยาบรรณ หรือหลักเกณฑ์อื่นที่เทียบเท่า ความเสี่ยงด้าน ESG</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="หลักปฏิบัติ หลักจรรยาบรรณ หรือหลักเกณฑ์อื่นที่เทียบเท่า">✓ GRM05_1</span><span class="sub-ok" title="ความเสี่ยงด้าน ESG">✓ GRM05_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM07</span></td>
+        <td><div title="a. ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท b. กรอบการทำงานด้านการบริหารความเสี่ยงดังกล่าวครอบคลุมถึงความเสี่ยงด"><b>จรรยาบรรณธุรกิจ/กฎบัตร/นโยบายของบริษัท หรือเอกสารอื่นที่เทียบเท่า</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท b. กรอบการทำงานด้านการบริหารความเสี่ยง…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ระบุกรอบการทำงานด้านการบริหารความเสี่ยงของบริษัท">✓ GRM07_1</span><span class="sub-ok" title="กรอบการทำงานด้านการบริหารความเสี่ยงดังกล่าวครอบคลุมถึงความเสี่ยงด้าน ESG แบบเฉพาะเจาะจง">✓ GRM07_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM08</span></td>
+        <td><div title="a. บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว b. บริษัทรายงานจำนวนกรณีหรือเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด"><b>แนวทางดำเนินการในกรณีที่เกิดการไม่ปฏิบัติตามข้อกำหนด</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว b. บริษัทรายงานจำนวนกรณีหรือเหตุการ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="บริษัทกำหนดกระบวนการสืบสวนและละติดตามผลกรณีดังกล่าว">✓ GRM08_1</span><span class="sub-ok" title="บริษัทรายงานจำนวนกรณีหรือเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">✓ GRM08_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM10</span></td>
+        <td><div title="a. บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ b. บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ"><b>การให้คำมั่นของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ b. บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GRM10_1</span> <span class="sub-gap">⚠ GRM10_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ">⚠ GRM10_1</span><span class="sub-gap" title="บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ">⚠ GRM10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM12</span></td>
+        <td><div title="a. ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด b. ทบทวนประสิ"><b>การดำเนินการของบริษัท</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการณ์การไม่ปฏ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="ติดตามการปฏิบัติตามหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นประจำ และระบุเหตุการณ์การไม่ปฏิบัติตามข้อกำหนด">✓ GRM12_1</span><span class="sub-ok" title="ทบทวนประสิทธิผลของหลักปฏิบัติ/หลักจรรยาบรรณของบริษัทเป็นระยะ">✓ GRM12_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM14</span></td>
+        <td><div title="ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว"><b>ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GRM14_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว">⚠ GRM14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GRM20</span></td>
+        <td><div title="เพื่อเป็นช่องทางการรายงานการละเมิดหลักปฏิบัติหรือนโยบายของบริษัทสำหรับ a. พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื"><b>การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็นความลับหรือปกปิดตัวตน</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">เพื่อเป็นช่องทางการรายงานการละเมิดหลักปฏิบัติหรือนโยบายของบริษัทสำหรับ a. พนักงาน ซึ่งอาจร…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GRM20_1</span> <span class="sub-gap">⚠ GRM20_2</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื่น ๆ ที่ทำงานร่วมกับบริษัท">⚠ GRM20_1</span><span class="sub-gap" title="ผู้มีส่วนได้เสียภายนอกอื่น ๆ และประชาชนทั่วไป">⚠ GRM20_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 2 GAP</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#880e4f;">
+    <span>🛡 Anti-Corruption</span>
+    <span class="theme-count">13 indicators</span>
+    <span class="theme-gap-count">⚠ 3 gaps</span>
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">GAC01</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ"><b>นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับการต่อต้านการทุจริตครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ GAC01_1</span><span class="sub-ok" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">✓ GAC01_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC02</span></td>
+        <td><div title="a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ"><b>ระบบจัดการเพื่อจัดการรับมือกับประเด็นปัญหาด้านการทุจริตครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การจัดการรับมือกับประเด็นปัญหาดังกล่าว b. การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ GAC02_1</span><span class="sub-ok" title="การลดหรือหลีกเลี่ยงไม่ให้เกิดผลกระทบ">✓ GAC02_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC03</span></td>
+        <td><div title="นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่อการเมือง"><b>นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่อการเมือง</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="นโยบายเกี่ยวกับของขวัญ การเลี้ยงรับรอง และการบริจาคเพื่อการเมือง">✓ GAC03_1</span><span class="sub-ok" title="การต่อต้านการทุจริตอย่างครบถ้วน">✓ GAC03_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC04</span></td>
+        <td><div title="โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต"><b>โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="โครงการฝึกอบรมเกี่ยวกับการต่อต้านการทุจริต">✓ GAC04_1</span><span class="sub-ok" title="การต่อต้านการทุจริตอย่างครบถ้วน">✓ GAC04_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC05</span></td>
+        <td><div title="กลไกการแจ้งเบาะแส (whistleblowing)"><b>กลไกการแจ้งเบาะแส (whistleblowing)</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="กลไกการแจ้งเบาะแส (whistleblowing)">✓ GAC05_1</span><span class="sub-ok" title="การต่อต้านการทุจริตอย่างครบถ้วน">✓ GAC05_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC07</span></td>
+        <td><div title="การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน"><b>การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การจัดการรับมือกับการทุจริตในห่วงโซ่อุปทาน">✓ GAC07_1</span><span class="sub-ok" title="การต่อต้านการทุจริตอย่างครบถ้วน">✓ GAC07_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC08</span></td>
+        <td><div title="การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะกรรมการบริษัท"><b>การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะกรรมการบริษัท</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การกำกับดูแล (oversight) ด้านการต่อต้านการทุจริตโดยคณะกรรมการบริษัท">✓ GAC08_1</span><span class="sub-ok" title="การต่อต้านการทุจริตอย่างครบถ้วน">✓ GAC08_2</span></div><div style="margin-top:3px;font-size:7.5pt;color:#e65100;">+Extra จาก Phase 31 expansion</div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC09</span></td>
+        <td><div title="a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน b. การต่อด้านการทุจริตอย่างครบถ้วน"><b>การประเมินความเสี่ยงที่จะเกิดการทุจริตในการดำเนินงานของบริษัทครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน b. การต่อด้านการทุจริตอย่างค…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต ซึ่งรวมถึงการให้สินบน">✓ GAC09_1</span><span class="sub-ok" title="การต่อด้านการทุจริตอย่างครบถ้วน">✓ GAC09_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC10</span></td>
+        <td><div title="a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต b. การต่อด้านการทุจริตอย่างครบถ้วน"><b>กระบวนการสำหรับจัดการรับมือกับการทุจริตในการดำเนินงาน ซึ่งถูกระบุว่าเป็น ความเสี่ยงสูง ครอบคลุม</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต b. การต่อด้านการทุจริตอย่างครบถ้วน</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="องค์ประกอบ/ประเภทต่าง ๆ ของการทุจริต">✓ GAC10_1</span><span class="sub-ok" title="การต่อด้านการทุจริตอย่างครบถ้วน">✓ GAC10_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC11</span></td>
+        <td><div title="a. การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุจริตสำหรับตัวกลาง b. การสื่อสารนโยบายการ"><b>วิธีการดำเนินการสำหรับตัวกลาง ซึ่งรวมถึงผู้รับเหมา (contractor) หรือตัวแทน (agent)</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุจริตสำหรับ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การประเมินความเสี่ยงที่จะเกิดการทุจริต หรือกระบวนการเพื่อจัดการรับมือกับการทุจริตสำหรับตัวกลาง">✓ GAC11_1</span><span class="sub-ok" title="การสื่อสารนโยบายการต่อด้านการทุจริตให้ตัวกลางรับทราบ">✓ GAC11_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC12</span></td>
+        <td><div title="การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง"><b>การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GAC12_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง">⚠ GAC12_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC13</span></td>
+        <td><div title="การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต"><b>การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GAC13_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต">⚠ GAC13_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">GAC14</span></td>
+        <td><div title="การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต"><b>การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต</b></div></td>
+        <td style="font-size:8pt;color:#666;">เชิงปริมาณ</td>
+        <td><div class="sub-list"><span class="sub-gap">⚠ GAC14_1</span></div></td>
+        <td><div class="sub-list"><span class="sub-gap" title="การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต">⚠ GAC14_1</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-gap">⚠ 1 GAP</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="theme-section">
+  <div class="theme-header" style="background:#0d47a1;">
+    <span>🛒 Customer Responsibility</span>
+    <span class="theme-count">6 indicators</span>
+    
+  </div>
+  <table class="ind-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">Code</th>
+        <th>ชื่อ Indicator</th>
+        <th style="width:70px;">Type</th>
+        <th>REF (Ake PDF) — Sub-indicators</th>
+        <th>KB System — Sub-indicators</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ind-code">SCR06</span></td>
+        <td><div title="a. การฝึกอบรมพนักงานขาย b. นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ"><b>การดำเนินการที่ใช้เพื่อปรับปรุงนโยบายการขาย/การให้สินเชื่ออย่างมีความรับผิดชอบสำหรับพนักงานขาย ซึ่งรวมถึง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การฝึกอบรมพนักงานขาย b. นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การฝึกอบรมพนักงานขาย">✓ SCR06_1</span><span class="sub-ok" title="นโยบายการให้ค่ารางวัลจูงใจให้มีความรับผิดชอบ">✓ SCR06_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR64</span></td>
+        <td><div title="a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่นว่าจะทำการตลาดหรือโฆษณาอย่างมีความรับผิ"><b>การโฆษณาหรือการทำการตลาดสำหรับผลิตภัณฑ์สินเชื่อเพื่อผู้บริโภคอย่างมีความรับผิดชอบ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่นว่าจะทำกา…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ SCR64_1</span><span class="sub-ok" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะทำการตลาดหรือโฆษณาอย่างมีความรับผิดชอบ">✓ SCR64_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR65</span></td>
+        <td><div title="a. การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม b. การปรับใช้หรือการสนับสนุนหลักปฏิบัติ/แนวปฏิบัติที่เกี่ยวข้อง"><b>การมีส่วนร่วมในโครงการเพื่อการให้สินเชื่อแก่ผู้บริโภคอย่างมีความรับผิดชอบ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม b. การปรับใช้หรือการสนับสนุนหลักปฏิบัติ…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การเป็นสมาชิกในโครงการที่เกี่ยวข้องในอุตสาหกรรม">✓ SCR65_1</span><span class="sub-ok" title="การปรับใช้หรือการสนับสนุนหลักปฏิบัติ/แนวปฏิบัติที่เกี่ยวข้อง">✓ SCR65_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR66</span></td>
+        <td><div title="a. แนวทางในการดำเนินการโดยละเอียด b. พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการตรวจสอบ"><b>การดำเนินการที่แสดงถึงแนวทางการโฆษณา การทำการตลาด หรือการส่งเสริมการขายผลิตภัณฑ์สินเชื่อเพื่อผู้บริโภคอย่างมีความรับผิดชอบ</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. แนวทางในการดำเนินการโดยละเอียด b. พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการตรวจสอบ</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="แนวทางในการดำเนินการโดยละเอียด">✓ SCR66_1</span><span class="sub-ok" title="พนักงานได้รับการฝึกอบรมหรือบริษัทได้รับการตรวจสอบ">✓ SCR66_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR67</span></td>
+        <td><div title="a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่นว่าจะลดผลกระทบด้านลบของผลิตภัณฑ์"><b>ผลกระทบด้านลบของผลิตภัณฑ์สินเชื่อต่อผู้บริโภค</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว b. นโยบายหรือคำแถลงการให้คำมั่นว่าจะลดผล…</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="คำแถลงว่าจะจัดการรับมือกับประเด็นปัญหาดังกล่าว">✓ SCR67_1</span><span class="sub-ok" title="นโยบายหรือคำแถลงการให้คำมั่นว่าจะลดผลกระทบด้านลบของผลิตภัณฑ์">✓ SCR67_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+      <tr>
+        <td><span class="ind-code">SCR68</span></td>
+        <td><div title="a. การตระหนักถึงกลุ่มเปราะบาง b. โครงการเพื่อปกป้องกลุ่มเปราะบาง"><b>การดำเนินการเพื่อจัดการรับมือกับผลกระทบด้านลบของผลิตภัณฑ์สินเชื่อต่อกลุ่มเปราะบาง</b></div><div style="font-size:7.5pt;color:#666;margin-top:2px;">a. การตระหนักถึงกลุ่มเปราะบาง b. โครงการเพื่อปกป้องกลุ่มเปราะบาง</div></td>
+        <td style="font-size:8pt;color:#666;">เชิงคุณภาพ</td>
+        <td><span style="color:#1a6b3c;font-size:8pt;">✅ ผ่านทั้งหมด</span></td>
+        <td><div class="sub-list"><span class="sub-ok" title="การตระหนักถึงกลุ่มเปราะบาง">✓ SCR68_1</span><span class="sub-ok" title="โครงการเพื่อปกป้องกลุ่มเปราะบาง">✓ SCR68_2</span></div></td>
+        <td style="text-align:center;"><span class="badge badge-match">✅ OK</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+<div class="section page-break">
+<h2>📌 ดัชนี Gap Sub-indicators ทั้งหมด (58 รายการ)</h2>
+<p style="font-size:9pt;color:#666;margin-bottom:12px;">รายการ sub-indicators ที่ Ake PDF ระบุว่า Tidlor ยังไม่เปิดเผยหรือไม่มีข้อมูล (ไม่รวม SLS27_1-2 ที่เกี่ยวกับ South Africa)</p>
+<table class="ind-table">
+<thead>
+  <tr>
+    <th style="width:100px;">Sub-indicator</th>
+    <th style="width:80px;">Indicator</th>
+    <th>ชื่อ Indicator</th>
+    <th>Theme</th>
+    <th>สิ่งที่วัด (Sub-indicator)</th>
+  </tr>
+</thead>
+<tbody>
+
+  <tr>
+    <td><span class="sub-gap">⚠ ECC03_1</span></td>
+    <td><span class="ind-code">ECC03</span></td>
+    <td style="font-size:8.5pt;">การแสดงออกถึงการให้การสนับสนุนเพื่อการบรรเทาปัญหาการเปลี่ยนแ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">การเป็นสมาชิกสมาคมด้านธุรกิจ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC41_2</span></td>
+    <td><span class="ind-code">ECC41</span></td>
+    <td style="font-size:8.5pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อมูลการ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC42_2</span></td>
+    <td><span class="ind-code">ECC42</span></td>
+    <td style="font-size:8.5pt;">การทวนสอบโดยอิสระ (independent verification) สำหรับข้อมูลการ…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">มาตรฐานการรับรองในระดับสากลที่ใช้และระดับการรับรองที่ประกาศ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC43_1</span></td>
+    <td><span class="ind-code">ECC43</span></td>
+    <td style="font-size:8.5pt;">การตระหนักรู้เกี่ยวกับการเปลี่ยนแปลงสภาพภูมิอากาศ</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">เป็นความเสี่ยงและ/หรือโอกาสที่เกี่ยวข้องกับธุรกิจ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC51_1</span></td>
+    <td><span class="ind-code">ECC51</span></td>
+    <td style="font-size:8.5pt;">ราคาคาร์บอนภายในองค์กร (internal carbon price)</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทมีราคาคาร์บอนภายในองค์กร</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC51_2</span></td>
+    <td><span class="ind-code">ECC51</span></td>
+    <td style="font-size:8.5pt;">ราคาคาร์บอนภายในองค์กร (internal carbon price)</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทเปิดเผยราคาคาร์บอนให้สาธารณะรับทราบ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC74_1</span></td>
+    <td><span class="ind-code">ECC74</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือการให้คำมั่นของบริษัท</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">ความสอดคล้องกันระหว่างนโยบายด้านการเปลี่ยนแปลงสภาพภูมิอากาศของบริษัทกับจุดยืนของสมาคมการค้าที่บริษัทเป็นสมาชิกอยู่</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC74_2</span></td>
+    <td><span class="ind-code">ECC74</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือการให้คำมั่นของบริษัท</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">การแสดงออกอย่างเหมาะสมของบริษัท</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC75_1</span></td>
+    <td><span class="ind-code">ECC75</span></td>
+    <td style="font-size:8.5pt;">การกำหนดค่าตอบแทนผู้บริหารระดับสูงของบริษัทคำนึงถึงผลการดำเน…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">ค่าตอบแทนของ CEO</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC76_1</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแน…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทให้คำมั่นว่าจะเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแนะของ TCFD</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC76_2</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแน…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทมีรายชื่อเป็นผู้สนับสนุน TCFD</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC76_3</span></td>
+    <td><span class="ind-code">ECC76</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นเกี่ยวกับการเปิดเผยข้อมูลให้สอดคล้องกับข้อเสนอแน…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทระบุอย่างชัดเจนว่าข้อมูลที่สอดคล้องกับข้อเสนอแนะของ TCFD ปรากฏเป็นส่วนหนึ่งของรายงานประจำปี</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC78_1</span></td>
+    <td><span class="ind-code">ECC78</span></td>
+    <td style="font-size:8.5pt;">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายทุน (c…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทให้คำมั่นอย่างชัดเจนว่าจะปรับเปลี่ยนรายจ่ายฝ่ายทุนในอนาคตทั้งหมดให้สอดคล้องกับเป้าหมายการลดการปล่อยก๊าซเรือนกระจกในระยะยาวของบริษัท</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ ECC78_2</span></td>
+    <td><span class="ind-code">ECC78</span></td>
+    <td style="font-size:8.5pt;">การดำเนินการเพื่อลดการปล่อยก๊าซเรือนกระจกในรายจ่ายฝ่ายทุน (c…</td>
+    <td><span style="background:#1a6b3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Climate Change</span></td>
+    <td style="font-size:8.5pt;">บริษัทให้คำมั่นอย่างชัดเจนว่าจะค่อย ๆ ลดการลงทุนในสินทรัพย์หรือผลิตภัณฑ์ที่มีการปล่อยคาร์บอนสูง</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GAC12_1</span></td>
+    <td><span class="ind-code">GAC12</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</td>
+    <td><span style="background:#880e4f;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยยอดเงินบริจาคทั้งหมดเพื่อสนับสนุนทางการเมือง</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GAC13_1</span></td>
+    <td><span class="ind-code">GAC13</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน…</td>
+    <td><span style="background:#880e4f;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยจำนวนพนักงานที่ถูกดำเนินการทางวินัยหรือปลดจากตำแหน่ง เนื่องจากไม่ปฏิบัติตามนโยบายการต่อด้านการทุจริต</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GAC14_1</span></td>
+    <td><span class="ind-code">GAC14</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิ…</td>
+    <td><span style="background:#880e4f;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Anti-Corruption</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยค่าปรับ บทลงโทษ หรือการชดใช้ที่เกี่ยวข้องกับการเกิดการทุจริต</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG01_2</span></td>
+    <td><span class="ind-code">GCG01</span></td>
+    <td style="font-size:8.5pt;">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">ประธานบริษัทที่ไม่ใช่ผู้บริหารเป็นคนละคนกับ CEO โดยที่ประธานเป็นกรรมการอิสระ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG21_2</span></td>
+    <td><span class="ind-code">GCG21</span></td>
+    <td style="font-size:8.5pt;">สิทธิของผู้ถือหุ้นในการออกเสียงเรื่องค่าตอบแทนของผู้บริหาร</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">นโยบายของบริษัทระบุสิทธิในการออกเสียงของผู้ถือหุ้นในเรื่องดังกล่าวไว้อย่างชัดเจน</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG26_1</span></td>
+    <td><span class="ind-code">GCG26</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">แบบจำกัด (limited)</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG26_2</span></td>
+    <td><span class="ind-code">GCG26</span></td>
+    <td style="font-size:8.5pt;">การเปิดเผยข้อมูลผลการออกเสียงในการประชุม AGM</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">แบบละเอียด (detailed)</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG37_1</span></td>
+    <td><span class="ind-code">GCG37</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับส…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) กรรมการผู้หญิงในคณะกรรมการบริษัท เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG38_1</span></td>
+    <td><span class="ind-code">GCG38</span></td>
+    <td style="font-size:8.5pt;">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลแ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">จำนวนวัน ก่อนการเผยแพร่วาระการประชุม AGM เปรียบเทียบกับสากลและธุรกิจในอุตสาหกรรมเดียวกันในประเทศ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG39_1</span></td>
+    <td><span class="ind-code">GCG39</span></td>
+    <td style="font-size:8.5pt;">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">จำนวนปีสูงสุดที่ค่าตอบแทนของผู้บริหารมีการชะลอการจ่ายออกไป เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG41_1</span></td>
+    <td><span class="ind-code">GCG41</span></td>
+    <td style="font-size:8.5pt;">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับ…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">ขนาดของคณะกรรมการบริษัท เปรียบเทียบกับแนวปฏิบัติที่ดีในระดับสากล</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG44_2</span></td>
+    <td><span class="ind-code">GCG44</span></td>
+    <td style="font-size:8.5pt;">ความเชี่ยวชาญด้านการเงินของคณะกรรมการตรวจสอบ</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">ในคณะกรรมการตรวจสอบมีผู้เชี่ยวชาญด้านการเงินที่เป็นอิสระเป็นส่วนใหญ่</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG47_2</span></td>
+    <td><span class="ind-code">GCG47</span></td>
+    <td style="font-size:8.5pt;">องค์ประกอบของคณะกรรมการพิจารณาค่าตอบแทนซึ่งแต่ละคนต้องไม่ใช่…</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">ทุกคนเป็นกรรมการอิสระ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GCG49_2</span></td>
+    <td><span class="ind-code">GCG49</span></td>
+    <td style="font-size:8.5pt;">ค่าธรรมเนียมที่จ่ายให้กับผู้สอบบัญชี</td>
+    <td><span style="background:#4a235a;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Corporate Governance</span></td>
+    <td style="font-size:8.5pt;">ยอดค่าธรรมเนียมการสอบบัญชี (audit fees) สูงกว่ายอดค่าธรรมเนียมที่ไม่ใช่การสอบบัญชี (non-audit fees)</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GRM10_1</span></td>
+    <td><span class="ind-code">GRM10</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นของบริษัท</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8.5pt;">บริษัทให้คำมั่นว่าจะเปลี่ยนผู้สอบบัญชีเป็นประจำ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GRM10_2</span></td>
+    <td><span class="ind-code">GRM10</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นของบริษัท</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8.5pt;">บริษัทให้คำมั่นว่าจะเปิดให้มีผู้สอบบัญชีรายใหม่เข้ามาเสนอ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GRM14_1</span></td>
+    <td><span class="ind-code">GRM14</span></td>
+    <td style="font-size:8.5pt;">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเง…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8.5pt;">ค่าปรับและค่าชดเชยในประเด็นปัญหาด้าน ESG ที่ระบุไว้ในงบการเงินที่ได้รับการตรวจสอบแล้ว</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GRM20_1</span></td>
+    <td><span class="ind-code">GRM20</span></td>
+    <td style="font-size:8.5pt;">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็นความล…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8.5pt;">พนักงาน ซึ่งอาจรวมถึงผู้รับเหมา หรือหน่วยงานอื่น ๆ ที่ทำงานร่วมกับบริษัท</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ GRM20_2</span></td>
+    <td><span class="ind-code">GRM20</span></td>
+    <td style="font-size:8.5pt;">การจัดให้มีกลไกการแจ้งเบาะแส (whistleblowing) อย่างเป็นความล…</td>
+    <td><span style="background:#6d4c41;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Risk Management</span></td>
+    <td style="font-size:8.5pt;">ผู้มีส่วนได้เสียภายนอกอื่น ๆ และประชาชนทั่วไป</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR04_1</span></td>
+    <td><span class="ind-code">SHR04</span></td>
+    <td style="font-size:8.5pt;">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แรงงานเ…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">มีหลักฐานว่าบริษัทสนับสนุนสิทธิเด็กในการดำเนินงานของบริษัทหรือผ่านโครงการต่าง ๆ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR04_2</span></td>
+    <td><span class="ind-code">SHR04</span></td>
+    <td style="font-size:8.5pt;">นโยบายระบุถึงเรื่องสิทธิเด็ก (นอกเหนือจากเรื่องการใช้แรงงานเ…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงการให้คำมั่นเกี่ยวกับสิทธิเด็ก การให้คำมั่นว่าจะปฏิบัติตาม Children's Rights and Business Principles</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR11_2</span></td>
+    <td><span class="ind-code">SHR11</span></td>
+    <td style="font-size:8.5pt;">การมีส่วนร่วมของผู้มีส่วนได้เสียในประเด็นปัญหาด้านสิทธิมนุษย…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">มีการบันทึกการประชุมหรือรายงานว่าบริษัทนำผลที่ได้จากการหารือกับผู้มีส่วนได้เสียไปใช้อย่างไร</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR15_2</span></td>
+    <td><span class="ind-code">SHR15</span></td>
+    <td style="font-size:8.5pt;">ผลลัพธ์หรือประโยชน์ที่เกิดขึ้นจากการลงทุนในชุมชน</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">ผลลัพธ์ในเชิงปริมาณ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR16_1</span></td>
+    <td><span class="ind-code">SHR16</span></td>
+    <td style="font-size:8.5pt;">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์กรการก…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">หลักฐานที่แสดงว่าบริษัทสนับสนุนการเป็นอาสาสมัคร</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR16_2</span></td>
+    <td><span class="ind-code">SHR16</span></td>
+    <td style="font-size:8.5pt;">กลไกที่สนับสนุนให้พนักงานมีส่วนร่วมหรือเข้าร่วมกับองค์กรการก…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">การวางรากฐาน เป้าหมาย หรือโครงสร้างเพื่อสนับสนุนเป็นการเฉพาะ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SHR17_1</span></td>
+    <td><span class="ind-code">SHR17</span></td>
+    <td style="font-size:8.5pt;">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษ…</td>
+    <td><span style="background:#7b3f00;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Human Rights &amp; Community</span></td>
+    <td style="font-size:8.5pt;">ยอดรวมการบริจาค/การลงทุนในชุมชนทั้งหมดที่บริษัทหรือกลุ่มบริษัทสนับสนุนองค์กรไม่แสวงหากำไรที่ขึ้นทะเบียน</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS01_1</span></td>
+    <td><span class="ind-code">SLS01</span></td>
+    <td style="font-size:8.5pt;">การป้องกันการใช้แรงงานเด็ก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS05_1</span></td>
+    <td><span class="ind-code">SLS05</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS05_2</span></td>
+    <td><span class="ind-code">SLS05</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">ครอบคลุมถึงการเคารพหรือการสนับสนุนเสรีภาพในการรวมกลุ่ม</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS06_1</span></td>
+    <td><span class="ind-code">SLS06</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">อ้างอิงถึงการปฏิบัติตามกฎหมายท้องถิ่นเท่านั้น</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS06_2</span></td>
+    <td><span class="ind-code">SLS06</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">ครอบคลุมถึงการเคารพหรือการสนับสนุนสิทธิในการร่วมเจรจาต่อรอง</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS07_1</span></td>
+    <td><span class="ind-code">SLS07</span></td>
+    <td style="font-size:8.5pt;">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำงานที…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">มุ่งเน้นที่การปฏิบัติตามกฎหมายท้องถิ่นว่าด้วยชั่วโมงการทำงาน/การทำงานล่วงเวลา</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS07_2</span></td>
+    <td><span class="ind-code">SLS07</span></td>
+    <td style="font-size:8.5pt;">นโยบาย/หลักการ/หลักปฏิบัติที่ระบุการจำกัดจำนวนชั่วโมงทำงานที…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">มุ่งเน้นที่การลดจำนวนชั่วโมงทำงานที่มากเกินควรโดยเฉพาะ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS08_1</span></td>
+    <td><span class="ind-code">SLS08</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต่ำหรื…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">มุ่งเน้นที่การปฏิบัติตามข้อกำหนดเกี่ยวกับค่าจ้างขั้นต่ำ</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS08_2</span></td>
+    <td><span class="ind-code">SLS08</span></td>
+    <td style="font-size:8.5pt;">นโยบายหรือคำแถลงที่สนับสนุนสิทธิในการได้รับค่าจ้างขั้นต่ำหรื…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การให้คำมั่นว่าจะให้ค่าตอบแทนเกินค่าจ้างขั้นต่ำ/เท่ากับค่าจ้างที่เพียงพอต่อการดำรงชีวิต</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS11_2</span></td>
+    <td><span class="ind-code">SLS11</span></td>
+    <td style="font-size:8.5pt;">นโยบายที่สนับสนุนชุมชนครอบคลุม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">โครงการเพื่อเปิดโอกาสในการจ้างงานหรือการฝึกงานให้กลุ่มคนหนุ่มสาว</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS12_2</span></td>
+    <td><span class="ind-code">SLS12</span></td>
+    <td style="font-size:8.5pt;">นโยบายของบริษัทเกี่ยวกับมาตรฐานแรงงาน</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">มีการแปลนโยบายเป็นภาษาต่าง ๆ ที่เกี่ยวข้อง</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS14_1</span></td>
+    <td><span class="ind-code">SLS14</span></td>
+    <td style="font-size:8.5pt;">บริษัทได้ดำเนินการเพื่อจัดการรับมือกับประเด็นปัญหาด้านแรงงาน…</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การป้องกันการใช้แรงงานเด็ก</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS30_1</span></td>
+    <td><span class="ind-code">SLS30</span></td>
+    <td style="font-size:8.5pt;">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การจัดให้มีช่องทางการรายงานอย่างเป็นความลับ หรือระบบการแจ้งเบาะแส (whistleblowing)</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS30_2</span></td>
+    <td><span class="ind-code">SLS30</span></td>
+    <td style="font-size:8.5pt;">การจัดการรับมือกับการกลั่นแกล้งและ/หรือการก่อกวนคุกคาม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การฝึกอบรมพนักงานระดับผู้จัดการเกี่ยวกับการจัดการกับรายงานหรือสถานการณ์การกลั่นแกล้งหรือการก่อกวนคุกคาม</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS32_1</span></td>
+    <td><span class="ind-code">SLS32</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) ของจำนวนพนักงานผู้พิการทั่วโลก</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS33_1</span></td>
+    <td><span class="ind-code">SLS33</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">สัดส่วน (%) ของพนักงานหญิงทั่วโลก</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS34_1</span></td>
+    <td><span class="ind-code">SLS34</span></td>
+    <td style="font-size:8.5pt;">การจ่ายค่าตอบแทนที่เท่าเทียม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การจัดการรับมือกับประเด็นปัญหาดังกล่าว/การแถลงว่าบริษัทปฏิบัติตามกฎหมายท้องถิ่น</td>
+  </tr>
+  <tr>
+    <td><span class="sub-gap">⚠ SLS34_2</span></td>
+    <td><span class="ind-code">SLS34</span></td>
+    <td style="font-size:8.5pt;">การจ่ายค่าตอบแทนที่เท่าเทียม</td>
+    <td><span style="background:#1d4e89;color:#fff;padding:2px 6px;border-radius:10px;font-size:7.5pt;">Labour Standards</span></td>
+    <td style="font-size:8.5pt;">การเผยแพร่นโยบาย/หลักการ/หลักปฏิบัติ</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="report-footer">
+  <span>FTSE ESG Gap Analysis — TIDLOR | จัดทำโดย KB System v1.0</span>
+  <span>ข้อมูลอ้างอิง: Tidlor_FTSE_Gap_Analysis (By Ake).pdf + FTSE ESG RC11 2024-2025</span>
+</div>
+</body>
+</html>

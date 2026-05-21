@@ -16,18 +16,9 @@ import { AnalysisProgress } from '@/components/AnalysisProgress';
 import { WebsiteArchitecture } from '@/components/WebsiteArchitecture';
 import { getAnalysis } from '@/lib/api';
 import type { AnalysisDetail, FtseResultItem, StatusType } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn, isSafeUrl } from '@/lib/utils';
 
 const POLL_INTERVAL_MS = 5000;
-
-function isSafeUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
 const IN_PROGRESS_STATUSES = new Set(['pending', 'crawling', 'analyzing', 'scoring']);
 
 interface ThemeGroup {
@@ -205,12 +196,15 @@ export default function AnalysisDashboard({
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const lastStatusRef = useRef<string>('pending');
+  const consecutiveErrorsRef = useRef<number>(0);
+  const MAX_CONSECUTIVE_ERRORS = 5;
 
   const fetchData = useCallback(async () => {
     try {
       const result = await getAnalysis(id);
       setData(result);
       setError(null);
+      consecutiveErrorsRef.current = 0;
       lastStatusRef.current = result.analysis.status;
       return result.analysis.status;
     } catch (err) {
@@ -218,7 +212,12 @@ export default function AnalysisDashboard({
         setError('Analysis not found.');
         return 'failed';
       }
-      // Transient network error — keep polling
+      // Transient network error — count consecutive failures
+      consecutiveErrorsRef.current += 1;
+      if (consecutiveErrorsRef.current >= MAX_CONSECUTIVE_ERRORS) {
+        setError('Unable to reach the server. Please refresh the page.');
+        return 'failed';
+      }
       return lastStatusRef.current;
     }
   }, [id]);

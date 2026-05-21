@@ -12,9 +12,10 @@ import httpx
 from supabase import Client
 
 from app.dependencies import get_openai, get_supabase
+from app.prompts.industry_detect import INDUSTRY_DETECT_PROMPT
 from app.services.crawler import PageContent, crawl_website
 from app.services.ftse_analyzer import FtseResult, analyze_ftse
-from app.services.ifrs_analyzer import IfrsResult, analyze_ifrs
+from app.services.ifrs_analyzer import IfrsResult
 from app.services.scoring import (
     VALID_STATUSES,
     FtseScores,
@@ -25,48 +26,12 @@ from app.services.scoring import (
 from app.services.sitemap_generator import SitemapRecommendation, generate_sitemap
 from app.utils.data_loader import (
     get_indicators_by_theme,
-    get_requirements_by_chapter,
     load_ftse_indicators,
     load_ifrs_requirements,
 )
 from app.utils.sector_themes import get_applicable_themes
 
 logger = logging.getLogger(__name__)
-
-# Industry detection prompt for auto-detect
-_INDUSTRY_DETECT_PROMPT = """You are an ICB (Industry Classification Benchmark) expert.
-
-Analyze this company website content and determine the most appropriate ICB subsector.
-
-Return ONLY a JSON object with:
-- "subsector_code": the 8-digit ICB subsector code (e.g. "45102020" for Food Products)
-- "industry": short industry name in English
-- "confidence": 0.0-1.0
-
-Common ICB subsector codes:
-- 60101010: Oil & Gas Producers
-- 65101010: Electricity
-- 55101010: Industrial Metals & Mining
-- 45102020: Food Products
-- 45201020: Personal Goods
-- 20103010: Pharmaceuticals
-- 30101010: Banks
-- 35102010: Real Estate Investment & Services
-- 10101015: Software
-- 15101010: Telecommunications
-- 40201020: General Retailers
-- 40501020: Restaurants & Bars
-- 50101010: Industrial Transportation
-- 40101010: Automobiles
-- 50201030: Electronic & Electrical Equipment
-- 55201010: Chemicals
-- 50201010: Construction & Materials
-- 60102020: Alternative Energy
-- 15104025: Media
-- 65102020: Gas, Water & Multi-utilities
-
-Website content (first 3000 chars):
-"""
 
 
 async def _detect_subsector(openai_client, website_content: str) -> str | None:
@@ -88,7 +53,7 @@ async def _detect_subsector(openai_client, website_content: str) -> str | None:
         response = await openai_client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=[
-                {"role": "system", "content": _INDUSTRY_DETECT_PROMPT},
+                {"role": "system", "content": INDUSTRY_DETECT_PROMPT},
                 {"role": "user", "content": snippet},
             ],
             response_format={"type": "json_object"},
@@ -291,7 +256,7 @@ def _extract_company_name(
     return _extract_name_from_domain(base_url)
 
 
-def _update_status(
+async def _update_status(
     supabase: Client,
     analysis_id: str,
     status: str,
@@ -312,11 +277,13 @@ def _update_status(
         update_data["status_message"] = status_message
     if error_message:
         update_data["error_message"] = error_message
-    if status == "completed" or status == "failed":
+    if status in ("completed", "failed"):
         update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
 
     try:
-        supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
+        await asyncio.to_thread(
+            lambda: supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
+        )
         logger.info("Analysis %s status updated to: %s", analysis_id, status)
     except Exception as exc:
         if status in ("completed", "failed"):
@@ -324,7 +291,7 @@ def _update_status(
         logger.warning("Failed to update status for %s: %s", analysis_id, exc)
 
 
-def _update_message(
+async def _update_message(
     supabase: Client,
     analysis_id: str,
     message: str,
@@ -337,14 +304,16 @@ def _update_message(
         message: Human-readable progress message.
     """
     try:
-        supabase.table("analyses").update(
-            {"status_message": message}
-        ).eq("id", analysis_id).execute()
+        await asyncio.to_thread(
+            lambda: supabase.table("analyses").update(
+                {"status_message": message}
+            ).eq("id", analysis_id).execute()
+        )
     except Exception as exc:
         logger.warning("Failed to update progress message for %s: %s", analysis_id, exc)
 
 
-def _save_ftse_results(
+async def _save_ftse_results(
     supabase: Client,
     analysis_id: str,
     results: list[FtseResult],
@@ -359,10 +328,8 @@ def _save_ftse_results(
         indicators: All FTSE indicators for looking up IDs.
     """
     # Look up indicator UUIDs from the database
-    indicator_rows = (
-        supabase.table("ftse_indicators")
-        .select("id, indicator_code")
-        .execute()
+    indicator_rows = await asyncio.to_thread(
+        lambda: supabase.table("ftse_indicators").select("id, indicator_code").execute()
     )
     code_to_id: dict[str, str] = {
         row["indicator_code"]: row["id"]
@@ -395,13 +362,15 @@ def _save_ftse_results(
         batch_size = 50
         for i in range(0, len(rows), batch_size):
             batch = rows[i:i + batch_size]
-            supabase.table("analysis_ftse_results").upsert(
-                batch, on_conflict="analysis_id,indicator_id"
-            ).execute()
+            await asyncio.to_thread(
+                lambda b=batch: supabase.table("analysis_ftse_results").upsert(
+                    b, on_conflict="analysis_id,indicator_id"
+                ).execute()
+            )
         logger.info("Saved %d FTSE results for analysis %s", len(rows), analysis_id)
 
 
-def _save_ifrs_results(
+async def _save_ifrs_results(
     supabase: Client,
     analysis_id: str,
     results: list[IfrsResult],
@@ -414,10 +383,8 @@ def _save_ifrs_results(
         results: List of IfrsResult from analysis.
     """
     # Look up requirement UUIDs from the database
-    req_rows = (
-        supabase.table("ifrs_requirements")
-        .select("id, paragraph_ref")
-        .execute()
+    req_rows = await asyncio.to_thread(
+        lambda: supabase.table("ifrs_requirements").select("id, paragraph_ref").execute()
     )
     ref_to_id: dict[str, str] = {
         row["paragraph_ref"]: row["id"]
@@ -448,13 +415,15 @@ def _save_ifrs_results(
         batch_size = 50
         for i in range(0, len(rows), batch_size):
             batch = rows[i:i + batch_size]
-            supabase.table("analysis_ifrs_results").upsert(
-                batch, on_conflict="analysis_id,requirement_id"
-            ).execute()
+            await asyncio.to_thread(
+                lambda b=batch: supabase.table("analysis_ifrs_results").upsert(
+                    b, on_conflict="analysis_id,requirement_id"
+                ).execute()
+            )
         logger.info("Saved %d IFRS results for analysis %s", len(rows), analysis_id)
 
 
-def _save_scores(
+async def _save_scores(
     supabase: Client,
     analysis_id: str,
     ftse_scores: FtseScores,
@@ -481,20 +450,22 @@ def _save_scores(
         for ts in ftse_scores.theme_scores
     ]
 
-    supabase.table("analyses").update({
-        "overall_score": ftse_scores.overall_score,
-        "environmental_score": ftse_scores.environmental_score,
-        "social_score": ftse_scores.social_score,
-        "governance_score": ftse_scores.governance_score,
-        "ifrs_s1_score": ifrs_scores.s1_score,
-        "ifrs_s2_score": ifrs_scores.s2_score,
-        "theme_summaries": theme_summaries,
-    }).eq("id", analysis_id).execute()
+    await asyncio.to_thread(
+        lambda: supabase.table("analyses").update({
+            "overall_score": ftse_scores.overall_score,
+            "environmental_score": ftse_scores.environmental_score,
+            "social_score": ftse_scores.social_score,
+            "governance_score": ftse_scores.governance_score,
+            "ifrs_s1_score": ifrs_scores.s1_score,
+            "ifrs_s2_score": ifrs_scores.s2_score,
+            "theme_summaries": theme_summaries,
+        }).eq("id", analysis_id).execute()
+    )
 
     logger.info("Saved scores for analysis %s", analysis_id)
 
 
-def _save_sitemap(
+async def _save_sitemap(
     supabase: Client,
     analysis_id: str,
     recommendations: list[SitemapRecommendation],
@@ -522,7 +493,9 @@ def _save_sitemap(
         })
 
     if rows:
-        supabase.table("sitemap_recommendations").insert(rows).execute()
+        await asyncio.to_thread(
+            lambda: supabase.table("sitemap_recommendations").insert(rows).execute()
+        )
         logger.info(
             "Saved %d sitemap recommendations for analysis %s",
             len(rows),
@@ -629,16 +602,24 @@ async def run_analysis(
 
     try:
         # Step 1: Crawl
-        _update_status(supabase, analysis_id, "crawling", status_message="Starting web crawler...")
-        supabase.table("analyses").update({
-            "started_at": datetime.now(timezone.utc).isoformat(),
-        }).eq("id", analysis_id).execute()
+        await _update_status(supabase, analysis_id, "crawling", status_message="Starting web crawler...")
+        await asyncio.to_thread(
+            lambda: supabase.table("analyses").update({
+                "started_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", analysis_id).execute()
+        )
 
         from app.config import get_settings
         settings = get_settings()
 
+        _progress_tasks: set[asyncio.Task] = set()
+
         def _crawl_progress(msg: str) -> None:
-            _update_message(supabase, analysis_id, msg)
+            task = asyncio.get_running_loop().create_task(
+                _update_message(supabase, analysis_id, msg)
+            )
+            _progress_tasks.add(task)
+            task.add_done_callback(_progress_tasks.discard)
 
         try:
             crawl_result = await asyncio.wait_for(
@@ -649,8 +630,8 @@ async def run_analysis(
                 ),
                 timeout=600.0,
             )
-        except asyncio.TimeoutError:
-            raise RuntimeError("Website crawl timed out after 10 minutes")
+        except asyncio.TimeoutError as exc:
+            raise asyncio.TimeoutError("Website crawl timed out after 10 minutes") from exc
 
         # Extract company name from homepage title
         company_name = _extract_company_name(
@@ -667,17 +648,19 @@ async def run_analysis(
             for d in crawl_result.pdf_downloads
         ]
 
-        supabase.table("analyses").update({
-            "pages_crawled": crawl_result.pages_crawled,
-            "company_name": company_name,
-            "status_message": f"Crawled {crawl_result.pages_crawled} pages from {company_name or company_url}",
-            "crawled_urls": {
-                "all_discovered": crawl_result.all_discovered_urls[:500],
-                "selected": crawl_result.selected_urls[:100],
-                "pages": crawled_pages_data[:100],
-                "pdfs": pdf_data[:20],
-            },
-        }).eq("id", analysis_id).execute()
+        await asyncio.to_thread(
+            lambda: supabase.table("analyses").update({
+                "pages_crawled": crawl_result.pages_crawled,
+                "company_name": company_name,
+                "status_message": f"Crawled {crawl_result.pages_crawled} pages from {company_name or company_url}",
+                "crawled_urls": {
+                    "all_discovered": crawl_result.all_discovered_urls[:500],
+                    "selected": crawl_result.selected_urls[:100],
+                    "pages": crawled_pages_data[:100],
+                    "pdfs": pdf_data[:20],
+                },
+            }).eq("id", analysis_id).execute()
+        )
 
         # Separate HTML pages from PDF pages
         html_pages = [
@@ -707,21 +690,23 @@ async def run_analysis(
         # Step 1.5: Auto-detect subsector if not provided
         if not subsector_code:
             logger.info("No subsector code — running auto-detection")
-            _update_message(supabase, analysis_id, "Auto-detecting industry...")
+            await _update_message(supabase, analysis_id, "Auto-detecting industry...")
             subsector_code = await _detect_subsector(openai_client, website_content)
             if subsector_code:
                 # Update analysis record with detected subsector
-                sub_result = (
-                    supabase.table("icb_subsectors")
+                sub_result = await asyncio.to_thread(
+                    lambda: supabase.table("icb_subsectors")
                     .select("id")
                     .eq("code", subsector_code)
                     .limit(1)
                     .execute()
                 )
                 if sub_result.data:
-                    supabase.table("analyses").update({
-                        "subsector_id": sub_result.data[0]["id"],
-                    }).eq("id", analysis_id).execute()
+                    await asyncio.to_thread(
+                        lambda: supabase.table("analyses").update({
+                            "subsector_id": sub_result.data[0]["id"],
+                        }).eq("id", analysis_id).execute()
+                    )
                     logger.info("Updated analysis with auto-detected subsector: %s", subsector_code)
             else:
                 logger.warning("Auto-detection failed — using all 381 indicators")
@@ -730,7 +715,6 @@ async def run_analysis(
         ftse_indicators = load_ftse_indicators()
         ifrs_requirements = load_ifrs_requirements()
         indicators_by_theme = get_indicators_by_theme()
-        requirements_by_chapter = get_requirements_by_chapter()
 
         # Filter indicators by subsector mapping (theme applicability + indicator-subsector)
         zero_indicator_themes_list: list[dict[str, str]] = []
@@ -812,7 +796,7 @@ async def run_analysis(
         total_indicators = sum(len(inds) for inds in indicators_by_theme.values())
         has_pdf = bool(pdf_content)
         round_info = " (Round 1: website → Round 2: PDF for gaps)" if has_pdf else " (website only)"
-        _update_status(
+        await _update_status(
             supabase, analysis_id, "analyzing",
             status_message=f"Analyzing {total_indicators} indicators across {total_themes} themes{round_info}",
         )
@@ -823,14 +807,20 @@ async def run_analysis(
             "IFRS analysis disabled (cost saving). Scores will be zero for %s.",
             analysis_id,
         )
-        ftse_results = await analyze_ftse(
-            openai_client, website_content, indicators_by_theme, pdf_content=pdf_content,
-        )
+        try:
+            ftse_results = await asyncio.wait_for(
+                analyze_ftse(
+                    openai_client, website_content, indicators_by_theme, pdf_content=pdf_content,
+                ),
+                timeout=900.0,
+            )
+        except asyncio.TimeoutError as exc:
+            raise asyncio.TimeoutError("FTSE analysis timed out after 15 minutes") from exc
         ifrs_results: list[IfrsResult] = []
 
         # Step 4: Save raw results
-        _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE results...")
-        _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
+        await _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE results...")
+        await _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
 
         # Step 5: Calculate scores
         ftse_result_dicts = [
@@ -842,7 +832,7 @@ async def run_analysis(
             for r in ftse_results
         ]
 
-        _update_message(supabase, analysis_id, "Calculating ESG scores...")
+        await _update_message(supabase, analysis_id, "Calculating ESG scores...")
         ftse_scores = calculate_ftse_scores(
             ftse_result_dicts,
             indicators_by_theme,
@@ -850,10 +840,10 @@ async def run_analysis(
             zero_indicator_themes=zero_indicator_themes_list if subsector_code else None,
         )
         ifrs_scores = calculate_ifrs_scores([], ifrs_requirements)
-        _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)
+        await _save_scores(supabase, analysis_id, ftse_scores, ifrs_scores)
 
         # Step 6: Generate sitemap recommendations
-        _update_message(supabase, analysis_id, "Generating sitemap recommendations...")
+        await _update_message(supabase, analysis_id, "Generating sitemap recommendations...")
         ftse_gaps = _extract_ftse_gaps(ftse_results, indicators_by_theme)
 
         existing_pages = [
@@ -868,10 +858,10 @@ async def run_analysis(
             ifrs_gaps=[],
             existing_pages=existing_pages,
         )
-        _save_sitemap(supabase, analysis_id, recommendations)
+        await _save_sitemap(supabase, analysis_id, recommendations)
 
         # Step 7: Complete
-        _update_status(supabase, analysis_id, "completed", status_message="Analysis complete!")
+        await _update_status(supabase, analysis_id, "completed", status_message="Analysis complete!")
         logger.info("Analysis %s completed successfully", analysis_id)
 
     except Exception as exc:
@@ -879,10 +869,16 @@ async def run_analysis(
         safe_msg = "Analysis failed due to an internal error. Please try again."
         if "SSRF" in str(exc):
             safe_msg = "The provided URL could not be accessed safely."
+        elif isinstance(exc, asyncio.TimeoutError):
+            exc_msg = str(exc)
+            if "FTSE" in exc_msg:
+                safe_msg = "Analysis scoring timed out. Please try again."
+            else:
+                safe_msg = "Website crawl timed out after 10 minutes. Please try again."
         elif isinstance(exc, httpx.TimeoutException):
             safe_msg = "Website took too long to respond. Please try again."
         try:
-            _update_status(
+            await _update_status(
                 supabase,
                 analysis_id,
                 "failed",
