@@ -8,8 +8,8 @@ import type {
   CreateAnalysisResponse,
 } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? '';
+// All API calls go through the Next.js proxy route — API key is injected server-side.
+const API_BASE = '/api/proxy';
 
 class ApiError extends Error {
   constructor(
@@ -21,10 +21,20 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+const DEFAULT_TIMEOUT_MS = 15_000;
+// Creating an analysis can take >15s when the database is cold (e.g. Supabase
+// resuming from pause) — the backend still succeeds, so allow a longer wait
+// before aborting to avoid showing a false failure to the user.
+const CREATE_ANALYSIS_TIMEOUT_MS = 60_000;
+
+async function request<T>(
+  path: string,
+  options?: RequestInit,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<T> {
   const url = `${API_BASE}${path}`;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15_000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(url, {
@@ -32,7 +42,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        ...(API_KEY && { 'X-API-Key': API_KEY }),
         ...options?.headers,
       },
     });
@@ -64,13 +73,17 @@ export const createAnalysis = (
   companyUrl: string,
   subsectorCode: string,
 ): Promise<CreateAnalysisResponse> => {
-  return request<CreateAnalysisResponse>('/analyses', {
-    method: 'POST',
-    body: JSON.stringify({
-      company_url: companyUrl,
-      subsector_code: subsectorCode,
-    }),
-  });
+  return request<CreateAnalysisResponse>(
+    '/analyses',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        company_url: companyUrl,
+        subsector_code: subsectorCode,
+      }),
+    },
+    CREATE_ANALYSIS_TIMEOUT_MS,
+  );
 };
 
 export const getAnalysis = (id: string): Promise<AnalysisDetail> => {
