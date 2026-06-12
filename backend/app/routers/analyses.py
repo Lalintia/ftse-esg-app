@@ -4,10 +4,11 @@ import asyncio
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from supabase import Client
 
 from app.dependencies import get_supabase
+from app.limiter import limiter
 from app.models.schemas import AnalysisCreateResponse, AnalysisRequest
 from app.services.analyzer import run_analysis
 from app.services.crawler import is_safe_url
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/analyses", tags=["analyses"])
 
 
 @router.post("", status_code=201, response_model=AnalysisCreateResponse)
+@limiter.limit("5/minute")
 async def create_analysis(
+    request: Request,
     body: AnalysisRequest,
     background_tasks: BackgroundTasks,
     supabase: Client = Depends(get_supabase),
@@ -214,7 +217,7 @@ async def get_analysis(
     """
     analysis_id_str = str(analysis_id)
 
-    # Get analysis record
+    # Fetch analysis record first (needed to 404 early if missing)
     analysis_result = await asyncio.to_thread(
         lambda: supabase.table("analyses")
         .select("*")
@@ -228,56 +231,63 @@ async def get_analysis(
 
     analysis = analysis_result.data[0]
 
-    # Get FTSE results with indicator details
-    try:
-        ftse_results = await asyncio.to_thread(
-            lambda: supabase.table("analysis_ftse_results")
-            .select(
-                "id, status, score, evidence, confidence, ai_reasoning, "
-                "source_url, source_page_title, "
-                "ftse_indicators(indicator_code, indicator_name, theme_id, "
-                "ftse_themes(theme_name, pillar, pillar_code))"
+    async def _fetch_ftse() -> object:
+        try:
+            return await asyncio.to_thread(
+                lambda: supabase.table("analysis_ftse_results")
+                .select(
+                    "id, status, score, evidence, confidence, ai_reasoning, "
+                    "source_url, source_page_title, "
+                    "ftse_indicators(indicator_code, indicator_name, theme_id, "
+                    "ftse_themes(theme_name, pillar, pillar_code))"
+                )
+                .eq("analysis_id", analysis_id_str)
+                .execute()
             )
+        except Exception:
+            logger.warning("Join query failed for FTSE results, using simple query", exc_info=True)
+            return await asyncio.to_thread(
+                lambda: supabase.table("analysis_ftse_results")
+                .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title")
+                .eq("analysis_id", analysis_id_str)
+                .execute()
+            )
+
+    async def _fetch_ifrs() -> object:
+        try:
+            return await asyncio.to_thread(
+                lambda: supabase.table("analysis_ifrs_results")
+                .select(
+                    "id, status, evidence, confidence, ai_reasoning, "
+                    "ifrs_requirements(paragraph_ref, standard, chapter, "
+                    "section, requirement_text, is_mandatory)"
+                )
+                .eq("analysis_id", analysis_id_str)
+                .execute()
+            )
+        except Exception:
+            logger.warning("Join query failed for IFRS results, using simple query")
+            return await asyncio.to_thread(
+                lambda: supabase.table("analysis_ifrs_results")
+                .select("id, requirement_id, status, evidence, confidence, ai_reasoning")
+                .eq("analysis_id", analysis_id_str)
+                .execute()
+            )
+
+    async def _fetch_sitemap() -> object:
+        return await asyncio.to_thread(
+            lambda: supabase.table("sitemap_recommendations")
+            .select("*")
             .eq("analysis_id", analysis_id_str)
-            .execute()
-        )
-    except Exception:
-        logger.warning("Join query failed for FTSE results, using simple query", exc_info=True)
-        ftse_results = await asyncio.to_thread(
-            lambda: supabase.table("analysis_ftse_results")
-            .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title")
-            .eq("analysis_id", analysis_id_str)
+            .order("priority")
             .execute()
         )
 
-    # Get IFRS results with requirement details
-    try:
-        ifrs_results = await asyncio.to_thread(
-            lambda: supabase.table("analysis_ifrs_results")
-            .select(
-                "id, status, evidence, confidence, ai_reasoning, "
-                "ifrs_requirements(paragraph_ref, standard, chapter, "
-                "section, requirement_text, is_mandatory)"
-            )
-            .eq("analysis_id", analysis_id_str)
-            .execute()
-        )
-    except Exception:
-        logger.warning("Join query failed for IFRS results, using simple query")
-        ifrs_results = await asyncio.to_thread(
-            lambda: supabase.table("analysis_ifrs_results")
-            .select("id, requirement_id, status, evidence, confidence, ai_reasoning")
-            .eq("analysis_id", analysis_id_str)
-            .execute()
-        )
-
-    # Get sitemap recommendations
-    sitemap_results = await asyncio.to_thread(
-        lambda: supabase.table("sitemap_recommendations")
-        .select("*")
-        .eq("analysis_id", analysis_id_str)
-        .order("priority")
-        .execute()
+    # Run 3 independent DB queries in parallel
+    ftse_results, ifrs_results, sitemap_results = await asyncio.gather(
+        _fetch_ftse(),
+        _fetch_ifrs(),
+        _fetch_sitemap(),
     )
 
     return {

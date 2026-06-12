@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { INDUSTRY_CATEGORIES } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -14,11 +14,67 @@ interface IndustrySelectProps {
 
 export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const closeDropdown = useCallback(() => setIsOpen(false), []);
+  const listboxRef = useRef<HTMLDivElement>(null);
+
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+    setFocusedIndex(-1);
+  }, []);
   useClickOutside(containerRef, closeDropdown);
 
   const selectedCategory = INDUSTRY_CATEGORIES.find((c) => c.value === value);
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (!isOpen || focusedIndex < 0) return;
+    const list = listboxRef.current;
+    if (!list) return;
+    const item = list.querySelector<HTMLElement>(`[id="industry-option-${focusedIndex}"]`);
+    item?.scrollIntoView({ block: 'nearest' });
+  }, [focusedIndex, isOpen]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+          setFocusedIndex(0);
+        } else if (focusedIndex >= 0) {
+          onChange(INDUSTRY_CATEGORIES[focusedIndex].value);
+          closeDropdown();
+        }
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+          setFocusedIndex(0);
+        } else {
+          setFocusedIndex((prev) => Math.min(prev + 1, INDUSTRY_CATEGORIES.length - 1));
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (isOpen) {
+          setFocusedIndex((prev) => Math.max(prev - 1, 0));
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        closeDropdown();
+        break;
+    }
+  };
+
+  const activedescendant = isOpen && focusedIndex >= 0
+    ? `industry-option-${focusedIndex}`
+    : undefined;
 
   return (
     <div ref={containerRef} className="relative">
@@ -30,7 +86,9 @@ export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProp
         aria-haspopup="listbox"
         aria-controls="industry-listbox"
         aria-label="Select industry"
+        aria-activedescendant={activedescendant}
         onClick={() => !disabled && setIsOpen(!isOpen)}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
         className={cn(
           'flex h-14 w-full items-center justify-between rounded-lg border bg-card px-4 text-left transition-all',
@@ -50,22 +108,30 @@ export const IndustrySelect = ({ value, onChange, disabled }: IndustrySelectProp
       </button>
 
       {isOpen && (
-        <div id="industry-listbox" role="listbox" aria-label="Industry options" className="absolute z-50 mt-2 w-full rounded-lg border bg-card shadow-lg animate-fade-in">
+        <div
+          id="industry-listbox"
+          role="listbox"
+          aria-label="Industry options"
+          ref={listboxRef}
+          className="absolute z-50 mt-2 w-full rounded-lg border bg-card shadow-lg animate-fade-in"
+        >
           <div className="max-h-80 overflow-y-auto py-1">
-            {INDUSTRY_CATEGORIES.map((category) => (
+            {INDUSTRY_CATEGORIES.map((category, index) => (
               <button
                 key={category.value}
+                id={`industry-option-${index}`}
                 type="button"
                 role="option"
                 aria-selected={category.value === value}
                 onClick={() => {
                   onChange(category.value);
-                  setIsOpen(false);
+                  closeDropdown();
                 }}
                 className={cn(
                   'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50',
                   category.value === value && 'bg-muted',
                   category.value === 'auto' && 'border-b',
+                  focusedIndex === index && 'outline outline-2 outline-foreground/30',
                 )}
               >
                 {category.value === 'auto' && (

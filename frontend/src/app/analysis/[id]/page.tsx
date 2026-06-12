@@ -389,42 +389,52 @@ export default function AnalysisDashboard({
         ))}
       </div>
 
-      {/* Tab Content — min-height prevents scroll jump when switching tabs */}
-      <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="min-h-screen animate-fade-up-d4">
-        {activeTab === 'ftse' && (
-          <div className="space-y-10">
-            {(['Environmental', 'Social', 'Governance'] as const).map((pillar) => {
-              const themes = pillarGroups[pillar];
-              if (!themes || themes.length === 0) { return null; }
+      {/* Tab panels — both always in DOM so aria-controls targets always exist (WCAG 2.1 AA) */}
+      <div
+        role="tabpanel"
+        id="tabpanel-ftse"
+        aria-labelledby="tab-ftse"
+        hidden={activeTab !== 'ftse'}
+        className="min-h-screen animate-fade-up-d4"
+      >
+        <div className="space-y-10">
+          {(['Environmental', 'Social', 'Governance'] as const).map((pillar) => {
+            const themes = pillarGroups[pillar];
+            if (!themes || themes.length === 0) { return null; }
 
-              return (
-                <div key={pillar}>
-                  <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">
-                    {pillar}
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    {themes.map((group) => (
-                      <ThemeCard key={group.theme} group={group} />
-                    ))}
-                  </div>
+            return (
+              <div key={pillar}>
+                <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                  {pillar}
+                </h3>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                  {themes.map((group) => (
+                    <ThemeCard key={group.theme} group={group} />
+                  ))}
                 </div>
-              );
-            })}
-            {ftseResults.length === 0 && (
-              <EmptyState message="No FTSE indicator results available." />
-            )}
-          </div>
-        )}
+              </div>
+            );
+          })}
+          {ftseResults.length === 0 && (
+            <EmptyState message="No FTSE indicator results available." />
+          )}
+        </div>
+      </div>
 
-        {activeTab === 'architecture' && (
-          <WebsiteArchitecture
-            crawledUrls={analysis.crawled_urls}
-            recommendations={sitemap_recommendations}
-            companyName={companyDisplayName}
-            ftseResults={ftseResults}
-            themeSummaries={themeSummaries ?? undefined}
-          />
-        )}
+      <div
+        role="tabpanel"
+        id="tabpanel-architecture"
+        aria-labelledby="tab-architecture"
+        hidden={activeTab !== 'architecture'}
+        className="min-h-screen animate-fade-up-d4"
+      >
+        <WebsiteArchitecture
+          crawledUrls={analysis.crawled_urls}
+          recommendations={sitemap_recommendations}
+          companyName={companyDisplayName}
+          ftseResults={ftseResults}
+          themeSummaries={themeSummaries ?? undefined}
+        />
       </div>
     </div>
   );

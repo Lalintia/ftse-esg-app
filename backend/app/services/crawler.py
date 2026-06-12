@@ -1463,9 +1463,11 @@ async def crawl_website(
         pdf_count = 0
 
         # One shared Playwright browser for all PDF fallback downloads
-        _pdf_pw = await async_playwright().start()
-        _pdf_browser = await _pdf_pw.chromium.launch(headless=True, args=_PLAYWRIGHT_ARGS)
+        _pdf_pw = None
+        _pdf_browser = None
         try:
+            _pdf_pw = await async_playwright().start()
+            _pdf_browser = await _pdf_pw.chromium.launch(headless=True, args=_PLAYWRIGHT_ARGS)
             for pdf_url in pdf_urls:
                 if pdf_total_chars >= _PDF_MAX_CHARS_TOTAL:
                     logger.info("PDF total char limit reached — stopping PDF extraction")
@@ -1488,8 +1490,10 @@ async def crawl_website(
                     pdf_total_chars += len(pdf_result.markdown_text)
                     pdf_count += 1
         finally:
-            await _pdf_browser.close()
-            await _pdf_pw.stop()
+            if _pdf_browser is not None:
+                await _pdf_browser.close()
+            if _pdf_pw is not None:
+                await _pdf_pw.stop()
 
         logger.info(
             "PDF extraction complete: %d PDF(s) extracted (%d chars total)",

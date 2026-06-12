@@ -17,14 +17,9 @@ _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 async def verify_api_key(api_key: str | None = Security(_api_key_header)) -> None:
-    """Reject requests that don't carry a valid X-API-Key header.
-
-    Skipped when API_KEY env var is not set (local dev without auth).
-    """
+    """Reject requests that don't carry a valid X-API-Key header."""
     settings = get_settings()
     expected = settings.API_KEY
-    if not expected:
-        return
     if not api_key or not secrets.compare_digest(api_key, expected):
         raise HTTPException(status_code=401, detail="Invalid or missing API key.")
 
