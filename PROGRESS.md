@@ -1,6 +1,6 @@
 # FTSE ESG Web App — Progress & Notes
 
-Updated: 19 May 2569
+Updated: 11 June 2569
 
 ---
 
@@ -678,11 +678,7 @@ Tab 3: Sitemap (recommendations เดิม)
 - Sustainable pages (CorporateGovernance, SafetyAndWorkEnvironment): **PASS** — ภาษาไทยถูกต้อง, ฟอนต์ 16px อ่านง่าย
 - Homepage (/): **FAIL** — 3 ปัญหาค้าง
 
-**⚠️ TODO — ค้างอยู่:**
-- [ ] **Homepage index.html เสีย** — cookie banner ภาษาไทยยังเพี้ยน, logo โหลดไม่ได้, ตัวเลข 10009/10010 หลุดมาแสดง (น่าจะเกิดจากการลบ nested HTML กระทบโครงสร้าง)
-- [ ] **รัน FTSE ESG score ใหม่** — หลังลบ mock จะได้คะแนนต่ำกว่า 3.6 (เหลือแต่ข้อมูลจริง)
-- [ ] **แก้ Schema.org** ให้ครบ 100%
-- [ ] **Cloudflare AI bot blocking** — ปิดเฉพาะ ptgesg subdomain
+**~~TODO — ยกเลิกแล้ว (21 พ.ค. 2569)~~** — ตัดสินใจไม่ทำต่อ ptgesg demo
 
 **Server:**
 - IP: 54.169.168.58
@@ -1391,4 +1387,55 @@ EPR28 fix ทำให้ PTG ดีขึ้น **+9 sub-indicators** (261→27
 | Theme header repeat ทุกหน้า | ✅ |
 | PDF พร้อมส่ง Ake | ✅ |
 
-*Updated 20 May 2569*
+---
+
+### Phase 33 — Supabase Auto-Pause Incident + Create-Analysis Timeout Fix (11 June 2569)
+
+**Trigger:** ทดสอบ esg.ohmai.me แบบ end-to-end (ใส่ URL PTG แล้วกด Analyse) — พบว่าใช้งานไม่ได้ ขึ้น "Failed to start analysis" (API 500)
+
+#### Root Cause Investigation (CE debugging — ไล่ทีละจุด)
+
+1. **Container ทั้ง 3 ตัวบน EC2 ปกติ** (up 2 weeks, RAM/disk เหลือ) — ไม่ใช่ปัญหา server
+2. **Backend log:** `httpx.ConnectError: Name or service not known` ตอนเรียก Supabase (`analyses.py:61`)
+3. **DNS test:** `mlfsswnsbajuekmggzqm.supabase.co` = NXDOMAIN จากทุกที่ (host, container, local) แต่ google.com resolve ได้ → **Supabase free tier auto-pause** หลังไม่ใช้งาน ~7 วัน (ใช้ครั้งสุดท้าย 21 พ.ค. → idle 3 สัปดาห์) พอ pause แล้ว DNS record หายไปเลย
+
+**แก้:** พี่โอม Resume project ใน Supabase Dashboard เอง
+- หลัง resume: DNS กลับมาทันที แต่ database บูตจริงอีก ~3 นาที (ช่วงนั้น Cloudflare ตอบ 521 "Web server is down" สลับกับสำเร็จ)
+
+#### Bug ที่เจอเพิ่มระหว่างทดสอบ: False "Failed to start analysis"
+
+- กด Analyse ตอน database เพิ่งตื่น → backend รับงานสำเร็จ (201 Created, ใช้เวลา ~18s เพราะ DB ยังตอบช้า + มี cleanup analyses เก่า) แต่ frontend ขึ้น error
+- **Root cause:** `frontend/src/lib/api.ts:27` — AbortController timeout 15s เท่ากันทุก request → browser ตัด request ก่อน backend ตอบ (`net::ERR_ABORTED`) ทั้งที่ analysis เริ่มรันแล้วเบื้องหลัง → user เข้าใจผิดว่าไม่สำเร็จ แล้วอาจกดซ้ำ
+
+**Fix (commit b6bc277, merged 1556e90):**
+- [x] `request()` รับ `timeoutMs` parameter (default 15s เท่าเดิม)
+- [x] `createAnalysis` ใช้ `CREATE_ANALYSIS_TIMEOUT_MS = 60_000`
+- [x] ผ่าน tsc + eslint, commit บน branch `fix/create-analysis-timeout` → merge main → push GitHub
+
+**Deploy:**
+- Server pull ติด conflict เพราะ `api.ts` มี uncommitted changes (proxy refactor) → backup ไว้ที่ `~/api.ts.server.backup` บน EC2 → `git stash push -- frontend/src/lib/api.ts` → pull → diff ยืนยันไม่มีงานหาย (commit ครอบคลุม proxy changes อยู่แล้ว)
+- Rebuild: `docker compose --env-file .env.production build frontend` + `up -d frontend`
+- Verified: JS bundle บนเว็บจริงมีค่า 60s แล้ว
+
+**⚠️ หมายเหตุสำคัญ:** Server + เครื่อง local มี **uncommitted changes ค้างเยอะ** (proxy refactor, `limiter.py`, `backend/app/routers/main.py`, nginx.conf ฯลฯ) ที่ยังไม่เคย push GitHub — ควร commit ให้เรียบร้อย ไม่งั้น deploy ครั้งหน้าติด stash อีก
+
+#### Benchmark — PTG Energy (11 มิ.ย. 2569)
+
+| | Overall | E | S | G | Pages | PDFs |
+|---|---|---|---|---|---|---|
+| รอบนี้ | **2.3** | 1.5 | 1.7 | 4.4 | 26 | 2 (SD2025 + SD2024) |
+| 1 เม.ย. (best) | 3.1 | 2.3 | 3.0 | 4.0 | 37 | 2 |
+| **REAL** | **3.3** | **2.3** | **3.3** | **4.6** | — | — |
+
+- ตอนนี้นับ **154 indicators / 9 themes** (รวม Biodiversity จาก Phase 30) vs REAL 142/8 → ตัวหารใหญ่ขึ้น กดคะแนน E/S ลง
+- Pages ได้ 26 (เดิม 37) — ต้องตรวจว่า crawl ขาดหน้าไหนไป
+- Pipeline ทำงานครบ: crawl → PDF → 2-round analysis → scoring → dashboard ✅
+
+#### Remaining Work (เพิ่มจากรอบนี้)
+
+- [ ] **กัน Supabase หลับซ้ำ** — ตัดสินใจ: cron ping ทุก 2-3 วัน (ฟรี) vs อัปเกรด Pro (~$25/เดือน) — ยังไม่ได้ทำ
+- [ ] **Commit uncommitted changes บน server/local เข้า GitHub** (proxy refactor ฯลฯ)
+- [ ] **ตรวจ score drop 3.1 → 2.3** — แยกผลกระทบ: 154 vs 142 indicators (Biodiversity denominator) + pages 26 vs 37
+- [ ] ลบ stash + `~/api.ts.server.backup` บน EC2 เมื่อยืนยันทุกอย่างนิ่งแล้ว
+
+*Updated 11 June 2569*
