@@ -727,12 +727,19 @@ async def run_analysis(
 
             # Load indicator-subsector mapping
             from pathlib import Path
-            import json as _json
             mapping_path = Path(__file__).resolve().parent.parent.parent / "data" / "indicator_subsector_mapping.json"
-            indicator_mapping: dict[str, dict] = {}
-            if mapping_path.exists():
+            if not mapping_path.exists():
+                raise FileNotFoundError(
+                    f"Required data file missing: {mapping_path}. "
+                    "Rebuild the Docker image or ensure the data/ directory is mounted."
+                )
+            try:
                 with open(mapping_path, encoding="utf-8") as f:
-                    indicator_mapping = _json.load(f)
+                    indicator_mapping: dict[str, dict] = json.load(f)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"Malformed JSON in {mapping_path}: {exc}"
+                ) from exc
 
             # Build lookup for themes with indicators_applicable=False
             # (e.g., Climate Change for Oil & Gas: theme applies but 0 indicators)

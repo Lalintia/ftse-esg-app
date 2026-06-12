@@ -6,9 +6,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.config import get_settings
 from app.dependencies import get_supabase, verify_api_key
+from app.limiter import limiter
 from app.routers import analyses, health, subsectors
 from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements, sync_indicator_names_to_db
 
@@ -43,9 +47,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as exc:
         logger.warning("Failed to sync indicator names: %s", exc)
 
-    if not _settings.API_KEY:
-        logger.warning("API_KEY is not set — all protected endpoints are unauthenticated")
-
     yield
     logger.info("Shutting down FTSE ESG Analyzer")
 
@@ -56,6 +57,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 _settings = get_settings()
 app.add_middleware(

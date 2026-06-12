@@ -313,15 +313,20 @@ async def _analyze_theme(
                 for code in indicator_codes
             ]
         except Exception as exc:
-            logger.error("FTSE analysis failed for theme %s: %s", theme_name, exc)
+            logger.error(
+                "FTSE analysis failed for theme %s: %s",
+                theme_name,
+                exc,
+                exc_info=True,
+            )
             return [
                 FtseResult(
                     indicator_code=code,
-                    status="missing",
+                    status="error",
                     score=0,
                     evidence="",
                     confidence=0.0,
-                    reasoning="Analysis could not be completed for this indicator.",
+                    reasoning=f"Analysis error ({type(exc).__name__}): {exc}",
                 )
                 for code in indicator_codes
             ]
