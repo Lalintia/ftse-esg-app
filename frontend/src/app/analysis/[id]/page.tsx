@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   ChevronDown,
+  FileText,
   Globe,
   ExternalLink,
   CheckCircle2,
@@ -409,6 +410,13 @@ export default function AnalysisDashboard({
             )}
           </button>
         ))}
+        <Link
+          href={`/analysis/${id}/gap-report`}
+          className="ml-auto inline-flex items-center gap-1.5 self-center rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Gap Report
+        </Link>
       </div>
 
       {/* Tab panels — both always in DOM so aria-controls targets always exist (WCAG 2.1 AA) */}
