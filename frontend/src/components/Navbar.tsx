@@ -48,6 +48,14 @@ export const Navbar = () => {
           >
             About
           </Link>
+          <a
+            href="/readme.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Read Me
+          </a>
         </nav>
       </div>
     </header>

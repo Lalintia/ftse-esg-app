@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FTSE ESG Analyzer — รายงานภาพรวมโปรเจค ระบบ และความแม่นยำ (SI)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #1c2733;
+  --muted: #5c6b7a;
+  --line: #dde4ea;
+  --accent: #1d4e89;
+  --accent-soft: #e8f0fe;
+  --ok: #1a6b3c;
+  --warn: #8a6d00;
+  --bad: #a3252c;
+  --mono: 'IBM Plex Mono', monospace;
+}
+body {
+  font-family: 'Noto Sans Thai', sans-serif;
+  color: var(--ink);
+  line-height: 1.75;
+  background: #fff;
+  font-size: 15px;
+}
+.page { max-width: 880px; margin: 0 auto; padding: 48px 40px; }
+h1 { font-size: 26px; font-weight: 700; line-height: 1.4; }
+h2 {
+  font-size: 19px; font-weight: 700; margin: 40px 0 12px;
+  padding-bottom: 6px; border-bottom: 2px solid var(--accent);
+}
+h2 .num {
+  display: inline-block; background: var(--accent); color: #fff;
+  font-size: 13px; padding: 1px 9px; border-radius: 4px;
+  margin-right: 8px; vertical-align: 2px;
+}
+h3 { font-size: 16px; font-weight: 600; margin: 22px 0 8px; color: var(--accent); }
+p { margin: 8px 0; }
+.cover {
+  border: 1px solid var(--line); border-top: 6px solid var(--accent);
+  border-radius: 8px; padding: 28px 32px; margin-bottom: 8px;
+}
+.cover .sub { color: var(--muted); margin-top: 8px; }
+.meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; font-size: 13.5px; color: var(--muted); }
+.meta b { color: var(--ink); }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13.5px; }
+th {
+  background: #f2f5f8; text-align: left; padding: 8px 10px;
+  border: 1px solid var(--line); font-weight: 600;
+}
+td { padding: 7px 10px; border: 1px solid var(--line); vertical-align: top; }
+tr { break-inside: avoid; }
+thead { display: table-header-group; }
+td.r, th.r { text-align: right; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; background: #f4f6f8; padding: 1px 5px; border-radius: 3px; }
+.rule {
+  background: var(--accent-soft); border: 1px solid #c5d5f5; border-radius: 6px;
+  padding: 12px 16px; margin: 12px 0; font-size: 14px;
+}
+.rule b:first-child { color: var(--accent); }
+.note {
+  background: #fff8e6; border: 1px solid #f0dfa8; border-radius: 6px;
+  padding: 12px 16px; margin: 12px 0; font-size: 14px;
+}
+.flow { margin: 16px 0; }
+.flow .step {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px dashed var(--line);
+  break-inside: avoid;
+}
+.flow .step:last-child { border-bottom: 0; }
+.flow .badge {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; margin-top: 3px;
+}
+.flow .body b { display: block; }
+.ok { color: var(--ok); font-weight: 700; }
+.warn { color: var(--warn); font-weight: 700; }
+.bad { color: var(--bad); font-weight: 700; }
+.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.kpi {
+  flex: 1 1 150px; border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; text-align: center; break-inside: avoid;
+}
+.kpi .v { font-size: 24px; font-weight: 700; color: var(--accent); }
+.kpi .l { font-size: 12.5px; color: var(--muted); }
+.small { font-size: 13px; color: var(--muted); }
+footer {
+  margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px; color: var(--muted);
+}
+@media print {
+  body { font-size: 10.5pt; }
+  .page { padding: 0; max-width: none; }
+  h2 { break-after: avoid; }
+  .cover { break-after: avoid; }
+  @page { size: A4; margin: 16mm 14mm; @bottom-center { content: "หน้า " counter(page) " / " counter(pages); font-size: 9pt; color: #888; } }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="cover">
+  <h1>FTSE ESG Analyzer<br>รายงานภาพรวมโปรเจค ระบบ และความแม่นยำ</h1>
+  <p class="sub">เอกสารอธิบายโปรเจคทั้งหมด — สถาปัตยกรรม ฐานความรู้ (KB) วิธีการ derive ตัวชี้วัด การสอบเทียบกับผลประเมินจริง และข้อจำกัดที่ทราบ — เพื่อให้ผู้อ่านตรวจสอบหลักการและขั้นตอนของระบบได้ครบถ้วน</p>
+  <div class="meta">
+    <span>จัดทำโดย: <b>ทีม ShareInvestor (SI)</b></span>
+    <span>วันที่: <b>12 มิถุนายน 2569</b></span>
+    <span>ระบบ: <b>esg.ohmai.me</b></span>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="v">381</div><div class="l">Indicators ใน KB</div></div>
+  <div class="kpi"><div class="v">827</div><div class="l">Sub-indicators</div></div>
+  <div class="kpi"><div class="v">14</div><div class="l">Themes</div></div>
+  <div class="kpi"><div class="v">173</div><div class="l">ICB Subsectors ในระบบ</div></div>
+  <div class="kpi"><div class="v">2</div><div class="l">บริษัทที่สอบเทียบกับผลจริง</div></div>
+</div>
+
+<h2><span class="num">1</span>โปรเจคนี้คืออะไร</h2>
+<p><b>FTSE ESG Analyzer</b> คือระบบที่รับ URL เว็บไซต์ของบริษัทจดทะเบียน แล้ววิเคราะห์อัตโนมัติว่า ข้อมูล ESG ที่บริษัทเปิดเผยต่อสาธารณะครอบคลุมตัวชี้วัด (indicators) ของ FTSE Russell ESG Scores มากน้อยเพียงใด พร้อมให้คะแนนรายธีมและราย pillar (E / S / G) ผลลัพธ์ใช้เป็นเครื่องมือ pre-assessment สำหรับทีมที่ปรึกษาและบริษัทที่ต้องการเตรียมตัวเข้ารับการประเมิน FTSE จริง</p>
+<p>ระบบให้บริการที่ <code>https://esg.ohmai.me</code> ผู้ใช้กรอก URL เลือกอุตสาหกรรม (หรือให้ AI ตรวจจับอัตโนมัติ) แล้วระบบจะ crawl เว็บไซต์ อ่านเอกสาร แล้วประเมินทีละตัวชี้วัด</p>
+
+<h2><span class="num">2</span>หลักการสำคัญ: No-Leakage (แยกระบบออกจากเฉลย)</h2>
+<div class="rule">
+  <b>กติกาที่ระบบยึดถือ:</b> ฐานความรู้ (KB) ของระบบทั้งหมด derive มาจากเอกสารสาธารณะของ FTSE Russell — เอกสารผลประเมินจริงของบริษัทใดๆ (เฉลย) ใช้เพื่อ <b>สอบเทียบโครงสร้าง</b> (ตัวชี้วัดใด applicable กับอุตสาหกรรมใด มีข้อย่อยกี่ข้อ) เท่านั้น <b>ไม่มีการนำคำตอบหรือคะแนนของบริษัทไหลกลับเข้าระบบ</b>
+</div>
+<p>ปัจจุบันระบบผ่านการสอบเทียบกับผลจริง 2 ชุด: (1) เอกสาร Gap Analysis ของผู้เชี่ยวชาญสำหรับ TIDLOR และ (2) ไฟล์ CDD (Company Data Download) อย่างเป็นทางการของ FTSE สำหรับ PTG Energy — รายละเอียดในหัวข้อ 7</p>
+
+<h2><span class="num">3</span>สถาปัตยกรรมระบบ</h2>
+<table>
+  <thead><tr><th style="width:24%">ส่วนประกอบ</th><th style="width:36%">เทคโนโลยี</th><th>หน้าที่</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend</td><td>Next.js + Tailwind + shadcn/ui</td><td>หน้ากรอก URL, แสดงผลคะแนน, ตาราง gap, Website Architecture, ประวัติการวิเคราะห์</td></tr>
+    <tr><td>Backend</td><td>Python FastAPI</td><td>API, จัดการคิววิเคราะห์, derive ตัวชี้วัด, คำนวณคะแนน</td></tr>
+    <tr><td>Crawler</td><td>Playwright (headless browser)</td><td>เก็บเนื้อหาเว็บ + PDF (เช่น รายงานความยั่งยืน) รวม subdomain ด้าน IR/sustainability</td></tr>
+    <tr><td>AI</td><td>OpenAI <code>gpt-4.1-mini</code></td><td>ตรวจจับอุตสาหกรรม + ประเมินตัวชี้วัดทีละข้อจากเนื้อหาที่ crawl ได้</td></tr>
+    <tr><td>Database</td><td>Supabase (PostgreSQL)</td><td>เก็บผลวิเคราะห์, รายชื่อ 173 ICB subsectors, theme summaries</td></tr>
+    <tr><td>Deploy</td><td>Docker บน AWS EC2</td><td>โดเมน esg.ohmai.me ผ่าน nginx, API key ฝั่ง server เท่านั้น (proxy), มี rate limiting</td></tr>
+  </tbody>
+</table>
+
+<div class="flow">
+  <div class="step"><div class="badge">1</div><div class="body"><b>รับ URL + อุตสาหกรรม</b>ผู้ใช้เลือกจาก 20 กลุ่มอุตสาหกรรม หรือเลือก Auto-detect ให้ AI อ่านเนื้อหาเว็บแล้วระบุรหัส ICB subsector เอง (ถ้าตรวจไม่ได้ ระบบใช้ตัวชี้วัดครบทั้ง 381 ตัว)</div></div>
+  <div class="step"><div class="badge">2</div><div class="body"><b>Crawl เว็บไซต์</b>เก็บหน้าเว็บ + PDF ที่เกี่ยวข้องกับ ESG (รายงานความยั่งยืน, นโยบาย CG, สิทธิมนุษยชน ฯลฯ) รวม subdomain เช่น investor.*, sustainability.*</div></div>
+  <div class="step"><div class="badge">3</div><div class="body"><b>Derive ตัวชี้วัดที่ applicable</b>คัดกรอง 3 ชั้นตามอุตสาหกรรม (หัวข้อ 5) ให้เหลือเฉพาะตัวชี้วัดที่ FTSE ใช้กับอุตสาหกรรมนั้นจริง</div></div>
+  <div class="step"><div class="badge">4</div><div class="body"><b>AI ประเมินทีละตัวชี้วัด</b>ตรวจว่าเนื้อหาที่ crawl ได้ ตอบตัวชี้วัดย่อยแต่ละข้อหรือไม่ พร้อมอ้างอิงแหล่งที่มา (URL/หน้าเอกสาร)</div></div>
+  <div class="step"><div class="badge">5</div><div class="body"><b>คำนวณคะแนน</b>รวมเป็นคะแนนรายธีม (0–5) → pillar E/S/G → คะแนนรวม แล้วบันทึกลงฐานข้อมูลให้ frontend แสดงผล</div></div>
+</div>
+
+<h2><span class="num">4</span>ฐานความรู้ (KB) — แหล่งข้อมูลสาธารณะที่ใช้</h2>
+<table>
+  <thead><tr><th style="width:30%">ไฟล์ในระบบ</th><th style="width:30%">เนื้อหา</th><th>เอกสารต้นทาง (สาธารณะ)</th></tr></thead>
+  <tbody>
+    <tr><td><code>ftse_indicators.json</code></td><td>ตัวชี้วัด 381 ตัว พร้อมชื่อ คำอธิบาย และธีม (14 ธีม)</td><td>FTSE ESG Data Model Indicators RC11 2024–2025 (ฉบับภาษาไทย)</td></tr>
+    <tr><td><code>indicator_subsector_mapping.json</code></td><td>ประเภทของตัวชี้วัดแต่ละตัว (core / sector-specific / performance) และรายชื่อ subsector ที่เกี่ยวข้อง</td><td>คอลัมน์ Subsector ในเอกสาร RC11 (แปลงรหัส ICB เดิม → รหัส 8 หลัก)</td></tr>
+    <tr><td><code>indicator_subparts.json</code></td><td>ตัวชี้วัดย่อย (sub-indicators) รวม 827 รายการ</td><td>ข้อ a./b./c. ในคำอธิบาย RC11 + โครงสร้างข้อย่อยจาก CDD (หัวข้อ 7)</td></tr>
+    <tr><td><code>sector_themes.py</code></td><td>ตารางธีมต่ออุตสาหกรรม (66 subsectors แบบระบุชัด + ค่า default)</td><td>Guidelines FTSE Russell 2026 (ฉบับภาษาไทย) หน้า 41–51</td></tr>
+    <tr><td><code>icb_old_to_new.json</code> + ตาราง DB</td><td>รายชื่อ ICB 173 subsectors + การแปลงรหัสเก่า/ใหม่</td><td>ICB official structure + legacy mapping</td></tr>
+  </tbody>
+</table>
+<div class="note"><b>กฎการ apply ธีม (จากเอกสาร FTSE Data Model Methodology หน้า 9):</b> แต่ละธีมถูกกำหนด exposure จากปัจจัยต่างกัน — ทุกธีมขึ้นกับ Subsector แต่บางธีม (Biodiversity, Water Security, Health &amp; Safety, Human Rights, Labour Standards, Anti-Corruption) ขึ้นกับ <b>Geography</b> ด้วย และบางธีม (Anti-Corruption, Tax Transparency) ขึ้นกับความเป็น <b>Multinational</b> — FTSE ไม่เผยแพร่รายชื่อประเทศต่อธีม ระบบจึงใช้ override สำหรับบริษัทไทย (เช่น ไม่ apply Tax Transparency กับ Emerging Markets)</div>
+
+<h2><span class="num">5</span>Logic การคัดกรองตัวชี้วัด 3 ชั้น</h2>
+<div class="flow">
+  <div class="step"><div class="badge">1</div><div class="body"><b>ชั้นธีม — อุตสาหกรรมนี้ถูกประเมินธีมใดบ้าง</b>เปิดตาราง <code>sector_themes.py</code> ตามรหัส ICB subsector เช่น Consumer Lending ได้ 7 ธีม, Integrated Oil &amp; Gas ได้ 10 ธีม (โดย Climate Change และ Biodiversity คงไว้ระดับธีมแต่ไม่มีตัวชี้วัด สำหรับบริษัทไทยที่ไม่ใช่ multinational)</div></div>
+  <div class="step"><div class="badge">2</div><div class="body"><b>ชั้นตัวชี้วัด — ในธีมนั้นตัวใด applicable</b>ตัวชี้วัด core/performance ใช้กับทุกบริษัทในธีมที่ apply ส่วน sector-specific ใช้เฉพาะ subsector ที่ระบุใน mapping และมี exclude/เงื่อนไขการดำเนินงานตาม footnote ของ RC11 (เช่น ตัวชี้วัด fracking ใช้เฉพาะบริษัทที่มีกระบวนการ E&amp;P)</div></div>
+  <div class="step"><div class="badge">3</div><div class="body"><b>ชั้นตัวชี้วัดย่อย — แต่ละตัวต้องตรวจกี่ข้อ</b>แตกจากข้อ a./b./c. ในคำอธิบาย + ช่องข้อมูลเชิงโครงสร้าง (Coverage, Currency, Base Year, Target Year ฯลฯ) ที่ปรากฏในระบบประเมินจริงของ FTSE</div></div>
+</div>
+
+<h3>จำนวนตัวชี้วัดต่ออุตสาหกรรม (20 กลุ่มที่เปิดให้เลือกบนเว็บ — ตรวจนับจากระบบจริง)</h3>
+<table>
+  <thead><tr><th>อุตสาหกรรม</th><th>รหัส ICB</th><th class="r">ธีม</th><th class="r">Indicators</th><th class="r">Sub-indicators</th></tr></thead>
+  <tbody>
+    <tr><td>Oil, Gas &amp; Energy (Integrated)</td><td><code>60101000</code></td><td class="r">10</td><td class="r">142</td><td class="r">413</td></tr>
+    <tr><td>Electricity &amp; Utilities</td><td><code>65101015</code></td><td class="r">10</td><td class="r">199</td><td class="r">499</td></tr>
+    <tr><td>Renewable Energy</td><td><code>65101010</code></td><td class="r">9</td><td class="r">166</td><td class="r">448</td></tr>
+    <tr><td>Mining &amp; Metals</td><td><code>55102000</code></td><td class="r">10</td><td class="r">180</td><td class="r">483</td></tr>
+    <tr><td>Chemicals</td><td><code>55201000</code></td><td class="r">11</td><td class="r">186</td><td class="r">490</td></tr>
+    <tr><td>Construction &amp; Materials</td><td><code>50101010</code></td><td class="r">9</td><td class="r">158</td><td class="r">380</td></tr>
+    <tr><td>Food &amp; Beverages</td><td><code>45102020</code></td><td class="r">13</td><td class="r">214</td><td class="r">544</td></tr>
+    <tr><td>Personal &amp; Household Goods</td><td><code>45201020</code></td><td class="r">8</td><td class="r">143</td><td class="r">351</td></tr>
+    <tr><td>Healthcare &amp; Pharmaceuticals</td><td><code>20103015</code></td><td class="r">10</td><td class="r">173</td><td class="r">409</td></tr>
+    <tr><td>Banks &amp; Financial Services</td><td><code>30101010</code></td><td class="r">7</td><td class="r">149</td><td class="r">301</td></tr>
+    <tr><td>Consumer Finance</td><td><code>30201020</code></td><td class="r">7</td><td class="r">120</td><td class="r">251</td></tr>
+    <tr><td>Real Estate</td><td><code>35101010</code></td><td class="r">12</td><td class="r">215</td><td class="r">549</td></tr>
+    <tr><td>Technology</td><td><code>10101015</code></td><td class="r">8</td><td class="r">136</td><td class="r">315</td></tr>
+    <tr><td>Telecommunications</td><td><code>15102015</code></td><td class="r">10</td><td class="r">167</td><td class="r">398</td></tr>
+    <tr><td>Media &amp; Entertainment</td><td><code>40301020</code></td><td class="r">5</td><td class="r">104</td><td class="r">215</td></tr>
+    <tr><td>Retail &amp; Consumer Services</td><td><code>40401010</code></td><td class="r">8</td><td class="r">138</td><td class="r">283</td></tr>
+    <tr><td>Travel &amp; Leisure</td><td><code>40501025</code></td><td class="r">9</td><td class="r">146</td><td class="r">358</td></tr>
+    <tr><td>Transportation &amp; Logistics *</td><td><code>50206060</code></td><td class="r">10</td><td class="r">165</td><td class="r">394</td></tr>
+    <tr><td>Automobiles &amp; Parts</td><td><code>40101020</code></td><td class="r">8</td><td class="r">152</td><td class="r">367</td></tr>
+    <tr><td>Industrial &amp; Manufacturing *</td><td><code>50203000</code></td><td class="r">10</td><td class="r">165</td><td class="r">394</td></tr>
+  </tbody>
+</table>
+<p class="small">* สองกลุ่มนี้ยังใช้ชุดธีม default (ตาราง Guidelines ไม่มีคอลัมน์ของ subsector นี้โดยตรง) — อีก 18 กลุ่มใช้โปรไฟล์ธีมเฉพาะอุตสาหกรรมตามเอกสาร FTSE</p>
+
+<h2><span class="num">6</span>การประเมินด้วย AI</h2>
+<p>เมื่อได้รายการตัวชี้วัดย่อยแล้ว ระบบส่งเนื้อหาที่ crawl ได้ (แยกหน้าเว็บ/PDF พร้อม URL ต้นทาง) ให้ AI ตรวจทีละธีมว่า แต่ละข้อย่อยมีข้อมูลเปิดเผยหรือไม่ ผลแต่ละข้อคือสถานะ (พบ / พบบางส่วน / ไม่พบ) พร้อมข้อความอ้างอิงและแหล่งที่มา จากนั้นคำนวณเป็นคะแนนธีม 0–5 ตามสัดส่วนข้อที่ตอบได้ และถ่วงน้ำหนักรวมเป็น pillar E/S/G ด้วยระดับ exposure ของธีม (High = 3, Medium = 2, Low = 1 ตามวิธีของ FTSE)</p>
+<div class="note"><b>ข้อสังเกตเรื่องความนิ่งของคะแนน:</b> การรันวิเคราะห์ซ้ำบนเว็บเดียวกันให้คะแนนต่างกันได้ราว ±0.5–1.0 ต่อ pillar จากความแปรปรวนของ AI (ตัวอย่างจริง: PTG รัน 2 ครั้งห่างกัน 1 วัน ได้คะแนนรวม 2.34 และ 2.48 จากเนื้อหา 26 หน้าเท่ากัน) — การปรับให้คะแนนนิ่งและตรง band ของผลจริง เป็นงานเฟสถัดไป</div>
+
+<h2><span class="num">7</span>การสอบเทียบกับผลจริง (2 บริษัท)</h2>
+<h3>7.1 TIDLOR — เทียบกับ Gap Analysis ของผู้เชี่ยวชาญ</h3>
+<table>
+  <thead><tr><th>รายการ</th><th class="r">ระบบ SI</th><th class="r">ผู้เชี่ยวชาญ (REF)</th><th>ผล</th></tr></thead>
+  <tbody>
+    <tr><td>ธีมที่ applicable</td><td class="r">7</td><td class="r">7</td><td class="ok">ตรงกัน</td></tr>
+    <tr><td>Indicators</td><td class="r">120</td><td class="r">120</td><td class="ok">ตรงกัน</td></tr>
+    <tr><td>Gap ที่ผู้เชี่ยวชาญพบ — ระบบครอบคลุม</td><td class="r">60/60</td><td class="r">60</td><td class="ok">100%</td></tr>
+    <tr><td>Sub-indicators</td><td class="r">251</td><td class="r">219</td><td>ต่างจากรูปแบบการนับ (REF นับตัวชี้วัดที่แตกข้อย่อยเป็น 1 แถว)</td></tr>
+  </tbody>
+</table>
+<h3>7.2 PTG Energy — เทียบกับ CDD อย่างเป็นทางการของ FTSE</h3>
+<p>CDD (Company Data Download) คือไฟล์ผลประเมินจริงที่ FTSE ส่งให้บริษัท ระบุรายตัวว่าตัวชี้วัดใด applicable (YES/NAP) และแต่ละตัวมีข้อย่อยรหัสอะไรบ้าง — เป็น ground truth ที่ละเอียดที่สุดที่มี</p>
+<table>
+  <thead><tr><th>รายการ</th><th class="r">ระบบ SI</th><th class="r">FTSE CDD</th><th>ผล</th></tr></thead>
+  <tbody>
+    <tr><td>ธีมที่มีตัวชี้วัด</td><td class="r">8</td><td class="r">8</td><td class="ok">ตรงกัน</td></tr>
+    <tr><td>Indicators</td><td class="r">142</td><td class="r">142</td><td class="ok">ตรงกัน 142/142 (ไม่มีเกิน ไม่มีขาด)</td></tr>
+    <tr><td>Sub-indicators</td><td class="r">413</td><td class="r">413</td><td class="ok">ตรงกัน 413/413</td></tr>
+  </tbody>
+</table>
+<div class="rule"><b>ความแม่นยำแบบไม่ดูเฉลย:</b> ก่อนการสอบเทียบกับ CDD ระบบ (ที่ derive จากเอกสารสาธารณะล้วน) ได้ 154 indicators เทียบกับเฉลย 142 — <b>ครบทุกตัวที่ควรมี (recall 100%) แต่เกินมา 12 ตัว (~92% precision)</b> ส่วนเกินทั้งหมดอธิบายได้: 7 ตัวจากธีม Biodiversity ที่ขึ้นกับเงื่อนไข geography (กฎอยู่ในเอกสารสาธารณะ แต่รายชื่อประเทศไม่เผยแพร่) และ 5 ตัวจาก footnote เงื่อนไขการดำเนินงานใน RC11 ที่ KB ตกหล่นตอนสกัดข้อมูล — แก้ไขแล้วทั้งหมด</div>
+
+<h2><span class="num">8</span>การตรวจสอบคุณภาพ KB (Audit ที่ผ่านมา)</h2>
+<p>ระบบผ่านการ audit ฐานความรู้ครั้งใหญ่ โดยเทียบกับเอกสารสาธารณะและ CDD พบและแก้ไขปัญหาดังนี้</p>
+<table>
+  <thead><tr><th style="width:34%">ปัญหาที่พบ</th><th style="width:38%">รายละเอียด</th><th>การแก้ไข</th></tr></thead>
+  <tbody>
+    <tr><td>รหัสอุตสาหกรรมบนหน้าเว็บผิด 9/20 ตัว</td><td>2 ตัวไม่มีอยู่ในรายชื่อ ICB (เลือกแล้ว error ทันที), หลายตัวชี้ผิด subsector เช่น "Mining" ชี้ไปรหัสของ Forestry, "Real Estate" ชี้ไปรหัสของ Health Care REITs</td><td>แก้ทั้ง 20 ตัวให้ตรงรายชื่อ ICB 173 และตรวจกับฐานข้อมูลจริงแล้ว</td></tr>
+    <tr><td>ธีม Biodiversity เกินสำหรับ Integrated O&amp;G</td><td>ตาราง Guidelines ระบุว่าธีมนี้ขึ้นกับ geography/multinational ซึ่งบริษัทไทยล้วนไม่เข้าเงื่อนไข</td><td>ปิดตัวชี้วัดธีมนี้สำหรับ subsector ดังกล่าว (แนวเดียวกับ Climate Change)</td></tr>
+    <tr><td>ตัวชี้วัด EWT36–40 เกิน</td><td>RC11 มี footnote "เฉพาะบริษัทที่มีกระบวนการ E&amp;P/กลั่น" ซึ่ง KB ตกหล่นตอนสกัด</td><td>ปรับ mapping + บันทึกเงื่อนไขจาก footnote ไว้ในข้อมูล</td></tr>
+    <tr><td>ข้อย่อยขาด 42 รายการ</td><td>ช่องข้อมูลเชิงโครงสร้าง (Coverage, Currency, Base Year ฯลฯ) ไม่ปรากฏในเอกสารสาธารณะ — เห็นได้จากระบบจริงของ FTSE เท่านั้น</td><td>เติมจากโครงสร้าง CDD (ไม่ใช่คำตอบของบริษัท)</td></tr>
+    <tr><td><b>ชื่อตัวชี้วัดผูกผิดรหัส 49/381 ตัว</b></td><td>กระจุกในธีม Supply Chain: Social (36 ตัว — สลับกับตัวชี้วัดกลุ่มธนาคาร/ประกัน/asset managers), บล็อก Anti-Corruption เลื่อน 1 ตำแหน่ง, กลุ่ม Water 7 ตัว — จำนวนนับไม่เคยผิด (mapping ถูก) แต่ AI อ่านโจทย์ผิดความหมาย</td><td>สร้างชื่อ+คำอธิบายใหม่จากแถวนิยามใน RC11 ทั้ง 49 ตัว ตรวจซ้ำด้วย CDD แล้วทุกตัวที่เทียบได้</td></tr>
+    <tr><td>ข้อย่อย b. ขาด 27 ตัว</td><td>ผลพวงจากชื่อที่ผูกผิด — โครงสร้างจริงมี a./b. แต่ KB มีแค่ข้อเดียว</td><td>เติมครบจากแถว RC11</td></tr>
+  </tbody>
+</table>
+<p>หลังการแก้ไขทั้งหมด: <span class="ok">ชื่อตัวชี้วัด 381/381 ตรงกับแถวนิยามใน RC11</span> (ยกเว้น ECC22 ซึ่ง RC11 ฉบับภาษาไทยไม่มีแถวนิยาม มีเพียงการอ้างถึง) และผลสอบเทียบ TIDLOR/PTG ในหัวข้อ 7 ยังคงครบถ้วน</p>
+
+<h2><span class="num">9</span>เครื่องมือตรวจสอบซ้ำ (Reproducibility)</h2>
+<table>
+  <thead><tr><th style="width:40%">สคริปต์</th><th>หน้าที่</th></tr></thead>
+  <tbody>
+    <tr><td><code>scripts/verify_against_refs.py</code></td><td>เทียบผล derive ของระบบกับ ground truth ทั้ง 2 ชุด (TIDLOR + PTG) — รันซ้ำได้ทุกเมื่อ</td></tr>
+    <tr><td><code>scripts/validate_kb_against_rc11.py</code></td><td>ตรวจชื่อ/คำอธิบายทั้ง 381 ตัว เทียบกับแถวนิยามใน RC11 แบบ row-level (exit code 1 ถ้าพบไม่ตรง)</td></tr>
+    <tr><td><code>scripts/fix_kb_names_from_rc11.py</code></td><td>เครื่องมือซ่อมชื่อจาก RC11 (dry-run เป็นค่าเริ่มต้น)</td></tr>
+    <tr><td><code>scripts/add_cdd_subparts.py</code></td><td>เติมโครงสร้างข้อย่อยจาก CDD (idempotent)</td></tr>
+    <tr><td><code>scripts/generate_tidlor_compare.py</code></td><td>สร้างรายงานเปรียบเทียบ TIDLOR (HTML)</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">10</span>ข้อจำกัดที่ทราบ และงานเฟสถัดไป</h2>
+<table>
+  <thead><tr><th style="width:38%">ข้อจำกัด</th><th>ผลกระทบ / แนวทาง</th></tr></thead>
+  <tbody>
+    <tr><td>FTSE ไม่เผยแพร่รายชื่อประเทศต่อธีม (Geography rule)</td><td>ธีมที่ขึ้นกับ geography ต้องอนุมานจากผลจริง — แม่นยำเต็มที่เฉพาะอุตสาหกรรม/ประเทศที่เคยสอบเทียบ</td></tr>
+    <tr><td>โครงสร้างข้อย่อยเชิงระบบไม่อยู่ในเอกสารสาธารณะ</td><td>เติมได้จาก CDD ของลูกค้าแต่ละราย — ทุกการสอบเทียบใหม่ทำให้ KB แม่นขึ้นถาวร</td></tr>
+    <tr><td>ตาราง Guidelines มี 55 subsectors — ระบบ map ตรงตัวได้ 34</td><td>คอลัมน์ที่เหลือ (เช่น Airlines, Marine Transportation, Tires) ใช้ค่า default ไปก่อน เพราะเอกสารไม่ระบุระดับ exposure ให้เพิ่มเองได้โดยไม่เดา</td></tr>
+    <tr><td>ตัวชี้วัดแบบมีเงื่อนไขการดำเนินงาน (เช่น fracking)</td><td>ระบบคัดที่ระดับ subsector — บริษัทใน subsector เดียวกันที่มี operations ต่างกัน (เช่น Integrated O&amp;G ที่มีโรงกลั่น) อาจต้องปรับรายบริษัท</td></tr>
+    <tr><td>คะแนนยังแกว่งจาก AI (±0.5–1.0 ต่อ pillar) และยังต่ำกว่า band ผลจริง</td><td>เฟสถัดไป: score band calibration (ตัวอย่าง PTG ระบบให้ 2.48 ขณะที่ผลจริงได้ 3.3)</td></tr>
+    <tr><td>ECC22 ไม่มีแถวนิยามใน RC11 ฉบับภาษาไทย</td><td>คงชื่อใน KB ไว้ (สอดคล้องกับบริบทการอ้างถึงในเอกสาร) — รอเทียบกับ CDD ของบริษัทที่ธีม Climate Change applicable</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">11</span>สรุป</h2>
+<p>FTSE ESG Analyzer เป็นระบบ pre-assessment ที่ derive ตัวชี้วัดจากเอกสารสาธารณะของ FTSE Russell ทั้งหมด ผ่านการสอบเทียบโครงสร้างกับผลประเมินจริง 2 บริษัท — <b>TIDLOR ตรง 120/120 indicators และครอบคลุม gap ของผู้เชี่ยวชาญ 60/60</b> และ <b>PTG ตรงกับ CDD อย่างเป็นทางการ 142/142 indicators และ 413/413 sub-indicators</b> — ฐานความรู้ผ่านการ audit ชื่อครบทั้ง 381 ตัวเทียบกับ RC11 พร้อมเครื่องมือตรวจสอบซ้ำอัตโนมัติ งานเฟสถัดไปคือการปรับความนิ่งและ band ของคะแนนให้ตรงกับผลประเมินจริง</p>
+
+<footer>
+  เอกสารภายในทีม ShareInvestor (SI) — ตัวเลขทั้งหมดในรายงานนี้ตรวจนับจากระบบจริง ณ วันที่ 12 มิถุนายน 2569 (KB เวอร์ชันหลัง commit <span class="mono">c996aad</span>) | เอกสารอ้างอิง: FTSE ESG Data Model Indicators RC11 2024–2025 (TH), Guidelines FTSE Russell 2026 (TH) หน้า 41–51, FTSE ESG Data Model Methodology v1.1 (Aug 2025) หน้า 8–9, FTSE ESG Scores &amp; Indices FAQ (Dec 2025)
+</footer>
+
+</div>
+</body>
+</html>
