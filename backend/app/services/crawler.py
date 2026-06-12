@@ -140,7 +140,10 @@ _DISCOVERY_TIMEOUT_MS = 10_000
 _NETWORKIDLE_TIMEOUT_MS = 4_000
 _SUB_PREFIXES = ["investor", "ir", "sustainability", "esg"]
 
-_PDF_MAX_BYTES = 20 * 1024 * 1024  # 20 MB — cap to avoid OOM on t3.medium
+# 50 MB — modern SD reports run 40-45 MB (PTG 2025: 41 MB, 2024: 44.8 MB).
+# Extraction is TOC-driven and page-selective, so the memory cost of a large
+# file is dominated by the raw bytes, not the parsed pages.
+_PDF_MAX_BYTES = 50 * 1024 * 1024
 _PDF_MAX_CHARS_PER_FILE = 200_000
 _PDF_MAX_CHARS_TOTAL = 400_000
 _PDF_MAX_FILES = 2
