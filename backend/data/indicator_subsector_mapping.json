@@ -734,7 +734,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -742,7 +741,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -750,7 +748,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -758,7 +755,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
@@ -766,7 +762,6 @@
     "type": "specific",
     "marker": "S",
     "subsectors": [
-      "60101000",
       "60101010"
     ]
   },
