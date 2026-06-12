@@ -6,6 +6,7 @@ import type {
   AnalysisDetail,
   AnalysisListResponse,
   CreateAnalysisResponse,
+  PrecheckResponse,
 } from '@/lib/types';
 
 // All API calls go through the Next.js proxy route — API key is injected server-side.
@@ -83,6 +84,27 @@ export const createAnalysis = (
       }),
     },
     CREATE_ANALYSIS_TIMEOUT_MS,
+  );
+};
+
+// Auto-detect mode fetches the homepage + one AI call — allow more than the
+// default read timeout but far less than a full analysis.
+const PRECHECK_TIMEOUT_MS = 45_000;
+
+export const precheckAnalysis = (
+  companyUrl: string,
+  subsectorCode: string,
+): Promise<PrecheckResponse> => {
+  return request<PrecheckResponse>(
+    '/precheck',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        company_url: companyUrl,
+        subsector_code: subsectorCode,
+      }),
+    },
+    PRECHECK_TIMEOUT_MS,
   );
 };
 

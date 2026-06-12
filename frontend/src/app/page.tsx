@@ -2,15 +2,19 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ListChecks } from 'lucide-react';
 import { IndustrySelect } from '@/components/IndustrySelect';
-import { createAnalysis } from '@/lib/api';
+import { PrecheckPanel } from '@/components/PrecheckPanel';
+import { createAnalysis, precheckAnalysis } from '@/lib/api';
+import type { PrecheckResponse } from '@/lib/types';
 
 export default function HomePage() {
   const router = useRouter();
   const [url, setUrl] = useState('');
   const [industryCode, setIndustryCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPrechecking, setIsPrechecking] = useState(false);
+  const [precheck, setPrecheck] = useState<PrecheckResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
 
@@ -32,16 +36,40 @@ export default function HomePage() {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
+  const validateForm = (): boolean => {
     if (!url.trim()) {
       setError('Please enter a company website URL.');
-      return;
+      return false;
     }
     if (!industryCode) {
       setError('Please select an industry.');
+      return false;
+    }
+    return true;
+  };
+
+  const handlePrecheck = async () => {
+    setError(null);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsPrechecking(true);
+    setPrecheck(null);
+    try {
+      const result = await precheckAnalysis(url.trim(), industryCode);
+      setPrecheck(result);
+    } catch {
+      setError('Pre-check failed. Please check the URL and try again.');
+    } finally {
+      setIsPrechecking(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!validateForm()) {
       return;
     }
 
@@ -111,21 +139,44 @@ export default function HomePage() {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-foreground text-base font-medium text-background transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <span>Analysing...</span>
-            ) : (
-              <>
-                <span>Analyse</span>
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handlePrecheck}
+              disabled={isSubmitting || isPrechecking}
+              className="flex h-14 flex-1 items-center justify-center gap-2 rounded-lg border bg-card text-base font-medium transition-all hover:bg-muted active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isPrechecking ? (
+                <span>Checking...</span>
+              ) : (
+                <>
+                  <ListChecks className="h-4 w-4" />
+                  <span>Pre-check</span>
+                </>
+              )}
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || isPrechecking}
+              className="flex h-14 flex-1 items-center justify-center gap-2 rounded-lg bg-foreground text-base font-medium text-background transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <span>Analysing...</span>
+              ) : (
+                <>
+                  <span>Analyse</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
         </form>
+
+        {precheck && (
+          <div className="mt-6">
+            <PrecheckPanel result={precheck} />
+          </div>
+        )}
       </div>
     </div>
   );

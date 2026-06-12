@@ -159,3 +159,24 @@ export interface CrawledUrls {
   pages: CrawledPageInfo[];
   pdfs: CrawledPdfInfo[];
 }
+
+export interface PrecheckTheme {
+  theme_name: string;
+  pillar: string;
+  exposure: string;
+  indicator_count: number;
+  subpart_count: number;
+  zero_indicator: boolean;
+}
+
+export interface PrecheckResponse {
+  company_url: string;
+  subsector_code: string;
+  subsector_name: string;
+  industry_name: string;
+  auto_detected: boolean;
+  total_themes: number;
+  total_indicators: number;
+  total_sub_indicators: number;
+  themes: PrecheckTheme[];
+}
