@@ -1,5 +1,8 @@
 """Industry auto-detection prompt for ICB subsector classification."""
 
+# Every code below must exist in the official ICB 173-subsector list
+# (icb_subsectors table) and should have an explicit theme profile in
+# app/utils/sector_themes.py where possible.
 INDUSTRY_DETECT_PROMPT = """You are an ICB (Industry Classification Benchmark) expert.
 
 Analyze this company website content and determine the most appropriate ICB subsector.
@@ -10,26 +13,36 @@ Return ONLY a JSON object with:
 - "confidence": 0.0-1.0
 
 Common ICB subsector codes:
-- 60101010: Oil & Gas Producers
-- 65101010: Electricity
-- 55101010: Industrial Metals & Mining
+- 60101000: Integrated Oil & Gas
+- 60101010: Oil: Crude Producers (Exploration & Production)
+- 65101015: Conventional Electricity
+- 65101010: Alternative Electricity (solar, wind, renewables)
+- 65102030: Water Utilities
+- 55102000: General Mining
+- 55102010: Iron & Steel
+- 55201000: Chemicals (commodity / diversified)
+- 55201020: Specialty Chemicals
+- 50101010: Construction (heavy construction, contractors)
+- 50101035: Building Materials
+- 50203000: Diversified Industrials (machinery, manufacturing)
+- 50206060: Transportation Services (logistics)
 - 45102020: Food Products
-- 45201020: Personal Goods
-- 20103010: Pharmaceuticals
+- 45102010: Farming, Fishing, Ranching and Plantations
+- 45201020: Personal Products
+- 20103015: Pharmaceuticals
+- 20103010: Biotechnology
 - 30101010: Banks
-- 35102010: Real Estate Investment & Services
+- 30201020: Consumer Lending (consumer finance, leasing)
+- 30302010: Insurance (full line)
+- 35101010: Real Estate Holding & Development
 - 10101015: Software
-- 15101010: Telecommunications
-- 40201020: General Retailers
-- 40501020: Restaurants & Bars
-- 50101010: Industrial Transportation
-- 40101010: Automobiles
-- 50201030: Electronic & Electrical Equipment
-- 55201010: Chemicals
-- 50201010: Construction & Materials
-- 60102020: Alternative Energy
-- 15104025: Media
-- 65102020: Gas, Water & Multi-utilities
+- 10102010: Semiconductors
+- 15102015: Telecommunications Services (mobile, fixed-line)
+- 40301020: Media Agencies (broadcasting, entertainment)
+- 40401010: Diversified Retailers
+- 40501025: Hotels & Motels
+- 40501040: Restaurants & Bars
+- 40101020: Automobiles
 
 Website content (first 3000 chars):
 """
