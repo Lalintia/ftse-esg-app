@@ -41,6 +41,11 @@ export interface FtseIndicatorInfo {
   ftse_themes: FtseThemeInfo;
 }
 
+export interface SubpartResult {
+  status: 'found' | 'partial' | 'missing';
+  text: string;
+}
+
 export interface FtseResultItem {
   id: string;
   status: 'found' | 'partial' | 'missing';
@@ -50,6 +55,7 @@ export interface FtseResultItem {
   ai_reasoning: string | null;
   source_url: string | null;
   source_page_title: string | null;
+  subpart_results: Record<string, SubpartResult> | null;
   ftse_indicators: FtseIndicatorInfo;
 }
 

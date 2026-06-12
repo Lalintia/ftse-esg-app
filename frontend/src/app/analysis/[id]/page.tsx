@@ -160,6 +160,28 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
                       {r.evidence}
                     </p>
                   )}
+                  {r.subpart_results && Object.keys(r.subpart_results).length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5">
+                      {Object.entries(r.subpart_results).map(([code, sp]) => (
+                        <li key={code} className="flex items-start gap-1.5 text-[11px] leading-relaxed">
+                          <span aria-hidden className={cn(
+                            'mt-0.5 shrink-0 font-bold',
+                            sp.status === 'found' && 'text-emerald-600',
+                            sp.status === 'partial' && 'text-amber-600',
+                            sp.status === 'missing' && 'text-red-400',
+                          )}>
+                            {sp.status === 'found' ? '✓' : sp.status === 'partial' ? '◐' : '✗'}
+                          </span>
+                          <span className={cn(
+                            sp.status === 'missing' ? 'text-muted-foreground/60' : 'text-muted-foreground',
+                          )}>
+                            <span className="sr-only">{sp.status}: </span>
+                            {sp.text || code}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {r.source_url && isSafeUrl(r.source_url) && (
                     <a
                       href={r.source_url}

@@ -30,6 +30,7 @@ from app.utils.data_loader import (
     load_ifrs_requirements,
 )
 from app.utils.applicability import derive_applicable
+from app.utils.subpart_resolver import get_subparts_for_subsector
 
 logger = logging.getLogger(__name__)
 
@@ -318,6 +319,7 @@ async def _save_ftse_results(
     analysis_id: str,
     results: list[FtseResult],
     indicators: list[dict[str, str | bool]],
+    subparts_by_indicator: dict[str, list[dict[str, str]]] | None = None,
 ) -> None:
     """Save FTSE analysis results to the database.
 
@@ -326,7 +328,16 @@ async def _save_ftse_results(
         analysis_id: UUID of the analysis.
         results: List of FtseResult from analysis.
         indicators: All FTSE indicators for looking up IDs.
+        subparts_by_indicator: Sub-indicator definitions, used to attach
+            the question text to each per-subpart status.
     """
+    subparts_by_indicator = subparts_by_indicator or {}
+    subpart_texts: dict[str, str] = {
+        sp["subpart_code"]: sp["subpart_text"]
+        for sps in subparts_by_indicator.values()
+        for sp in sps
+    }
+
     # Look up indicator UUIDs from the database
     indicator_rows = await asyncio.to_thread(
         lambda: supabase.table("ftse_indicators").select("id, indicator_code").execute()
@@ -336,7 +347,7 @@ async def _save_ftse_results(
         for row in indicator_rows.data
     }
 
-    seen: dict[str, dict[str, str | float | int | None]] = {}
+    seen: dict[str, dict[str, str | float | int | dict | None]] = {}
     for r in results:
         indicator_id = code_to_id.get(r.indicator_code)
         if not indicator_id:
@@ -344,6 +355,13 @@ async def _save_ftse_results(
             continue
 
         status = r.status if r.status in VALID_STATUSES else "missing"
+
+        subpart_results: dict[str, dict[str, str]] | None = None
+        if r.subparts:
+            subpart_results = {
+                code: {"status": sp_status, "text": subpart_texts.get(code, "")}
+                for code, sp_status in r.subparts.items()
+            }
 
         seen[indicator_id] = {
             "analysis_id": analysis_id,
@@ -355,6 +373,7 @@ async def _save_ftse_results(
             "ai_reasoning": r.reasoning or None,
             "source_url": r.source_url or None,
             "source_page_title": r.source_page_title or None,
+            "subpart_results": subpart_results,
         }
 
     rows = list(seen.values())
@@ -753,10 +772,22 @@ async def run_analysis(
             "IFRS analysis disabled (cost saving). Scores will be zero for %s.",
             analysis_id,
         )
+        # Sub-indicator lists per indicator — the AI assesses each one and
+        # the indicator score is derived from the per-subpart coverage.
+        subparts_by_indicator: dict[str, list[dict[str, str]]] = {}
+        if subsector_code:
+            for entry in get_subparts_for_subsector(subsector_code).values():
+                subparts_by_indicator.setdefault(entry["indicator_code"], []).append({
+                    "subpart_code": entry["subpart_code"],
+                    "subpart_text": entry["subpart_text"],
+                })
+
         try:
             ftse_results = await asyncio.wait_for(
                 analyze_ftse(
-                    openai_client, website_content, indicators_by_theme, pdf_content=pdf_content,
+                    openai_client, website_content, indicators_by_theme,
+                    pdf_content=pdf_content,
+                    subparts_by_indicator=subparts_by_indicator,
                 ),
                 timeout=900.0,
             )
@@ -766,7 +797,10 @@ async def run_analysis(
 
         # Step 4: Save raw results
         await _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE results...")
-        await _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
+        await _save_ftse_results(
+            supabase, analysis_id, ftse_results, ftse_indicators,
+            subparts_by_indicator=subparts_by_indicator,
+        )
 
         # Step 5: Calculate scores
         ftse_result_dicts = [

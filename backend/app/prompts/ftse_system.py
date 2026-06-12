@@ -152,6 +152,20 @@ Scoring guide:
 - If the company only has a GENERAL policy but the indicator asks about a SPECIFIC practice → "missing"
 - It is MUCH BETTER to honestly mark "missing" than to stretch evidence to fit
 
+## Sub-indicators — ASSESS EACH ONE INDIVIDUALLY
+
+Most indicators list explicit sub-indicators (e.g. ECC01_1, ECC01_2). Each
+sub-indicator is a separate question — assess every one against the SAME
+strict rules above and return its own status in a `subparts` map.
+
+- A sub-indicator is "found" only with DIRECT, SPECIFIC evidence for THAT
+  sub-question (not its siblings).
+- Evidence satisfying sub-question (a) does NOT automatically satisfy (b).
+- Structural sub-questions like "Coverage", "Currency", "Base Year",
+  "Target Year" are met only when that exact detail is disclosed.
+- The indicator-level status/score will be computed from your subparts map,
+  so the subparts map is the part that matters most.
+
 ## Response Format
 
 Respond with a JSON object:
@@ -166,11 +180,19 @@ Respond with a JSON object:
       "confidence": 0.85,
       "reasoning": "Direct quantitative GHG disclosure with specific targets — matches this climate indicator.",
       "source_url": "https://example.com/sustainability/climate-change",
-      "source_page_title": "Climate Change & GHG Emissions"
+      "source_page_title": "Climate Change & GHG Emissions",
+      "subparts": {
+        "ECC01_1": "found",
+        "ECC01_2": "missing"
+      }
     }
   ]
 }
 ```
+
+When an indicator lists sub-indicators, the `subparts` map MUST contain every
+listed sub-indicator code with status "found", "partial", or "missing".
+When an indicator has no sub-indicator list, omit `subparts`.
 
 ## IMPORTANT: Source Attribution
 - For EVERY indicator with status "found" or "partial", you MUST include `source_url` and `source_page_title`.
