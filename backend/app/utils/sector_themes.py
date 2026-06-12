@@ -780,13 +780,14 @@ SECTOR_THEME_MAPPING: dict[str, list[dict[str, str | bool]]] = {
     # ── ENERGY (Industry 60) ───────────────────────────────────────────────
     # Integrated Oil and Gas (old: 0537) — p.46
     # Climate Change kept at theme level; indicators_applicable=False per PTG calibration
-    # (Integrated O&G subsector has 0 applicable CC indicators in FTSE 2026 TH set).
-    # Biodiversity same treatment: Guidelines p.46 marks it geography/multinational-
-    # dependent (underlined check) and the PTG CDD flags every EBD indicator as NAP
-    # for a Thailand-only company.
+    # (Integrated O&G subsector has 0 applicable CC indicators in FTSE 2026 TH set,
+    # and the official PTG report scores the theme 1 — the zero-indicator floor).
+    # Biodiversity is NOT listed at all: Guidelines p.46 marks it geography/
+    # multinational-dependent, the PTG CDD flags every EBD indicator NAP, and the
+    # official PTG report leaves the theme score BLANK (excluded from the pillar),
+    # unlike Climate Change's floor score of 1.
     "60101000": [
         {"theme": "Climate Change", "exposure": "High", "indicators_applicable": False},
-        {"theme": "Biodiversity", "exposure": "High", "indicators_applicable": False},
         {"theme": "Pollution & Resources", "exposure": "High"},
         {"theme": "Water Security", "exposure": "High"},
         {"theme": "Health & Safety", "exposure": "High"},
