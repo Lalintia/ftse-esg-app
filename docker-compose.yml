@@ -3,7 +3,10 @@ services:
     build: ./backend
     env_file: .env.production
     restart: unless-stopped
+    # memswap 3g caps RAM+swap so a runaway extraction OOM-kills the
+    # container instead of dragging the whole host into reclaim thrash.
     mem_limit: 2g
+    memswap_limit: 3g
     expose:
       - "8000"
 
@@ -14,6 +17,7 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    mem_limit: 768m
     expose:
       - "3000"
 

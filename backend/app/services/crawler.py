@@ -144,6 +144,9 @@ _SUB_PREFIXES = ["investor", "ir", "sustainability", "esg"]
 # Extraction is TOC-driven and page-selective, so the memory cost of a large
 # file is dominated by the raw bytes, not the parsed pages.
 _PDF_MAX_BYTES = 50 * 1024 * 1024
+# Hard cap on pages extracted per PDF — bounds both runtime and memory
+# regardless of how many pages the TOC scan marks as relevant.
+_PDF_MAX_PAGES_READ = 150
 _PDF_MAX_CHARS_PER_FILE = 200_000
 _PDF_MAX_CHARS_TOTAL = 400_000
 _PDF_MAX_FILES = 2
@@ -771,7 +774,9 @@ def _find_relevant_pdf_pages(
         logger.info("PDF %s: no TOC page refs — scanning sampled pages", filename)
         sampled_pages: set[int] = set(range(min(10, total_pages)))
         for i in range(0, total_pages, 20):
-            page_text = pdf.pages[i].extract_text() or ""
+            scan_page = pdf.pages[i]
+            page_text = scan_page.extract_text() or ""
+            scan_page.flush_cache()
             page_lower = page_text.lower()
             for keyword, weight in _ESG_TOC_KEYWORDS:
                 if keyword.lower() in page_lower:
@@ -840,18 +845,23 @@ def _extract_text_from_pdf_bytes(
                 "PDF %s: %d pages total, smart-reading %d relevant pages",
                 filename, total_pdf_pages, len(relevant_pages),
             )
-            pages_to_read = relevant_pages
+            pages_to_read = relevant_pages[:_PDF_MAX_PAGES_READ]
         else:
             logger.info(
                 "PDF %s: %d pages total, no TOC found — reading sequentially",
                 filename, total_pdf_pages,
             )
-            pages_to_read = list(range(total_pdf_pages))
+            pages_to_read = list(range(min(total_pdf_pages, _PDF_MAX_PAGES_READ)))
 
         for i in pages_to_read:
             if i >= total_pdf_pages:
                 continue
-            page_text = pdf.pages[i].extract_text()
+            page = pdf.pages[i]
+            page_text = page.extract_text()
+            # Large reports (40+ MB) blow past the container memory limit if
+            # pdfplumber keeps every parsed page cached — drop each page's
+            # object cache as soon as its text is out.
+            page.flush_cache()
             if page_text and page_text.strip():
                 part = f"--- Page {i + 1} ---\n{page_text.strip()}"
                 extracted_parts.append(part)
