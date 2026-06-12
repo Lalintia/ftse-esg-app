@@ -735,35 +735,40 @@
     "marker": "S",
     "subsectors": [
       "60101010"
-    ]
+    ],
+    "condition": "RC11 p.21: only companies with Exploration & Production operations are assessed"
   },
   "EWT37": {
     "type": "specific",
     "marker": "S",
     "subsectors": [
       "60101010"
-    ]
+    ],
+    "condition": "RC11 p.21: only companies with Exploration & Production operations are assessed"
   },
   "EWT38": {
     "type": "specific",
     "marker": "S",
     "subsectors": [
       "60101010"
-    ]
+    ],
+    "condition": "RC11 p.21: only companies with refining operations are assessed"
   },
   "EWT39": {
     "type": "specific",
     "marker": "S",
     "subsectors": [
       "60101010"
-    ]
+    ],
+    "condition": "RC11 p.21: listed for 533 E&P and 537 Integrated O&G; PTG CDD marks NAP (no upstream ops)"
   },
   "EWT40": {
     "type": "specific",
     "marker": "S",
     "subsectors": [
       "60101010"
-    ]
+    ],
+    "condition": "RC11 p.21: only companies with Exploration & Production operations are assessed"
   },
   "EWT41": {
     "type": "specific",
