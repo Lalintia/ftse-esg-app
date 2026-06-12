@@ -29,7 +29,8 @@ from app.utils.data_loader import (
     load_ftse_indicators,
     load_ifrs_requirements,
 )
-from app.utils.sector_themes import get_applicable_themes
+from app.utils.applicability import derive_applicable
+from app.utils.subpart_resolver import get_subparts_for_subsector
 
 logger = logging.getLogger(__name__)
 
@@ -318,6 +319,7 @@ async def _save_ftse_results(
     analysis_id: str,
     results: list[FtseResult],
     indicators: list[dict[str, str | bool]],
+    subparts_by_indicator: dict[str, list[dict[str, str]]] | None = None,
 ) -> None:
     """Save FTSE analysis results to the database.
 
@@ -326,7 +328,16 @@ async def _save_ftse_results(
         analysis_id: UUID of the analysis.
         results: List of FtseResult from analysis.
         indicators: All FTSE indicators for looking up IDs.
+        subparts_by_indicator: Sub-indicator definitions, used to attach
+            the question text to each per-subpart status.
     """
+    subparts_by_indicator = subparts_by_indicator or {}
+    subpart_texts: dict[str, str] = {
+        sp["subpart_code"]: sp["subpart_text"]
+        for sps in subparts_by_indicator.values()
+        for sp in sps
+    }
+
     # Look up indicator UUIDs from the database
     indicator_rows = await asyncio.to_thread(
         lambda: supabase.table("ftse_indicators").select("id, indicator_code").execute()
@@ -336,7 +347,7 @@ async def _save_ftse_results(
         for row in indicator_rows.data
     }
 
-    seen: dict[str, dict[str, str | float | int | None]] = {}
+    seen: dict[str, dict[str, str | float | int | dict | None]] = {}
     for r in results:
         indicator_id = code_to_id.get(r.indicator_code)
         if not indicator_id:
@@ -344,6 +355,13 @@ async def _save_ftse_results(
             continue
 
         status = r.status if r.status in VALID_STATUSES else "missing"
+
+        subpart_results: dict[str, dict[str, str]] | None = None
+        if r.subparts:
+            subpart_results = {
+                code: {"status": sp_status, "text": subpart_texts.get(code, "")}
+                for code, sp_status in r.subparts.items()
+            }
 
         seen[indicator_id] = {
             "analysis_id": analysis_id,
@@ -355,6 +373,7 @@ async def _save_ftse_results(
             "ai_reasoning": r.reasoning or None,
             "source_url": r.source_url or None,
             "source_page_title": r.source_page_title or None,
+            "subpart_results": subpart_results,
         }
 
     rows = list(seen.values())
@@ -489,6 +508,7 @@ async def _save_sitemap(
                 "type": rec.rec_type,
                 "existing_page_url": rec.existing_page_url,
                 "data_to_add": rec.data_to_add,
+                "addresses_gaps": rec.addresses_gaps,
             }),
         })
 
@@ -719,84 +739,23 @@ async def run_analysis(
         # Filter indicators by subsector mapping (theme applicability + indicator-subsector)
         zero_indicator_themes_list: list[dict[str, str]] = []
         if subsector_code:
-            applicable_themes = get_applicable_themes(subsector_code)
-            applicable_theme_names = {t["theme"] for t in applicable_themes}
-            all_theme_count = sum(
+            all_indicator_count = sum(
                 len(inds) for inds in indicators_by_theme.values()
             )
-
-            # Load indicator-subsector mapping
-            from pathlib import Path
-            mapping_path = Path(__file__).resolve().parent.parent.parent / "data" / "indicator_subsector_mapping.json"
-            if not mapping_path.exists():
-                raise FileNotFoundError(
-                    f"Required data file missing: {mapping_path}. "
-                    "Rebuild the Docker image or ensure the data/ directory is mounted."
-                )
-            try:
-                with open(mapping_path, encoding="utf-8") as f:
-                    indicator_mapping: dict[str, dict] = json.load(f)
-            except json.JSONDecodeError as exc:
-                raise ValueError(
-                    f"Malformed JSON in {mapping_path}: {exc}"
-                ) from exc
-
-            # Build lookup for themes with indicators_applicable=False
-            # (e.g., Climate Change for Oil & Gas: theme applies but 0 indicators)
-            no_indicator_themes: set[str] = set()
-            for t in applicable_themes:
-                if not t.get("indicators_applicable", True):
-                    no_indicator_themes.add(t["theme"])
-
-            filtered_by_theme: dict[str, list[dict[str, str | bool]]] = {}
-            for theme, inds in indicators_by_theme.items():
-                if theme not in applicable_theme_names:
-                    continue
-                if theme in no_indicator_themes:
-                    continue
-
-                applicable_inds: list[dict[str, str | bool]] = []
-                for ind in inds:
-                    code = ind["indicator_code"]
-                    m = indicator_mapping.get(code, {"type": "core", "subsectors": []})
-
-                    # Check exclude_subsectors (indicators NAP for specific subsectors)
-                    exclude = m.get("exclude_subsectors", [])
-                    if any(subsector_code.startswith(s) or s == subsector_code for s in exclude):
-                        continue
-
-                    if m["type"] in ("core", "performance"):
-                        applicable_inds.append(ind)
-                    else:
-                        subs = m.get("subsectors", [])
-                        if any(subsector_code.startswith(s) or s == subsector_code for s in subs):
-                            applicable_inds.append(ind)
-
-                if applicable_inds:
-                    filtered_by_theme[theme] = applicable_inds
-
-            filtered_count = sum(
-                len(inds) for inds in filtered_by_theme.values()
-            )
-
-            # Collect zero-indicator themes for scoring (FTSE minimum score = 1)
-            zero_indicator_themes_list = [
-                {"theme": t["theme"], "exposure": t["exposure"]}
-                for t in applicable_themes
-                if not t.get("indicators_applicable", True)
-            ]
+            applicability = derive_applicable(subsector_code)
+            zero_indicator_themes_list = applicability.zero_indicator_themes
 
             logger.info(
                 "Subsector %s: evaluating %d/%d indicators across %d/%d themes"
                 " (%d zero-indicator themes)",
                 subsector_code,
-                filtered_count,
-                all_theme_count,
-                len(filtered_by_theme),
+                applicability.total_indicators,
+                all_indicator_count,
+                len(applicability.indicators_by_theme),
                 len(indicators_by_theme),
                 len(zero_indicator_themes_list),
             )
-            indicators_by_theme = filtered_by_theme
+            indicators_by_theme = applicability.indicators_by_theme
 
         # Step 3: Analyze FTSE + IFRS in parallel
         total_themes = len(indicators_by_theme)
@@ -814,10 +773,22 @@ async def run_analysis(
             "IFRS analysis disabled (cost saving). Scores will be zero for %s.",
             analysis_id,
         )
+        # Sub-indicator lists per indicator — the AI assesses each one and
+        # the indicator score is derived from the per-subpart coverage.
+        subparts_by_indicator: dict[str, list[dict[str, str]]] = {}
+        if subsector_code:
+            for entry in get_subparts_for_subsector(subsector_code).values():
+                subparts_by_indicator.setdefault(entry["indicator_code"], []).append({
+                    "subpart_code": entry["subpart_code"],
+                    "subpart_text": entry["subpart_text"],
+                })
+
         try:
             ftse_results = await asyncio.wait_for(
                 analyze_ftse(
-                    openai_client, website_content, indicators_by_theme, pdf_content=pdf_content,
+                    openai_client, website_content, indicators_by_theme,
+                    pdf_content=pdf_content,
+                    subparts_by_indicator=subparts_by_indicator,
                 ),
                 timeout=900.0,
             )
@@ -827,7 +798,10 @@ async def run_analysis(
 
         # Step 4: Save raw results
         await _update_message(supabase, analysis_id, f"Saving {len(ftse_results)} FTSE results...")
-        await _save_ftse_results(supabase, analysis_id, ftse_results, ftse_indicators)
+        await _save_ftse_results(
+            supabase, analysis_id, ftse_results, ftse_indicators,
+            subparts_by_indicator=subparts_by_indicator,
+        )
 
         # Step 5: Calculate scores
         ftse_result_dicts = [

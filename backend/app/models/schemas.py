@@ -203,3 +203,50 @@ class SubsectorItem(BaseModel):
     name: str
     industry_name: str
     supersector_name: str
+
+
+class PrecheckTheme(BaseModel):
+    """Per-theme breakdown in a pre-check response.
+
+    Attributes:
+        theme_name: FTSE theme name.
+        pillar: Parent pillar (Environmental/Social/Governance).
+        exposure: Exposure level for this subsector.
+        indicator_count: Applicable indicators in this theme.
+        subpart_count: Applicable sub-indicators in this theme.
+        zero_indicator: Theme applies but has no indicators
+            (FTSE assigns a minimum score of 1).
+    """
+
+    theme_name: str
+    pillar: str
+    exposure: str
+    indicator_count: int
+    subpart_count: int
+    zero_indicator: bool
+
+
+class PrecheckResponse(BaseModel):
+    """What a full analysis would check for this URL/industry.
+
+    Attributes:
+        company_url: Echo of the requested URL.
+        subsector_code: Resolved ICB subsector code.
+        subsector_name: Subsector display name.
+        industry_name: Parent industry name.
+        auto_detected: Whether the industry came from AI detection.
+        total_themes: Applicable themes (incl. zero-indicator themes).
+        total_indicators: Applicable indicators.
+        total_sub_indicators: Applicable sub-indicators.
+        themes: Per-theme breakdown.
+    """
+
+    company_url: str
+    subsector_code: str
+    subsector_name: str
+    industry_name: str
+    auto_detected: bool
+    total_themes: int
+    total_indicators: int
+    total_sub_indicators: int
+    themes: list[PrecheckTheme]

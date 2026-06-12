@@ -41,6 +41,11 @@ export interface FtseIndicatorInfo {
   ftse_themes: FtseThemeInfo;
 }
 
+export interface SubpartResult {
+  status: 'found' | 'partial' | 'missing';
+  text: string;
+}
+
 export interface FtseResultItem {
   id: string;
   status: 'found' | 'partial' | 'missing';
@@ -50,6 +55,7 @@ export interface FtseResultItem {
   ai_reasoning: string | null;
   source_url: string | null;
   source_page_title: string | null;
+  subpart_results: Record<string, SubpartResult> | null;
   ftse_indicators: FtseIndicatorInfo;
 }
 
@@ -86,11 +92,12 @@ export interface RecommendationMeta {
   type: 'new' | 'enhance';
   existing_page_url: string;
   data_to_add: string[];
+  addresses_gaps: string[];
 }
 
 export function parseRecommendationMeta(rec: SitemapRecommendation): RecommendationMeta {
   if (!rec.estimated_impact) {
-    return { type: 'new', existing_page_url: '', data_to_add: [] };
+    return { type: 'new', existing_page_url: '', data_to_add: [], addresses_gaps: [] };
   }
   try {
     const parsed = JSON.parse(rec.estimated_impact);
@@ -100,9 +107,12 @@ export function parseRecommendationMeta(rec: SitemapRecommendation): Recommendat
       data_to_add: Array.isArray(parsed.data_to_add)
         ? parsed.data_to_add.filter((item: unknown): item is string => typeof item === 'string').map((item: string) => item.slice(0, 500))
         : [],
+      addresses_gaps: Array.isArray(parsed.addresses_gaps)
+        ? parsed.addresses_gaps.filter((item: unknown): item is string => typeof item === 'string').map((item: string) => item.slice(0, 20))
+        : [],
     };
   } catch {
-    return { type: 'new', existing_page_url: '', data_to_add: [] };
+    return { type: 'new', existing_page_url: '', data_to_add: [], addresses_gaps: [] };
   }
 }
 
@@ -158,4 +168,25 @@ export interface CrawledUrls {
   selected: string[];
   pages: CrawledPageInfo[];
   pdfs: CrawledPdfInfo[];
+}
+
+export interface PrecheckTheme {
+  theme_name: string;
+  pillar: string;
+  exposure: string;
+  indicator_count: number;
+  subpart_count: number;
+  zero_indicator: boolean;
+}
+
+export interface PrecheckResponse {
+  company_url: string;
+  subsector_code: string;
+  subsector_name: string;
+  industry_name: string;
+  auto_detected: boolean;
+  total_themes: number;
+  total_indicators: number;
+  total_sub_indicators: number;
+  themes: PrecheckTheme[];
 }

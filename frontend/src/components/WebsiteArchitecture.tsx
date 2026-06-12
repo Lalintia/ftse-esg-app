@@ -334,7 +334,7 @@ function TreeNode({ title, isSection, isNew, isDimmed, isEsgHint, priority, chil
   priority?: PriorityType;
   children?: React.ReactNode;
   pdfAttachment?: { filename: string; url: string; chars: number; pages: number };
-  tooltip?: { title: string; path: string; reason: string };
+  tooltip?: { title: string; path: string; reason: string; gaps?: string[] };
   themeBadges?: ThemeBadge[];
 }) {
   const hasBadges = themeBadges && themeBadges.length > 0;
@@ -388,6 +388,11 @@ function TreeNode({ title, isSection, isNew, isDimmed, isEsgHint, priority, chil
             <p className="font-semibold">{tooltip.title}</p>
             <p className="mt-1 font-mono text-[10px] text-stone-400">{tooltip.path}</p>
             <p className="mt-2 leading-relaxed text-stone-300">{tooltip.reason}</p>
+            {tooltip.gaps && tooltip.gaps.length > 0 && (
+              <p className="mt-1.5 font-mono text-[10px] leading-relaxed text-emerald-300">
+                Closes: {tooltip.gaps.join(', ')}
+              </p>
+            )}
             <span className={cn(
               'mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
               priority === 'high' ? 'bg-emerald-900/50 text-emerald-300' : 'bg-amber-900/50 text-amber-300',
@@ -581,7 +586,7 @@ function RecommendedSection({ recommendations }: { recommendations: SitemapRecom
                       title={title}
                       isNew
                       priority={rec.priority}
-                      tooltip={{ title, path, reason: rec.reason }}
+                      tooltip={{ title, path, reason: rec.reason, gaps: parseRecommendationMeta(rec).addresses_gaps }}
                     />
                   </li>
                 );
@@ -647,9 +652,34 @@ function EnhancementBadges({ recommendations }: { recommendations: SitemapRecomm
                   </ul>
                 </div>
               )}
+              <GapCodeChips codes={meta.addresses_gaps} />
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/** Indicator-code chips showing which FTSE gaps a recommendation closes. */
+function GapCodeChips({ codes }: { codes: string[] }) {
+  if (codes.length === 0) {
+    return null;
+  }
+  return (
+    <div className="mt-2">
+      <p className="text-[11px] font-semibold text-stone-600 mb-1">
+        Closes indicators:
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {codes.map((code) => (
+          <span
+            key={code}
+            className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[10px] text-stone-600"
+          >
+            {code}
+          </span>
+        ))}
       </div>
     </div>
   );

@@ -237,7 +237,7 @@ async def get_analysis(
                 lambda: supabase.table("analysis_ftse_results")
                 .select(
                     "id, status, score, evidence, confidence, ai_reasoning, "
-                    "source_url, source_page_title, "
+                    "source_url, source_page_title, subpart_results, "
                     "ftse_indicators(indicator_code, indicator_name, theme_id, "
                     "ftse_themes(theme_name, pillar, pillar_code))"
                 )
@@ -248,7 +248,7 @@ async def get_analysis(
             logger.warning("Join query failed for FTSE results, using simple query", exc_info=True)
             return await asyncio.to_thread(
                 lambda: supabase.table("analysis_ftse_results")
-                .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title")
+                .select("id, indicator_id, status, score, evidence, confidence, ai_reasoning, source_url, source_page_title, subpart_results")
                 .eq("analysis_id", analysis_id_str)
                 .execute()
             )

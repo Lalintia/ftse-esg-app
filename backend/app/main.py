@@ -13,7 +13,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.config import get_settings
 from app.dependencies import get_supabase, verify_api_key
 from app.limiter import limiter
-from app.routers import analyses, health, subsectors
+from app.routers import analyses, health, precheck, subsectors
 from app.utils.data_loader import load_ftse_indicators, load_ifrs_requirements, sync_indicator_names_to_db
 
 logging.basicConfig(
@@ -75,6 +75,7 @@ _auth = [Depends(verify_api_key)]
 app.include_router(health.router, prefix="/api")
 app.include_router(subsectors.router, prefix="/api", dependencies=_auth)
 app.include_router(analyses.router, prefix="/api", dependencies=_auth)
+app.include_router(precheck.router, prefix="/api", dependencies=_auth)
 
 
 @app.get("/")

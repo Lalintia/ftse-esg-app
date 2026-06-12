@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   ChevronDown,
+  FileText,
   Globe,
   ExternalLink,
   CheckCircle2,
@@ -159,6 +160,28 @@ const ThemeCard = ({ group }: { group: ThemeGroup }) => {
                     <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
                       {r.evidence}
                     </p>
+                  )}
+                  {r.subpart_results && Object.keys(r.subpart_results).length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5">
+                      {Object.entries(r.subpart_results).map(([code, sp]) => (
+                        <li key={code} className="flex items-start gap-1.5 text-[11px] leading-relaxed">
+                          <span aria-hidden className={cn(
+                            'mt-0.5 shrink-0 font-bold',
+                            sp.status === 'found' && 'text-emerald-600',
+                            sp.status === 'partial' && 'text-amber-600',
+                            sp.status === 'missing' && 'text-red-400',
+                          )}>
+                            {sp.status === 'found' ? '✓' : sp.status === 'partial' ? '◐' : '✗'}
+                          </span>
+                          <span className={cn(
+                            sp.status === 'missing' ? 'text-muted-foreground/60' : 'text-muted-foreground',
+                          )}>
+                            <span className="sr-only">{sp.status}: </span>
+                            {sp.text || code}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                   {r.source_url && isSafeUrl(r.source_url) && (
                     <a
@@ -387,6 +410,13 @@ export default function AnalysisDashboard({
             )}
           </button>
         ))}
+        <Link
+          href={`/analysis/${id}/gap-report`}
+          className="ml-auto inline-flex items-center gap-1.5 self-center rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Gap Report
+        </Link>
       </div>
 
       {/* Tab panels — both always in DOM so aria-controls targets always exist (WCAG 2.1 AA) */}

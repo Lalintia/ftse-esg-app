@@ -67,6 +67,8 @@ class FtseResult:
         reasoning: AI reasoning for the assessment.
         source_url: URL of the page where evidence was found.
         source_page_title: Title of the source page.
+        subparts: Per-sub-indicator status map {subpart_code: status}.
+            Empty when the indicator has no expanded sub-indicators.
     """
 
     indicator_code: str
@@ -77,6 +79,38 @@ class FtseResult:
     reasoning: str
     source_url: str = ""
     source_page_title: str = ""
+    subparts: dict[str, str] | None = None
+
+
+def _score_from_subparts(subparts: dict[str, str]) -> tuple[str, int]:
+    """Derive indicator status and 0-5 score from sub-indicator coverage.
+
+    Mirrors FTSE's approach: each sub-question met contributes equally to
+    the indicator. Deterministic, so repeated runs on identical sub-part
+    statuses give identical indicator scores.
+
+    Args:
+        subparts: Map of subpart_code to status (found/partial/missing).
+
+    Returns:
+        (status, score) for the indicator.
+    """
+    total = len(subparts)
+    if total == 0:
+        return "missing", 0
+
+    covered = sum(
+        1.0 if s == "found" else 0.5 if s == "partial" else 0.0
+        for s in subparts.values()
+    )
+    coverage = covered / total
+    score = round(coverage * 5)
+
+    if coverage == 0:
+        return "missing", 0
+    if coverage >= 0.999:
+        return "found", 5
+    return ("found" if coverage >= 0.6 else "partial"), max(score, 1)
 
 
 _THEME_KEYWORDS: dict[str, list[str]] = {
@@ -148,6 +182,7 @@ def _build_theme_prompt(
     theme_name: str,
     indicators: list[dict[str, str | bool]],
     website_content: str,
+    subparts_by_indicator: dict[str, list[dict[str, str]]] | None = None,
 ) -> str:
     """Build a user prompt for analyzing indicators within a theme.
 
@@ -155,16 +190,31 @@ def _build_theme_prompt(
         theme_name: Name of the FTSE theme.
         indicators: List of indicator dicts with code, name, description.
         website_content: Concatenated markdown from crawled pages.
+        subparts_by_indicator: Optional sub-indicator lists per indicator
+            code; when present each sub-indicator is assessed individually.
 
     Returns:
         Formatted user prompt string.
     """
+    subparts_by_indicator = subparts_by_indicator or {}
     indicator_lines: list[str] = []
     for ind in indicators:
-        indicator_lines.append(
-            f"- **{ind['indicator_code']}**: {ind['indicator_name']}\n"
-            f"  Description: {ind['description']}"
-        )
+        code = str(ind["indicator_code"])
+        subparts = subparts_by_indicator.get(code, [])
+        if subparts:
+            subpart_text = "\n".join(
+                f"    - {sp['subpart_code']}: {sp['subpart_text']}"
+                for sp in subparts
+            )
+            indicator_lines.append(
+                f"- **{code}**: {ind['indicator_name']}\n"
+                f"  Sub-indicators (assess EACH one):\n{subpart_text}"
+            )
+        else:
+            indicator_lines.append(
+                f"- **{code}**: {ind['indicator_name']}\n"
+                f"  Description: {ind['description']}"
+            )
 
     indicators_text = "\n".join(indicator_lines)
 
@@ -189,6 +239,7 @@ async def _analyze_theme(
     indicators: list[dict[str, str | bool]],
     website_content: str,
     semaphore: asyncio.Semaphore,
+    subparts_by_indicator: dict[str, list[dict[str, str]]] | None = None,
 ) -> list[FtseResult]:
     """Analyze all indicators for a single FTSE theme.
 
@@ -198,12 +249,16 @@ async def _analyze_theme(
         indicators: Indicator dicts for this theme.
         website_content: Concatenated website content.
         semaphore: Concurrency limiter.
+        subparts_by_indicator: Sub-indicator lists per indicator code.
 
     Returns:
         List of FtseResult for each indicator in the theme.
     """
     settings = get_settings()
-    user_prompt = _build_theme_prompt(theme_name, indicators, website_content)
+    subparts_by_indicator = subparts_by_indicator or {}
+    user_prompt = _build_theme_prompt(
+        theme_name, indicators, website_content, subparts_by_indicator,
+    )
     indicator_codes = [ind["indicator_code"] for ind in indicators]
 
     async with semaphore:
@@ -271,15 +326,38 @@ async def _analyze_theme(
             for code in indicator_codes:
                 if code in results_map:
                     r = results_map[code]
+                    status = str(r.get("status", "missing"))
+                    score = int(r.get("score", 0))
+
+                    # When the KB defines sub-indicators, derive status and
+                    # score deterministically from per-subpart coverage —
+                    # the AI's job is the subpart verdicts, not the math.
+                    expected = subparts_by_indicator.get(str(code), [])
+                    subparts: dict[str, str] | None = None
+                    if expected:
+                        raw_subparts = r.get("subparts")
+                        raw_map = raw_subparts if isinstance(raw_subparts, dict) else {}
+                        subparts = {
+                            sp["subpart_code"]: (
+                                str(raw_map.get(sp["subpart_code"], "missing"))
+                                if str(raw_map.get(sp["subpart_code"], "missing"))
+                                in ("found", "partial", "missing")
+                                else "missing"
+                            )
+                            for sp in expected
+                        }
+                        status, score = _score_from_subparts(subparts)
+
                     results.append(FtseResult(
                         indicator_code=code,
-                        status=str(r.get("status", "missing")),
-                        score=int(r.get("score", 0)),
+                        status=status,
+                        score=score,
                         evidence=str(r.get("evidence", "")),
                         confidence=float(r.get("confidence", 0.0)),
                         reasoning=str(r.get("reasoning", "")),
                         source_url=_validate_source_url(str(r.get("source_url", ""))),
                         source_page_title=str(r.get("source_page_title", ""))[:500],
+                        subparts=subparts,
                     ))
                 else:
                     logger.warning(
@@ -391,14 +469,39 @@ def _merge_results(
     Returns:
         Merged list with best result per indicator.
     """
+    from dataclasses import replace
+
+    rank = {"missing": 0, "partial": 1, "found": 2}
+
     best: dict[str, FtseResult] = {}
     for r in round1:
         best[r.indicator_code] = r
     for r in round2:
         existing = best.get(r.indicator_code)
-        if existing is None or r.score > existing.score:
-            if existing and not r.source_url and existing.source_url:
-                from dataclasses import replace
+        if existing is None:
+            best[r.indicator_code] = r
+            continue
+
+        # With sub-indicator detail, merge per subpart (best status wins)
+        # and recompute the indicator from the merged coverage.
+        if r.subparts and existing.subparts:
+            merged_subparts = {
+                code: max(
+                    r.subparts.get(code, "missing"),
+                    existing.subparts.get(code, "missing"),
+                    key=lambda s: rank.get(s, 0),
+                )
+                for code in set(r.subparts) | set(existing.subparts)
+            }
+            status, score = _score_from_subparts(merged_subparts)
+            winner = r if r.score >= existing.score else existing
+            best[r.indicator_code] = replace(
+                winner, subparts=merged_subparts, status=status, score=score,
+            )
+            continue
+
+        if r.score > existing.score:
+            if not r.source_url and existing.source_url:
                 r = replace(r, source_url=existing.source_url, source_page_title=existing.source_page_title)
             best[r.indicator_code] = r
 
@@ -410,6 +513,7 @@ async def analyze_ftse(
     website_content: str,
     indicators_by_theme: dict[str, list[dict[str, str | bool]]],
     pdf_content: str = "",
+    subparts_by_indicator: dict[str, list[dict[str, str]]] | None = None,
 ) -> list[FtseResult]:
     """Analyze website content against all FTSE indicators (two-round).
 
@@ -438,6 +542,7 @@ async def analyze_ftse(
             indicators=indicators,
             website_content=website_content,
             semaphore=semaphore,
+            subparts_by_indicator=subparts_by_indicator,
         )
         for theme_name, indicators in indicators_by_theme.items()
     ]
@@ -487,6 +592,7 @@ async def analyze_ftse(
             indicators=indicators,
             website_content=combined_content,
             semaphore=semaphore,
+            subparts_by_indicator=subparts_by_indicator,
         )
         for theme_name, indicators in gap_themes.items()
     ]
