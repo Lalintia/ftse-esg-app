@@ -92,11 +92,12 @@ export interface RecommendationMeta {
   type: 'new' | 'enhance';
   existing_page_url: string;
   data_to_add: string[];
+  addresses_gaps: string[];
 }
 
 export function parseRecommendationMeta(rec: SitemapRecommendation): RecommendationMeta {
   if (!rec.estimated_impact) {
-    return { type: 'new', existing_page_url: '', data_to_add: [] };
+    return { type: 'new', existing_page_url: '', data_to_add: [], addresses_gaps: [] };
   }
   try {
     const parsed = JSON.parse(rec.estimated_impact);
@@ -106,9 +107,12 @@ export function parseRecommendationMeta(rec: SitemapRecommendation): Recommendat
       data_to_add: Array.isArray(parsed.data_to_add)
         ? parsed.data_to_add.filter((item: unknown): item is string => typeof item === 'string').map((item: string) => item.slice(0, 500))
         : [],
+      addresses_gaps: Array.isArray(parsed.addresses_gaps)
+        ? parsed.addresses_gaps.filter((item: unknown): item is string => typeof item === 'string').map((item: string) => item.slice(0, 20))
+        : [],
     };
   } catch {
-    return { type: 'new', existing_page_url: '', data_to_add: [] };
+    return { type: 'new', existing_page_url: '', data_to_add: [], addresses_gaps: [] };
   }
 }
 

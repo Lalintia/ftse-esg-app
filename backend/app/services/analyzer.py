@@ -508,6 +508,7 @@ async def _save_sitemap(
                 "type": rec.rec_type,
                 "existing_page_url": rec.existing_page_url,
                 "data_to_add": rec.data_to_add,
+                "addresses_gaps": rec.addresses_gaps,
             }),
         })
 
